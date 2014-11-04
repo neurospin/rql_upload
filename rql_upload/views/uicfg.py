@@ -10,6 +10,6 @@
 from cubicweb.web.views import uicfg
 
 
-uicfg.autoform_section.hide_fields("CWUpload",
-                                   ("has_data", "expiration_date", "data_type"))
+uicfg.autoform_section.hide_fields("CWUpload", (
+    "result_data", "expiration_date", "result_form"))
 

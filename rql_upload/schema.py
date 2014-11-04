@@ -47,7 +47,6 @@ class CWUpload(EntityType):
         "delete": ("managers", "owners"),
         "update": ("managers", "owners"),
     }
-
     # Entity parameters
     title = String(
         maxsize=256, required=True,
@@ -57,12 +56,11 @@ class CWUpload(EntityType):
                 mainvars="X",
                 msg=_("this name is already used"))
         ])
-    data_path = String(required=True,
-                  description=_("the path to the data that will be uploaded."))
-    expiration_date = Date(required=True, indexed=True)
-    data_type = String(required=True, default="", maxsize=50)
+    form_name = String(maxsize=256, required=True)
 
     # The link to the uploaded data
-    has_data = SubjectRelation("UploadFile", cardinality="1*", inlined=True,
-                             composite="subject")
+    result_data = SubjectRelation(
+        "UploadFile", cardinality="**", composite="subject")
+    result_form = SubjectRelation(
+        "File", cardinality="**", composite="subject")
     

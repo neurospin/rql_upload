@@ -13,7 +13,10 @@ author_email = 'contact@logilab.fr'
 description = ''
 web = 'http://www.cubicweb.org/project/%s' % distname
 
-__depends__ =  {'cubicweb': '>= 3.17.4'}
+__depends__ =  {
+    'cubicweb': '>= 3.17.4',
+    'cubicweb-file': None
+}
 __recommends__ = {}
 
 classifiers = [

@@ -18,5 +18,14 @@ options = (
             "group": "rql_upload", "level": 0,
         }
     ),
+    (
+        "upload_structure_json",
+        {
+            "type": "string",
+            "default": "",
+            "help": "json file describing the different upload entities.",
+            "group": "rql_upload", "level": 0,
+        }
+    ),
 )
 
