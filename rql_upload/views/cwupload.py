@@ -147,7 +147,10 @@ class CWUploadView(View):
                     if field_name in check_struct:
                         if re.match(check_struct[field_name],
                                     str(field_value)) is None:
-                            raise RequestError()
+                            raise RequestError(
+                                "Find wrong parameter value '{0}' while "
+                                "searching for pattern '{1}'".format(
+                                    field_value, check_struct[field_name]))
 
                     # Add db item
                     inline_params[field_name] = field_value
@@ -176,7 +179,7 @@ class CWUploadView(View):
             # Redirection to the created CWUpload entity
             raise Redirect(self._cw.build_url(eid=upload_eid))
         except RequestError as error:
-            self.w(u"<p>{0}</p>".format(error))
+            self.w(u"<p class='label label-danger'>{0}</p>".format(error))
 
         # Form rendering
         self.w(u'<h3 class="panel-title">Upload ("{0}" form)</h3>'.format(
