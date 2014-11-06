@@ -13,16 +13,14 @@ import os
 
 # CW import
 from cubicweb.server import hook
-from cubicweb.server.sources import storages
 
 
 class ServerStartupHook(hook.Hook):
     """ At the server startup, initialize the upload rules.
 
-    An UploadFile entity is created on the server file system. The created file
-    will be accessed to get the entity data.
-    To do so, customized the BytesFileSystemStorage storage for the UploadFile
-    'data' attribute, which hold the actual file's content.
+    An UploadFile entity data is deported on the server file system.
+    To do so, we configure the UploadFile 'data' attribute with the
+    BytesFileSystemStorage storage.
     """
     __regid__ = "rql_upload.serverstartup"
     events = ("server_startup", "server_maintenance")
@@ -30,6 +28,9 @@ class ServerStartupHook(hook.Hook):
     def __call__(self):
         """ Configuring the BytesFileSystem storage.
         """
+        # In order sphinx to work properly: cw modify the path
+        from cubicweb.server.sources import storages
+
         # Get the defined upload folder
         upload_dir = self.repo.vreg.config["upload_directory"]
 

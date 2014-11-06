@@ -21,7 +21,7 @@ from utils import load_forms
 
 class CWUploadBox(component.CtxComponent):
     """ Class that generate a left box on the web browser to access all the 
-    form decalred in the 'upload_structure_json' cubicweb instance parameter.
+    decalred forms in the 'upload_structure_json' cubicweb instance parameter.
     """
     __regid__ = "ctx-upload-box"
     __select__ = (component.CtxComponent.__select__ & ~anonymous_user())

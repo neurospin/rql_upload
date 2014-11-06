@@ -34,28 +34,14 @@ from utils import load_forms
 ###############################################################################
 
 class CWUploadForm(FieldsForm):
-    """ Allowed fields
+    """ The authorized form fields are defined in the 'cubicweb.web.formfields'
+    module:
 
-    Basic fields
-    ------------
+    * Basic fields: StringField - PasswordField - IntField - BigIntField -
+      FloatField - BooleanField - DateField - DateTimeField - TimeField - 
+      TimeIntervalField.
 
-    .. autoclass:: cubicweb.web.formfields.StringField()
-    .. autoclass:: cubicweb.web.formfields.PasswordField()
-    .. autoclass:: cubicweb.web.formfields.IntField()
-    .. autoclass:: cubicweb.web.formfields.BigIntField()
-    .. autoclass:: cubicweb.web.formfields.FloatField()
-    .. autoclass:: cubicweb.web.formfields.BooleanField()
-    .. autoclass:: cubicweb.web.formfields.DateField()
-    .. autoclass:: cubicweb.web.formfields.DateTimeField()
-    .. autoclass:: cubicweb.web.formfields.TimeField()
-    .. autoclass:: cubicweb.web.formfields.TimeIntervalField()
-
-    Compound fields
-    ---------------
-
-    .. autoclass:: cubicweb.web.formfields.RichTextField()
-    .. autoclass:: cubicweb.web.formfields.FileField()
-    .. autoclass:: cubicweb.web.formfields.CompoundField()
+    * Compound fields: RichTextField - FileField.
     """
     __regid__ = "upload-form"
 
@@ -66,7 +52,7 @@ class CWUploadForm(FieldsForm):
 
 @monkeypatch(FormRenderer)
 def render_content(self, w, form, values):
-    """ Overwrite the original loading message.
+    """ Overwrite the original uploading message.
     """
     if self.display_progress_div:
         w(u'<div id="progress" class="alert alert-warning">')
@@ -80,7 +66,7 @@ def render_content(self, w, form, values):
 
 
 class CWUploadView(View):
-    """ Custom widget to edit the form from the configuration file.
+    """ Custom view to edit the form from the configuration file.
     """
     __regid__ = "upload-view"
 
@@ -91,6 +77,12 @@ class CWUploadView(View):
 
     def call(self, **kwargs):
         """ Create the 'form' fields.
+
+        .. note::
+
+            All fields are checked to match the 'check_value' regular
+            expressions defined in the 'upload_structure_json' instance
+            parameter.
         """
         # Get some parameters
         path = self._cw.relative_path()

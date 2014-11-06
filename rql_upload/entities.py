@@ -14,7 +14,9 @@ import os
 from cubicweb.entities import AnyEntity
 
 
-class UploadFile(AnyEntity):
+class EntityUploadFile(AnyEntity):
+    """ Define the 'UploadFile' entity associated functions.
+    """
     __regid__ = "UploadFile"
 
     def dc_title(self):

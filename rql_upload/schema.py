@@ -7,11 +7,25 @@
 # for details.
 ##########################################################################
 
-from yams.buildobjs import EntityType, String, Bytes, RichString
+from yams.buildobjs import EntityType, String, Bytes, RichString, SubjectRelation   
+from cubicweb.schema import ERQLExpression, RQLUniqueConstraint
 
 
 class UploadFile(EntityType):
     """ An entity used to upload file which may contains binary data.
+
+    Attributes
+    ----------
+    title: String (optional)
+        a short description of the file.
+    data: Bytes (mandatory)
+        contains the uploaded file.
+    data_extension: String (mandatory)
+        the uploaded file extension.
+    data_name: String (mandatory)
+        the uploaded file name.
+    data_sha1hex: String (optional)
+        SHA1 sum of the file.
     """
     title = String(fulltextindexed=True, maxsize=256)
     data = Bytes(
@@ -35,6 +49,19 @@ class UploadFile(EntityType):
 
 
 class CWUpload(EntityType):
+    """ An entity used to to store a form.
+
+    Attributes
+    ----------
+    title: String (mandatory)
+        the name of the upload (has to be unique in the data base).
+    form_name: String (mandatory)
+        the name of the form we upload.
+    result_data: SubjectRelation (optional)
+        the link(s) to the uploaded file.
+    result_form: SubjectRelation (mandatory)
+        the link to the form.
+    """
     # Set default permissions
     __permissions__ = {
         "read":   ("managers", ERQLExpression("X owned_by U"),),
