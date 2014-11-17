@@ -14,8 +14,7 @@ description = ''
 web = 'http://www.cubicweb.org/project/%s' % distname
 
 __depends__ =  {
-    'cubicweb': '>= 3.17.4',
-    'cubicweb-file': None
+    'cubicweb': '>= 3.17.4'
 }
 __recommends__ = {}
 

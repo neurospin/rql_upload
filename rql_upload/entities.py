@@ -27,8 +27,22 @@ class EntityUploadFile(AnyEntity):
     def icon_url(self):
         """ Method to get an icon for this entity.
         """
-        config = self._cw.vreg.config
-        iconfile = "text.ico"
-        rpath, iconfile = config.locate_resource(os.path.join("icons", iconfile))
-        if rpath is not None:
-            return self._cw.data_url(iconfile)
+        #config = self._cw.vreg.config
+        return self._cw.data_url(os.path.join("icons", "upload.ico"))
+
+
+class EntityUploadForm(AnyEntity):
+    """ Define the 'UploadFile' entity associated functions.
+    """
+    __regid__ = "UploadForm"
+
+    def dc_title(self):
+        """ Method the defined the upload file entity title.
+        """
+        return self.data_name
+
+    def icon_url(self):
+        """ Method to get an icon for this entity.
+        """
+        #config = self._cw.vreg.config
+        return self._cw.data_url(os.path.join("icons", "upload.ico"))

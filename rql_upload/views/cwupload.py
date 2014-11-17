@@ -147,10 +147,16 @@ class CWUploadView(View):
                     # Add db item
                     inline_params[field_name] = str(field_value)
 
+            # Get the eid of the current user
+            user_eid = self._cw.execute(
+                "Any X Where X is CWUser, X login "
+                "'{0}'".format(self._cw.session.login))[0][0]
+
             # Save the inline parameters in a File entity
             form_eid = self._cw.create_entity(
-                "File", data=Binary(json.dumps(inline_params)),
-                data_format=u"text/json", data_name=u"form.json").eid
+                "UploadForm", data=Binary(json.dumps(inline_params)),
+                data_format=u"text/json", data_name=u"form.json",
+                uploaded_by=user_eid).eid
 
             # Save deported parameters in UploadFile entities
             upload_file_eids = []
@@ -160,13 +166,13 @@ class CWUploadView(View):
                 upload_file_eids.append(self._cw.create_entity(
                     "UploadFile", data=field_value, title=unicode(basename),
                     data_extension=unicode(extension[1:]),
-                    data_name=unicode(file_name)).eid)
+                    data_name=unicode(file_name), uploaded_by=user_eid).eid)
 
             # Create the CWUpload entity
             upload_eid = self._cw.create_entity(
                 "CWUpload", title=unicode(inline_params["upload_title"]),
                 form_name=unicode(form_name), result_form=form_eid,
-                result_data=upload_file_eids).eid
+                result_data=upload_file_eids, uploaded_by=user_eid).eid
             
             # Redirection to the created CWUpload entity
             raise Redirect(self._cw.build_url(eid=upload_eid))
