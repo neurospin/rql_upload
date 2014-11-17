@@ -145,7 +145,7 @@ class CWUploadView(View):
                                     field_value, check_struct[field_name]))
 
                     # Add db item
-                    inline_params[field_name] = field_value
+                    inline_params[field_name] = str(field_value)
 
             # Save the inline parameters in a File entity
             form_eid = self._cw.create_entity(
