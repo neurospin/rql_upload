@@ -9,9 +9,9 @@
 
 from components import CWUploadBox
 from cwupload import CWUploadForm, CWUploadView, render_content
-from outofcontext import FileUploadOutOfContext
+from outofcontext import UploadOutOfContext
 from utils import load_forms
 
 
 __all__ = ["CWUploadBox", "CWUploadForm", "render_content", "CWUploadView",
-           "FileUploadOutOfContext", "load_forms"]
+           "UploadOutOfContext", "load_forms"]

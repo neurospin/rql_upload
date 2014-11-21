@@ -27,12 +27,11 @@ class EntityUploadFile(AnyEntity):
     def icon_url(self):
         """ Method to get an icon for this entity.
         """
-        #config = self._cw.vreg.config
         return self._cw.data_url(os.path.join("icons", "upload.ico"))
 
 
 class EntityUploadForm(AnyEntity):
-    """ Define the 'UploadFile' entity associated functions.
+    """ Define the 'UploadForm' entity associated functions.
     """
     __regid__ = "UploadForm"
 
@@ -44,5 +43,4 @@ class EntityUploadForm(AnyEntity):
     def icon_url(self):
         """ Method to get an icon for this entity.
         """
-        #config = self._cw.vreg.config
         return self._cw.data_url(os.path.join("icons", "upload.ico"))

@@ -12,14 +12,14 @@ from cubicweb.web.views import baseviews
 from cubicweb.predicates import is_instance
 
 
-class FileUploadOutOfContext(baseviews.OutOfContextView):
-    """ Display a nice out of context view with a small icon on the left.
+class UploadOutOfContext(baseviews.OutOfContextView):
+    """ Display a nice out of context view with a small icon on the left for
+    uploded items.
     """
-    __select__ = is_instance("UploadFile")
+    __select__ = is_instance("UploadFile", "UploadForm")
 
     def cell_call(self, row, col):
         entity = self.cw_rset.get_entity(row, col)
         self.w(u'<img src="{0}" alt="{1}"/>'.format(
-            entity.icon_url(),
-            self._cw._("icon for {0}").format(entity.data_extension)))
-        super(FileUploadOutOfContext, self).cell_call(row, col)
+            entity.icon_url(), self._cw._("'upload' icon")))
+        super(UploadOutOfContext, self).cell_call(row, col)
