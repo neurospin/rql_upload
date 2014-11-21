@@ -58,6 +58,10 @@ An example with three forms 'test1', 'test2' and 'test3':
                 "name": "string", "type": "StringField",
                 "value": "", "label": "string"},
             {
+                "name": "dropdown", "type": "StringField",
+                "value": "", "label": "dropdown",
+                "choices": ["choice_1", "choice_2"]},
+            {
                 "name": "integer", "type": "IntField",
                 "required": "True", "value": 2,"label": "integer"},
             {

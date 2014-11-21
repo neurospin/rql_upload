@@ -26,7 +26,8 @@ from cubicweb.web.views.forms import FieldsForm
 from cubicweb.web.views.formrenderers import FormRenderer
 
 # RQL UPLOAD import
-from utils import load_forms
+from .utils import load_forms
+from .formfields import DECLARED_FIELDS
 
 
 ###############################################################################
@@ -34,14 +35,9 @@ from utils import load_forms
 ###############################################################################
 
 class CWUploadForm(FieldsForm):
-    """ The authorized form fields are defined in the 'cubicweb.web.formfields'
-    module:
-
-    * Basic fields: StringField - PasswordField - IntField - BigIntField -
-      FloatField - BooleanField - DateField - DateTimeField - TimeField - 
-      TimeIntervalField.
-
-    * Compound fields: RichTextField - FileField.
+    """ The authorized form fields are defined in the global parameter
+    'DECLARED_FIELDS' that can be found in the
+    'rql_upload.views.formfields.formfields' module.
     """
     __regid__ = "upload-form"
 
@@ -109,8 +105,15 @@ class CWUploadView(View):
                 field["required"] = self.bool_map[field["required"]]
             if "check_value" in field:
                 check_struct[field["name"]] = field.pop("check_value")
-            form.append_field(formfields.__dict__[field_type](**field))
 
+            # Get the declared field
+            if field_type in DECLARED_FIELDS:
+                form.append_field(DECLARED_FIELDS[field_type](**field))
+            else:
+                self.w(
+                    u"<p class='label label-danger'>Unknown field "
+                     "'{0}'</p>".format(field_type))
+                
         # Form processings
         try:
             posted = form.process_posted()
