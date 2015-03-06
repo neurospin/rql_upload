@@ -33,13 +33,12 @@ def load_forms(cw_config):
     """
     config_file = cw_config["upload_structure_json"]
     if not os.path.isfile(config_file):
-        raise ValidationError(
-            "CWUpload", {
-                "settings": unicode(
-                    "cannot find the 'upload_structure_json' "
-                    "configuration file at location "
-                    "'{0}'".format(config_file))})
-    with open(config_file) as open_json:
-        config = json.load(open_json)
+        # if file badly set, return False
+        return -1
+    try:
+        with open(config_file) as open_json:
+            config = json.load(open_json)
 
-    return config
+        return config
+    except:
+        return -2

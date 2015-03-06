@@ -36,11 +36,13 @@ class UploadHook(hook.Hook):
 
 
 class ServerStartupHook(hook.Hook):
-    """ At the server startup, initialize the upload rules.
+    """ Deport files on file system rather than database indexation
 
     An UploadFile entity data is deported on the server file system.
     To do so, we configure the UploadFile 'data' attribute with the
     BytesFileSystemStorage storage.
+    The repository location is defined at the instance creation 
+    "upload_directory" (instance parameter).
     """
     __regid__ = "rql_upload.serverstartup"
     events = ("server_startup", "server_maintenance")
@@ -55,11 +57,14 @@ class ServerStartupHook(hook.Hook):
         upload_dir = self.repo.vreg.config["upload_directory"]
 
         # Create the folder if necessary
-        if not os.path.exists(upload_dir):
-            os.makedirs(upload_dir)
+        try:
+            if not os.path.exists(upload_dir):
+                os.makedirs(upload_dir)
+            # Configure the storage folder
+            storage = storages.BytesFileSystemStorage(upload_dir)
 
-        # Configure the storage folder
-        storage = storages.BytesFileSystemStorage(upload_dir)
-
-        # Configure the storage file content
-        storages.set_attribute_storage(self.repo, "UploadFile", "data", storage)
+            # Configure the storage file content
+            storages.set_attribute_storage(self.repo, "UploadFile", "data",
+                                                                        storage)
+        except:
+            pass
