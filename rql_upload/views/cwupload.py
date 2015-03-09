@@ -48,7 +48,7 @@ class CWUploadForm(FieldsForm):
 
 @monkeypatch(FormRenderer)
 def render_content(self, w, form, values):
-    """ Overwrite the original uploading message.
+    """ Overwrite the original poping message when upload is runing.
     """
     if self.display_progress_div:
         w(u'<div id="progress" class="alert alert-warning">')
@@ -76,8 +76,8 @@ class CWUploadView(View):
 
         .. note::
 
-            All fields are checked to match the 'check_value' regular
-            expressions defined in the 'upload_structure_json' instance
+            At upload, all field inputs are checked to match the 'check_value' 
+            regular expressions defined in the 'upload_structure_json' instance
             parameter.
         """
         # Get some parameters
@@ -87,7 +87,7 @@ class CWUploadView(View):
             kwargs.update(parse_qs(param))
         form_name = kwargs["form_name"][0]
 
-        # Get the form fields
+        # Get the form fields from configuration file
         config = load_forms(self._cw.vreg.config)
 
         # Create a structure to store values that must be checked before the 
@@ -112,6 +112,7 @@ class CWUploadView(View):
             self.w(u'</div>')
             return -1
 
+        # If json can't be read, generate error page
         if config == -2:
             self.w(u'<div class="panel panel-danger">')
             self.w(u'<div class="panel-heading">')
@@ -148,13 +149,13 @@ class CWUploadView(View):
                                     field.pop("label"),
                                     self._cw.vreg.config["upload_directory"]))
                         
-                # Get the declared field
+                # Get the declared field and add it to the form
                 if field_type in DECLARED_FIELDS:
                     form.append_field(DECLARED_FIELDS[field_type](**field))
                 else:
                     self.w(
-                        u"<p class='label label-danger'>Unknown field "
-                         "'{0}'</p>".format(field_type))
+                        u"<p class='label label-danger'>'{0}': Unknown field "
+                         "</p>".format(field_type))
         except:
             self.w(u'<div class="panel panel-danger">')
             self.w(u'<div class="panel-heading">')

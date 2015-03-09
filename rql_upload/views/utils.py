@@ -30,10 +30,14 @@ def load_forms(cw_config):
     config: dict
         the forms descriptions defined in the 'upload_structure_json' setting
         file.
+    -1 
+        if the file is not specified or found on the system
+    -2
+        if the file cannot be read as json
     """
     config_file = cw_config["upload_structure_json"]
     if not os.path.isfile(config_file):
-        # if file badly set, return False
+        # if file not found, return -1
         return -1
     try:
         with open(config_file) as open_json:
@@ -41,4 +45,5 @@ def load_forms(cw_config):
 
         return config
     except:
+        # if file not readable as json, return -2
         return -2

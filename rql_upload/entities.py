@@ -39,7 +39,7 @@ class EntityUploadFile(AnyEntity):
             return unicode(hashlib.sha1(value).hexdigest())
 
     def dc_title(self):
-        """ Method the defined the upload file entity title.
+        """ Method that defines the upload file entity title.
         """
         return self.data_name
 
@@ -83,7 +83,7 @@ class EntityUploadForm(AnyEntity):
             return unicode(hashlib.sha1(value).hexdigest())
 
     def dc_title(self):
-        """ Method the defined the upload file entity title.
+        """ Method that defines the upload file entity title.
         """
         return self.data_name
 

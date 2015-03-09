@@ -43,6 +43,7 @@ class ServerStartupHook(hook.Hook):
     BytesFileSystemStorage storage.
     The repository location is defined at the instance creation 
     "upload_directory" (instance parameter).
+    If no instance parameter is set, the "file" field won't be created.
     """
     __regid__ = "rql_upload.serverstartup"
     events = ("server_startup", "server_maintenance")

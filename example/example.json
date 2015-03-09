@@ -1,0 +1,32 @@
+{
+    "example1": [
+        {
+            "name": "string", "type": "StringField",
+            "value": "", "label": "string"},
+        {
+            "name": "dropdown", "type": "StringField",
+            "value": "", "label": "dropdown",
+            "choices": ["choice_1", "choice_2"]},
+        {
+            "name": "integer", "type": "IntField",
+            "required": "True", "value": 2,"label": "integer (default=2)"},
+        {
+            "name": "float", "type": "FloatField",
+            "required": "True", "label": "float"},
+        {
+            "name": "boolean", "type": "BooleanField",
+            "required": "True", "value": "True", "label": "boolean"},
+        {
+            "name": "date", "type": "DateField",
+            "required": "False", "label": "date"}
+    ],
+
+    "example2": [
+        {
+            "name": "file1", "type": "FileField",
+            "required": "False", "label": "file1", "check_value": ".*zip"},
+        {
+            "name": "file2", "type": "FileField",
+            "required": "False", "label": "file2"}
+    ]
+}
