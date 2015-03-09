@@ -148,7 +148,7 @@ class CWUploadView(View):
                                 " path cannot be created ({1})</p>".format(
                                     field.pop("label"),
                                     self._cw.vreg.config["upload_directory"]))
-                        
+                        continue
                 # Get the declared field and add it to the form
                 if field_type in DECLARED_FIELDS:
                     form.append_field(DECLARED_FIELDS[field_type](**field))
