@@ -35,9 +35,7 @@ from .formfields import DECLARED_FIELDS
 ###############################################################################
 
 class CWUploadForm(FieldsForm):
-    """ The authorized form fields are defined in the global parameter
-    'DECLARED_FIELDS' that can be found in the
-    'rql_upload.views.formfields.formfields' module.
+    """ Create a submit button.
     """
     __regid__ = "upload-form"
 
@@ -48,7 +46,7 @@ class CWUploadForm(FieldsForm):
 
 @monkeypatch(FormRenderer)
 def render_content(self, w, form, values):
-    """ Overwrite the original poping message when upload is runing.
+    """ Overwrite the original processing message when the upload is running.
     """
     if self.display_progress_div:
         w(u'<div id="progress" class="alert alert-warning">')
@@ -62,7 +60,14 @@ def render_content(self, w, form, values):
 
 
 class CWUploadView(View):
-    """ Custom view to edit the form from the configuration file.
+    """ Custom view to edit the form generated from the instance
+    configuration file.
+
+    .. note::
+
+        The authorized form fields are defined in the global parameter
+        'DECLARED_FIELDS' that can be found in the
+        'rql_upload.views.formfields.formfields' module.
     """
     __regid__ = "upload-view"
 
@@ -72,7 +77,7 @@ class CWUploadView(View):
     }
 
     def call(self, **kwargs):
-        """ Create the 'form' fields.
+        """ Create the form fields.
 
         .. note::
 
@@ -126,6 +131,7 @@ class CWUploadView(View):
             self.w(u'</div>')
             self.w(u'</div>')
             return -1
+
         # Create the form       
         form = self._cw.vreg["forms"].select(
             "upload-form", self._cw, action="", form_name=form_name)
@@ -211,7 +217,7 @@ class CWUploadView(View):
                 "Any X Where X is CWUser, X login "
                 "'{0}'".format(self._cw.session.login))[0][0]
 
-            # Save the inline parameters in a File entity
+            # Save the inline parameters in an UploadForm entity
             form_eid = self._cw.create_entity(
                 "UploadForm", data=Binary(json.dumps(inline_params)),
                 data_format=u"text/json", data_name=u"form.json",

@@ -6,13 +6,3 @@
 # http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html
 # for details.
 ##########################################################################
-
-from components import CWUploadBox
-from cwupload import CWUploadForm, CWUploadView, render_content
-from outofcontext import UploadOutOfContext
-from .utils import load_forms
-from .formfields import registration_callback
-
-
-__all__ = ["CWUploadBox", "CWUploadForm", "render_content", "CWUploadView",
-           "UploadOutOfContext", "load_forms", "registration_callback"]

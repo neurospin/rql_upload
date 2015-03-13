@@ -14,8 +14,11 @@
 import sys, os
 
 # Doc generation depends on being able to import nsap and nipype
+sys.path.append(
+    os.path.join(os.path.dirname(__file__), os.pardir, os.pardir))
 try:
     import rql_upload
+    import rql_upload.__pkginfo__ as release_info
 except ImportError:
     raise RuntimeError("Cannot import 'rql_upload', please investigate.")
 
@@ -30,10 +33,6 @@ if LooseVersion(sphinx.__version__) < LooseVersion('1'):
 sys.path.insert(0,os.path.abspath('sphinxext'))
 
 # -- General configuration -----------------------------------------------------
-
-# We load the release info into a dict by explicit execution
-release_info = {}
-execfile(os.path.join(os.pardir, os.pardir, "rql_upload", "info.py"), release_info)
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
@@ -73,14 +72,14 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'Rql Upload'
-copyright = u'2013, %(AUTHOR)s <%(AUTHOR_EMAIL)s>' % release_info
+copyright = u'2015, NSAp developers <antoine.grigis@cea.fr>'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = release_info['__version__']
+version = release_info.version
 # The full version, including alpha/beta/rc tags.
 release = version
 

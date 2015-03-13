@@ -6,9 +6,3 @@
 # http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html
 # for details.
 ##########################################################################
-
-from .hooks import ServerStartupHook
-from .schema import UploadFile, CWUpload
-from .entities import EntityUploadFile
-
-__all__ = ["ServerStartupHook", "UploadFile", "CWUpload", "EntityUploadFile"]
