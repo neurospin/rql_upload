@@ -48,7 +48,7 @@ class CWUploadForm(FieldsForm):
 
 @monkeypatch(FormRenderer)
 def render_content(self, w, form, values):
-    """ Overwrite the original uploading message.
+    """ Overwrite the original poping message when upload is runing.
     """
     if self.display_progress_div:
         w(u'<div id="progress" class="alert alert-warning">')
@@ -76,8 +76,8 @@ class CWUploadView(View):
 
         .. note::
 
-            All fields are checked to match the 'check_value' regular
-            expressions defined in the 'upload_structure_json' instance
+            At upload, all field inputs are checked to match the 'check_value' 
+            regular expressions defined in the 'upload_structure_json' instance
             parameter.
         """
         # Get some parameters
@@ -87,32 +87,88 @@ class CWUploadView(View):
             kwargs.update(parse_qs(param))
         form_name = kwargs["form_name"][0]
 
-        # Get the form fields
+        # Get the form fields from configuration file
         config = load_forms(self._cw.vreg.config)
 
         # Create a structure to store values that must be checked before the 
         # insertion in the data base
         check_struct = {}
+    
+        # If json file missing, generate error page
+        if config == -1:
+            self.w(u'<div class="panel panel-danger">')
+            self.w(u'<div class="panel-heading">')
+            self.w(u'<h2 class="panel-title">ERROR</h2>')
+            self.w(u'</div>')
+            self.w(u'<div class="panel-body">')
+            self.w(u"<h3>Configuration file not found</h3>")
+            self.w(u"Check that the path 'upload_structure_json' "
+                    "declared in all-in-one.conf file is set.<br>")
+            self.w(u"Then check that the path declared "
+                    "(current path:'{0}') corresponds to a "
+                    "json file and restart the instance.".format(
+                        self._cw.vreg.config["upload_structure_json"]))
+            self.w(u'</div>')
+            self.w(u'</div>')
+            return -1
 
+        # If json can't be read, generate error page
+        if config == -2:
+            self.w(u'<div class="panel panel-danger">')
+            self.w(u'<div class="panel-heading">')
+            self.w(u'<h2 class="panel-title">ERROR</h2>')
+            self.w(u'</div>')
+            self.w(u'<div class="panel-body">')
+            self.w(u"<h3>Configuration unknown</h3>")
+            self.w(u"The json file configuring the form can't be "
+                    "read: {0}".format(
+                        self._cw.vreg.config["upload_structure_json"]))
+            self.w(u'</div>')
+            self.w(u'</div>')
+            return -1
         # Create the form       
         form = self._cw.vreg["forms"].select(
             "upload-form", self._cw, action="", form_name=form_name)
-        for field in config[form_name]:
-            field_type = field.pop("type")
-            if field_type == "BooleanField" and "value" in field:
-                field["value"] = self.bool_map[field["value"]]
-            if "required" in field:
-                field["required"] = self.bool_map[field["required"]]
-            if "check_value" in field:
-                check_struct[field["name"]] = field.pop("check_value")
-
-            # Get the declared field
-            if field_type in DECLARED_FIELDS:
-                form.append_field(DECLARED_FIELDS[field_type](**field))
-            else:
-                self.w(
-                    u"<p class='label label-danger'>Unknown field "
-                     "'{0}'</p>".format(field_type))
+        try:
+            for field in config[form_name]:
+                field_type = field.pop("type")
+                if field_type == "BooleanField" and "value" in field:
+                    field["value"] = self.bool_map[field["value"]]
+                if "required" in field:
+                    field["required"] = self.bool_map[field["required"]]
+                if "check_value" in field:
+                    check_struct[field["name"]] = field.pop("check_value")
+                if field_type == "FileField":
+                    if not os.path.isdir(
+                        self._cw.vreg.config["upload_directory"]):
+                        self.w(u"<p class='label label-danger'>{0}: File "
+                                "field can't"
+                                " be used because the  'upload_directory' "
+                                "has not been set in all-in-ine.conf file or its"
+                                " path cannot be created ({1})</p>".format(
+                                    field.pop("label"),
+                                    self._cw.vreg.config["upload_directory"]))
+                        continue
+                # Get the declared field and add it to the form
+                if field_type in DECLARED_FIELDS:
+                    form.append_field(DECLARED_FIELDS[field_type](**field))
+                else:
+                    self.w(
+                        u"<p class='label label-danger'>'{0}': Unknown field "
+                         "</p>".format(field_type))
+        except:
+            self.w(u'<div class="panel panel-danger">')
+            self.w(u'<div class="panel-heading">')
+            self.w(u'<h2 class="panel-title">ERROR</h2>')
+            self.w(u'</div>')
+            self.w(u'<div class="panel-body">')
+            self.w(u"<h3>Configuration file syntax error</h3>")
+            self.w(u"The configuration file can't be read<br>")
+            self.w(u"Please refer to the documentation and make corrections")
+            self.w(u'</div>')
+            self.w(u'</div>')
+            return -1
+            
                 
         # Form processings
         try:

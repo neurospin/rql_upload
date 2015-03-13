@@ -72,7 +72,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Rql Download'
+project = u'Rql Upload'
 copyright = u'2013, %(AUTHOR)s <%(AUTHOR_EMAIL)s>' % release_info
 
 # The version info for the project you're documenting, acts as replacement for

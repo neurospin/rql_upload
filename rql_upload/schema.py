@@ -16,7 +16,7 @@ from cubicweb.schema import ERQLExpression, RQLUniqueConstraint
 ###############################################################################
 
 class UploadFile(EntityType):
-    """ An entity used to upload file which may contains binary data.
+    """ An entity used to upload file which may contain binary data.
 
     Attributes
     ----------
@@ -58,7 +58,7 @@ class UploadFile(EntityType):
         "CWUser", cardinality="1*", composite="subject")
 
 class UploadForm(EntityType):
-    """ A downloadable file which may contains binary data.
+    """ A downloadable file.
 
     Attributes
     ----------
