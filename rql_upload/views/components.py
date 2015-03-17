@@ -44,6 +44,7 @@ class CWUploadBox(component.CtxComponent):
         """
         # Get the field form structure
         config = load_forms(self._cw.vreg.config)
+        print config
 
         if config == -1:
             href = self._cw.build_url("view", vid="upload-view",
@@ -55,7 +56,7 @@ class CWUploadBox(component.CtxComponent):
             w(u'{0}</a>'.format(self._cw._("Form: ") + 'ERROR: no json found'))
             w(u'</div></div>')
 
-        if config == -2:
+        elif config == -2:
             href = self._cw.build_url("view", vid="upload-view",
                                       title=self._cw._("Upload form"),
                                       form_name="ERROR: json file can't be read")
