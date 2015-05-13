@@ -23,14 +23,14 @@ DECLARED_FIELDS = {}
 def registration_callback(vreg):
     """ The authorized form fields are registered from this function.
 
-    The registration identifier must be of the form "<class_name>".
+    The registration identifier must be of the form '<class_name>'.
     The preregistered fields are:
 
-    * Basic fields: StringField - PasswordField - IntField -
+    * **Basic fields**: StringField - PasswordField - IntField -
       FloatField - BooleanField - DateField - DateTimeField - TimeField - 
       TimeIntervalField.
 
-    * Compound fields: FileField.
+    * **Compound fields**: FileField.
     """
 
     # Got through fields we want to register

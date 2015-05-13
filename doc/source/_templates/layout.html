@@ -53,7 +53,21 @@
       <ul>
         <li><a href="{{pathto('index')}}">Home</a></li>
         <li><a href="{{pathto('installation')}}">Installation</a></li>
-        <li><a href="{{pathto('documentation')}}">Documentation</a></li>
+        <li class="btn-li">
+          <div class="btn-group">
+		    <a href="{{pathto('documentation')}}">Documentation</a>
+		    <a class="btn dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </a>
+		    <ul class="dropdown-menu">
+	          <li class="link-title">RQL UPLOAD</li>
+			  <li class="divider"></li>
+			  <li><a href="{{ pathto('schema') }}">Schema modifications</a></li>
+			  <li><a href="{{ pathto('view') }}">Views</a></li>
+			  <li class="divider"></li>
+		    </ul>
+		  </div>
+        </li>
         <li><a href="http://neurospin-wiki.org/">NeuroSpin Wiki</a></li>
       </ul>
     </div> <!-- end navbar -->
@@ -66,9 +80,11 @@
 <div class="container banner-container">
 
   <div id="nsap_synopsis" class="span6">
-    <h1>Rql Upload</h1>
+    <h1>RQL Upload</h1>
     <h2>Powered by NeuroSpin</h2>
-    <ul>Cube to upload data in a cubicweb CWUpload entity.</ul>
+    <ul>Package that provides.
+    <li>A cube to upload data.</li>
+    <li>A demonstrator.</li></ul>
   </div>
 
 </div>
@@ -81,6 +97,7 @@
 {% block content %}
 <div class="content-wrapper">
 
+  {%- if pagename != 'documentation' %}
     <div class="sphinxsidebar">
       <div class="sphinxsidebarwrapper">
 
@@ -101,7 +118,7 @@
 
       </div>
     </div>
-
+  {% endif %}
 
   <div class="content">
     {%- block document %}
@@ -116,6 +133,7 @@
 
 {% block relbar1 %}{% endblock %}
 {% block relbar2 %}{% endblock %}
+
 
 
 <!-- footer -->

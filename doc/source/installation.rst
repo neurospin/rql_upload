@@ -1,42 +1,48 @@
 
+
 .. _install_guid:
 
-=========================
-Installing `Rql Upload`
-=========================
+=======================
+Installing `RQL Upload`
+=======================
 
-This tutorial will walk you through the process of installing Rql Upload...
+This tutorial will walk you through the process of installing RQL Upload:
 
-  * :ref:`Install an official release <install_release>`: this
-    is the best approach for users who want a stable version.
-
-
-.. _install_release:
-
-Installing a stable version and runing the example
-==================================================
+    * **rql_upload**: a cube that can only be instanciated
+      if `cubicweb is installed <https://docs.cubicweb.org/admin/setup>`_.
 
 
-Get the cube from *github*
---------------------------
+.. _install_rqlupload:
 
-* Clone the project: git clone https://github.com/neurospin/rql_upload.git
-* Update your PYTHONPATH: export PYTHONPATH=$CLONE_DIR:PYTHONPATH
+Installing rql_upload
+=====================
+
+Installing the current version
+------------------------------
+
+Install from *github*
+~~~~~~~~~~~~~~~~~~~~~
+
+**Clone the project**
+
+>>> cd $CLONEDIR
+>>> git clone https://github.com/neurospin/rql_upload.git
+
+**Update your CW_CUBES_PATH**
+
+>>> export CW_CUBES_PATH=$CLONE_DIR/rql_upload:$CW_CUBES_PATH
 
 Make sure the cube is in CubicWeb's path
 ----------------------------------------
 
 >>> cubicweb-ctl list
 
-if the cube is not is the displayed list, update your CW_CUBES_PATH environment
-variable.
+Create an instance of the cube and configure the demo upload service
+--------------------------------------------------------------------
 
-Create an instance of the cube and run the example
---------------------------------------------------
+>>> cubicweb-ctl create rql_upload toy_upload
 
->>> cubicweb-ctl create rql_upload myUploadInstance
-
-When asked, specify a directory path where the file will be stored:
+When asked, specify a directory path where the uploaded file will be stored:
 
 >>> rql_upload options
 >>> ------------------
@@ -52,24 +58,21 @@ And the json file that will define your forms:
 
 An example of configuration file can be found within the cubes file:
 
-<cube_directory>/example/example.json
+>>> $CLONE_DIR/rql_upload/demo/demo.json
 
-You can then run the instance
+You can then run the instance in debug mode:
 
->>> cubicweb-ctl start -D myUploadInstance
+>>> cubicweb-ctl start -D toy_upload
 
 The last line of the prompt will indicate which url the 
 instance can be reached by:
 
 >>> (cubicweb.twisted) INFO: instance started on http://url:port/
 
+Change configuration
+--------------------
 
-Change configuration file
-=========================
+You can change to configuration by modifying the instance configuration file
+stored on your system:
 
-If you want to create your own forms,  you can either make modification in the
-example file (not recommanded) or you can create your own configuration file.
-
-Replace the upload_structure_json variable in the all-in-one.conf file.
-
->>> ...etc/cubicweb.d/myUploadInstance/all-in-one.conf
+>>> ...etc/cubicweb.d/toy_upload/all-in-one.conf

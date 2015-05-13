@@ -25,7 +25,10 @@ class CWUploadBox(component.CtxComponent):
 
     It will appear on the left and contain the names if all forms defined in the
     json file.
-    It will NOT appear for anonymous users.
+
+    .. warning::
+
+        It will NOT appear for anonymous users.
     """
     __regid__ = "ctx-upload-box"
     __select__ = (component.CtxComponent.__select__ & ~anonymous_user())
@@ -41,6 +44,7 @@ class CWUploadBox(component.CtxComponent):
         """
         # Get the field form structure
         config = load_forms(self._cw.vreg.config)
+        print config
 
         if config == -1:
             href = self._cw.build_url("view", vid="upload-view",
@@ -49,17 +53,17 @@ class CWUploadBox(component.CtxComponent):
             w(u'<div class="btn-toolbar">')
             w(u'<div class="btn-group-vertical btn-block">')
             w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-            w(u'{0}</a>'.format(self._cw._("Upload: ") + 'ERROR: no json found'))
+            w(u'{0}</a>'.format(self._cw._("Form: ") + 'ERROR: no json found'))
             w(u'</div></div>')
 
-        if config == -2:
+        elif config == -2:
             href = self._cw.build_url("view", vid="upload-view",
                                       title=self._cw._("Upload form"),
                                       form_name="ERROR: json file can't be read")
             w(u'<div class="btn-toolbar">')
             w(u'<div class="btn-group-vertical btn-block">')
             w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-            w(u"{0}</a>".format(self._cw._("Upload: ") + "ERROR: "
+            w(u"{0}</a>".format(self._cw._("Form: ") + "ERROR: "
                "json file can't be read"))
             w(u'</div></div>')
 
@@ -72,6 +76,6 @@ class CWUploadBox(component.CtxComponent):
                 w(u'<div class="btn-toolbar">')
                 w(u'<div class="btn-group-vertical btn-block">')
                 w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-                w(u'{0}</a>'.format(self._cw._("Upload: ") + form_name))
+                w(u'{0}</a>'.format(self._cw._("Form: ") + form_name))
                 w(u'</div></div><br/>')
 

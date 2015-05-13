@@ -13,12 +13,14 @@ from cubicweb.predicates import is_instance
 
 
 class UploadOutOfContext(baseviews.OutOfContextView):
-    """ Display a nice out of context view with a small icon on the left for
+    """ Display a nice out of context view with a small icon on the left of
     uploded items.
     """
     __select__ = is_instance("UploadFile", "UploadForm")
 
     def cell_call(self, row, col):
+        """ Create the html code.
+        """
         entity = self.cw_rset.get_entity(row, col)
         self.w(u'<img src="{0}" alt="{1}"/>'.format(
             entity.icon_url(), self._cw._("'upload' icon")))
