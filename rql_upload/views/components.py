@@ -44,7 +44,6 @@ class CWUploadBox(component.CtxComponent):
         """
         # Get the field form structure
         config = load_forms(self._cw.vreg.config)
-        print config
 
         if config == -1:
             href = self._cw.build_url("view", vid="upload-view",
