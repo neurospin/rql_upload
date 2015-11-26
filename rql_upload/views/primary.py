@@ -12,7 +12,7 @@ import json
 
 # CW import
 from cubicweb.web.views.primary import PrimaryView
-from cubicweb.selectors import is_instance
+from cubicweb.predicates import is_instance
 from logilab.mtconverter import xml_escape
 
 
