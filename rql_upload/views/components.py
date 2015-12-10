@@ -75,6 +75,6 @@ class CWUploadBox(component.CtxComponent):
                 w(u'<div class="btn-toolbar">')
                 w(u'<div class="btn-group-vertical btn-block">')
                 w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-                w(u'{0}</a>'.format(self._cw._("Form: ") + form_name))
+                w(u'{0}</a>'.format(form_name))
                 w(u'</div></div><br/>')
 

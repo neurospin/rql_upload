@@ -4,7 +4,7 @@
 modname = 'rql_upload'
 distname = 'cubicweb-rql-upload'
 
-numversion = (1, 0, 1)
+numversion = (1, 0, 2)
 version = '.'.join(str(num) for num in numversion)
 
 license = 'LGPL'

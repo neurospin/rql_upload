@@ -245,7 +245,8 @@ class CWUploadView(View):
             self.w(u"<p class='label label-danger'>{0}</p>".format(error))
 
         # Form rendering
-        self.w(u'<h3 class="panel-title">Upload ("{0}" form)</h3>'.format(
+        self.w(u"<legend>'{0}' form</legend>".format(
             form_name))
+        
         form.render(w=self.w, formvalues=self._cw.form)
 
