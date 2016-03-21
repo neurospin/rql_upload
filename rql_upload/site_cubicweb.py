@@ -14,7 +14,7 @@ options = (
         {
             "type": "string",
             "default": "",
-            "help": "base directory in which a the files are uploaded.",
+            "help": "base directory in which the files are uploaded.",
             "group": "rql_upload", "level": 0,
         }
     ),
