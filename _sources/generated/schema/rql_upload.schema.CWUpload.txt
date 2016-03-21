@@ -1,0 +1,43 @@
+:orphan:
+
+rql_upload.schema.CWUpload
+==========================
+
+.. currentmodule:: rql_upload.schema
+
+.. autoclass:: CWUpload
+    :members:
+    :private-members:
+    :special-members: __module__, __regid__, __call__
+    :undoc-members:
+    
+    .. automethod:: __init__
+    
+    .. rubric:: Methods
+    .. autosummary::
+    
+      ~CWUpload.__init__
+      ~CWUpload.add_relation
+      ~CWUpload.expand_relation_definitions
+      ~CWUpload.expand_type_definitions
+      ~CWUpload.extend
+      ~CWUpload.get_permissions
+      ~CWUpload.get_relation
+      ~CWUpload.get_relations
+      ~CWUpload.insert_relation_after
+      ~CWUpload.remove_relation
+      ~CWUpload.set_permissions
+    
+    
+    
+    
+    .. rubric:: Attributes
+    .. autosummary::
+    
+      ~CWUpload.description
+      ~CWUpload.meta
+      ~CWUpload.package
+      ~CWUpload.specialized_by
+    
+    
+

@@ -1,0 +1,9 @@
+:orphan:
+
+rql_upload.views.cwupload.render_content
+========================================
+
+.. currentmodule:: rql_upload.views.cwupload
+
+.. autofunction:: render_content
+

@@ -1,0 +1,416 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+    <title>RQL Upload &mdash; Rql upload</title>
+  <!-- htmltitle is before nature.css - we use this hack to load bootstrap first -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../../_static/css/bootstrap.min.css" media="screen" />
+  <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive.css"/>
+
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Rql upload" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+  
+   
+       <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../../../_static/js/bootstrap.min.js" type="text/javascript"></script>
+  <!-- <link rel="canonical" href="https://bioproj.extra.cea.fr/redmine/projects/nsap/_modules/cubicweb/web/form.html" /> -->
+
+  <script type="text/javascript">
+    $("div.buttonNext, div.buttonPrevious").hover(
+       function () {
+           $(this).css('background-color', '#FF9C34');
+       },
+       function () {
+           $(this).css('background-color', '#A7D6E2');
+       }
+    );
+    var bodywrapper = $('.bodywrapper');
+    var sidebarbutton = $('#sidebarbutton');
+    sidebarbutton.css({'height': '900px'});
+  </script>
+
+  </head>
+  <body role="document">
+
+<div class="header-wrapper">
+  <div class="header">
+    <p class="logo">
+      <a href="../../../index.html">
+        <img src="../../../_static/nsap.png" alt="Logo"/>
+      </a>
+    </p><div class="navbar">
+      <ul>
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../../installation.html">Installation</a></li>
+        <li class="btn-li">
+          <div class="btn-group">
+		    <a href="../../../documentation.html">Documentation</a>
+		    <a class="btn dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </a>
+		    <ul class="dropdown-menu">
+	          <li class="link-title">RQL Upload</li>
+			  <li class="divider"></li>
+			  <li><a href="../../../schema.html">Schema modifications</a></li>
+			  <li><a href="../../../view.html">Views</a></li>
+			  <li class="divider"></li>
+		    </ul>
+		  </div>
+        </li>
+        <li><a href="http://neurospin-wiki.org/">NeuroSpin Wiki</a></li>
+      </ul>
+    </div> <!-- end navbar --></div>
+</div>
+
+
+<div class="content-wrapper">
+    <div class="sphinxsidebar">
+      <div class="sphinxsidebarwrapper">
+
+        <!-- info setup -->
+          <p class="doc-version">
+           This documentation is for Rql Upload <strong>version 2.0.0</strong>
+          </p>
+        <p class="citing">
+          If you use the software, please do not hesitate to
+          <a href="https://github.com/neurospin/rql_upload">report a bug</a>.
+        </p>
+
+      <!-- toc tree -->
+      
+
+      </div>
+    </div>
+  
+
+  <div class="content">
+      
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cubicweb.web.form</h1><div class="highlight"><pre>
+<span></span><span class="c1"># copyright 2003-2011 LOGILAB S.A. (Paris, FRANCE), all rights reserved.</span>
+<span class="c1"># contact http://www.logilab.fr/ -- mailto:contact@logilab.fr</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of CubicWeb.</span>
+<span class="c1">#</span>
+<span class="c1"># CubicWeb is free software: you can redistribute it and/or modify it under the</span>
+<span class="c1"># terms of the GNU Lesser General Public License as published by the Free</span>
+<span class="c1"># Software Foundation, either version 2.1 of the License, or (at your option)</span>
+<span class="c1"># any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># CubicWeb is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License along</span>
+<span class="c1"># with CubicWeb.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;abstract form classes for CubicWeb web client&quot;&quot;&quot;</span>
+<span class="n">__docformat__</span> <span class="o">=</span> <span class="s2">&quot;restructuredtext en&quot;</span>
+
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+
+<span class="kn">from</span> <span class="nn">logilab.common.decorators</span> <span class="kn">import</span> <span class="n">iclassmethod</span>
+<span class="kn">from</span> <span class="nn">logilab.common.deprecation</span> <span class="kn">import</span> <span class="n">deprecated</span>
+
+<span class="kn">from</span> <span class="nn">cubicweb.appobject</span> <span class="kn">import</span> <span class="n">AppObject</span>
+<span class="kn">from</span> <span class="nn">cubicweb.view</span> <span class="kn">import</span> <span class="n">NOINDEX</span><span class="p">,</span> <span class="n">NOFOLLOW</span>
+<span class="kn">from</span> <span class="nn">cubicweb.web</span> <span class="kn">import</span> <span class="n">httpcache</span><span class="p">,</span> <span class="n">formfields</span><span class="p">,</span> <span class="n">controller</span><span class="p">,</span> <span class="n">formwidgets</span> <span class="k">as</span> <span class="n">fwdgs</span>
+
+<span class="k">class</span> <span class="nc">FormViewMixIn</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;abstract form view mix-in&quot;&quot;&quot;</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="s1">&#39;form&#39;</span>
+    <span class="n">http_cache_manager</span> <span class="o">=</span> <span class="n">httpcache</span><span class="o">.</span><span class="n">NoHTTPCacheManager</span>
+    <span class="n">add_to_breadcrumbs</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">html_headers</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return a list of html headers (eg something to be inserted between</span>
+<span class="sd">        &lt;head&gt; and &lt;/head&gt; of the returned page</span>
+
+<span class="sd">        by default forms are neither indexed nor followed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">NOINDEX</span><span class="p">,</span> <span class="n">NOFOLLOW</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">linkable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;override since forms are usually linked by an action,</span>
+<span class="sd">        so we don&#39;t want them to be listed by appli.possible_views</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+
+<span class="c1">###############################################################################</span>
+
+<span class="k">class</span> <span class="nc">metafieldsform</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;metaclass for FieldsForm to retrieve fields defined as class attributes</span>
+<span class="sd">    and put them into a single ordered list: &#39;_fields_&#39;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">classdict</span><span class="p">):</span>
+        <span class="n">allfields</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;_fields_&#39;</span><span class="p">):</span>
+                <span class="n">allfields</span> <span class="o">+=</span> <span class="n">base</span><span class="o">.</span><span class="n">_fields_</span>
+        <span class="n">clsfields</span> <span class="o">=</span> <span class="p">(</span><span class="n">item</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">classdict</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">formfields</span><span class="o">.</span><span class="n">Field</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">fieldname</span><span class="p">,</span> <span class="n">field</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">clsfields</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">creation_rank</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="n">field</span><span class="o">.</span><span class="n">set_name</span><span class="p">(</span><span class="n">fieldname</span><span class="p">)</span>
+            <span class="n">allfields</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="n">classdict</span><span class="p">[</span><span class="s1">&#39;_fields_&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">allfields</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">metafieldsform</span><span class="p">,</span> <span class="n">mcs</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">classdict</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">FieldNotFound</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;raised by field_by_name when a field with the given name has not been</span>
+<span class="sd">    found</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<span class="k">class</span> <span class="nc">Form</span><span class="p">(</span><span class="n">AppObject</span><span class="p">):</span>
+    <span class="n">__metaclass__</span> <span class="o">=</span> <span class="n">metafieldsform</span>
+    <span class="n">__registry__</span> <span class="o">=</span> <span class="s1">&#39;forms&#39;</span>
+
+    <span class="n">parent_form</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">force_session_key</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">domid</span> <span class="o">=</span> <span class="s1">&#39;form&#39;</span>
+    <span class="n">copy_nav_params</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">control_fields</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span> <span class="p">(</span><span class="s1">&#39;__form_id&#39;</span><span class="p">,</span> <span class="s1">&#39;__errorurl&#39;</span><span class="p">,</span> <span class="s1">&#39;__domid&#39;</span><span class="p">,</span>
+                           <span class="s1">&#39;__redirectpath&#39;</span><span class="p">,</span> <span class="s1">&#39;_cwmsgid&#39;</span><span class="p">,</span>
+                           <span class="p">)</span> <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">rset</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">submitmsg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">mainform</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># process kwargs first so we can properly pass them to Form and match</span>
+        <span class="c1"># order expectation (ie cw_extra_kwargs populated almost first)</span>
+        <span class="n">hiddens</span><span class="p">,</span> <span class="n">extrakw</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># now call ancestor init</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Form</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">rset</span><span class="o">=</span><span class="n">rset</span><span class="p">,</span> <span class="n">row</span><span class="o">=</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="o">**</span><span class="n">extrakw</span><span class="p">)</span>
+        <span class="c1"># then continue with further specific initialization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">_fields_</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">hiddens</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_hidden</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mainform</span><span class="p">:</span>
+            <span class="n">formid</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;formvid&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__regid__</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_hidden</span><span class="p">(</span><span class="s1">u&#39;__form_id&#39;</span><span class="p">,</span> <span class="n">formid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_posting</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__form_id&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="n">formid</span>
+        <span class="k">if</span> <span class="n">mainform</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_hidden</span><span class="p">(</span><span class="s1">u&#39;__errorurl&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">session_key</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_hidden</span><span class="p">(</span><span class="s1">u&#39;__domid&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">domid</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">restore_previous_post</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">session_key</span><span class="p">())</span>
+        <span class="c1"># XXX why do we need two different variables (mainform and copy_nav_params ?)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy_nav_params</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">controller</span><span class="o">.</span><span class="n">NAV_FORM_PARAMETERS</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">add_hidden</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">submitmsg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_message</span><span class="p">(</span><span class="n">submitmsg</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_kwargs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">hiddens</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">extrakw</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># search for navigation parameters and customization of existing</span>
+        <span class="c1"># attributes; remaining stuff goes in extrakwargs</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">controller</span><span class="o">.</span><span class="n">NAV_FORM_PARAMETERS</span><span class="p">:</span>
+                <span class="n">hiddens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">elif</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;redirect_path&#39;</span><span class="p">:</span>
+                <span class="n">hiddens</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="s1">u&#39;__redirectpath&#39;</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;_&#39;</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">extrakw</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">return</span> <span class="n">hiddens</span><span class="p">,</span> <span class="n">extrakw</span>
+
+    <span class="k">def</span> <span class="nf">set_message</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">submitmsg</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;sets a submitmsg if exists, using _cwmsgid mechanism &quot;&quot;&quot;</span>
+        <span class="n">cwmsgid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">set_redirect_message</span><span class="p">(</span><span class="n">submitmsg</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">add_hidden</span><span class="p">(</span><span class="s1">u&#39;_cwmsgid&#39;</span><span class="p">,</span> <span class="n">cwmsgid</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">root_form</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the root form&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_form</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_form</span><span class="o">.</span><span class="n">root_form</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">form_valerror</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;the validation error exception if any&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_form</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># unset if restore_previous_post has not be called</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_form_valerror&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_form</span><span class="o">.</span><span class="n">form_valerror</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">form_previous_values</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;previously posted values (on validation error)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_form</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="c1"># unset if restore_previous_post has not be called</span>
+            <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_form_previous_values&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_form</span><span class="o">.</span><span class="n">form_previous_values</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">posting</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return True if the form is being posted, False if it is being</span>
+<span class="sd">        generated.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># XXX check behaviour on regeneration after error</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_form</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_posting</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_form</span><span class="o">.</span><span class="n">posting</span>
+
+    <span class="nd">@iclassmethod</span>
+    <span class="k">def</span> <span class="nf">_fieldsattr</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">cls_or_self</span><span class="o">.</span><span class="n">_fields_</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">cls_or_self</span><span class="o">.</span><span class="n">fields</span>
+        <span class="k">return</span> <span class="n">fields</span>
+
+    <span class="nd">@iclassmethod</span>
+    <span class="k">def</span> <span class="nf">field_by_name</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return field with the given name and role.</span>
+
+<span class="sd">        Raise :exc:`FieldNotFound` if the field can&#39;t be found.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">cls_or_self</span><span class="o">.</span><span class="n">_fieldsattr</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="n">role</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">field</span>
+        <span class="k">raise</span> <span class="n">FieldNotFound</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">role</span><span class="p">)</span>
+
+    <span class="nd">@iclassmethod</span>
+    <span class="k">def</span> <span class="nf">fields_by_name</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a list of fields with the given name and role.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">field</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">cls_or_self</span><span class="o">.</span><span class="n">_fieldsattr</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="n">role</span><span class="p">]</span>
+
+    <span class="nd">@iclassmethod</span>
+    <span class="k">def</span> <span class="nf">remove_field</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove the given field.&quot;&quot;&quot;</span>
+        <span class="n">cls_or_self</span><span class="o">.</span><span class="n">_fieldsattr</span><span class="p">()</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+
+    <span class="nd">@iclassmethod</span>
+    <span class="k">def</span> <span class="nf">append_field</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Append the given field.&quot;&quot;&quot;</span>
+        <span class="n">cls_or_self</span><span class="o">.</span><span class="n">_fieldsattr</span><span class="p">()</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+
+    <span class="nd">@iclassmethod</span>
+    <span class="k">def</span> <span class="nf">insert_field_before</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert the given field before the field of given name and role.&quot;&quot;&quot;</span>
+        <span class="n">bfield</span> <span class="o">=</span> <span class="n">cls_or_self</span><span class="o">.</span><span class="n">field_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">role</span><span class="p">)</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">cls_or_self</span><span class="o">.</span><span class="n">_fieldsattr</span><span class="p">()</span>
+        <span class="n">fields</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">bfield</span><span class="p">),</span> <span class="n">field</span><span class="p">)</span>
+
+    <span class="nd">@iclassmethod</span>
+    <span class="k">def</span> <span class="nf">insert_field_after</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert the given field after the field of given name and role.&quot;&quot;&quot;</span>
+        <span class="n">afield</span> <span class="o">=</span> <span class="n">cls_or_self</span><span class="o">.</span><span class="n">field_by_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">role</span><span class="p">)</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">cls_or_self</span><span class="o">.</span><span class="n">_fieldsattr</span><span class="p">()</span>
+        <span class="n">fields</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">fields</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">afield</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+
+    <span class="nd">@iclassmethod</span>
+    <span class="k">def</span> <span class="nf">add_hidden</span><span class="p">(</span><span class="n">cls_or_self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Append an hidden field to the form. `name`, `value` and extra keyword</span>
+<span class="sd">        arguments will be given to the field constructor. The inserted field is</span>
+<span class="sd">        returned.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;ignore_req_params&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;widget&#39;</span><span class="p">,</span> <span class="n">fwdgs</span><span class="o">.</span><span class="n">HiddenInput</span><span class="p">)</span>
+        <span class="n">field</span> <span class="o">=</span> <span class="n">formfields</span><span class="o">.</span><span class="n">StringField</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="n">value</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;id&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="c1"># by default, hidden input don&#39;t set id attribute. If one is</span>
+            <span class="c1"># explicitly specified, ensure it will be set</span>
+            <span class="n">field</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">setdomid</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">cls_or_self</span><span class="o">.</span><span class="n">append_field</span><span class="p">(</span><span class="n">field</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">field</span>
+
+    <span class="k">def</span> <span class="nf">session_key</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the key that may be used to store / retreive data about a</span>
+<span class="sd">        previous post which failed because of a validation error</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_session_key</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">#</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">url</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">domid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">force_session_key</span>
+
+    <span class="k">def</span> <span class="nf">restore_previous_post</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sessionkey</span><span class="p">):</span>
+        <span class="c1"># get validation session data which may have been previously set.</span>
+        <span class="c1"># deleting validation errors here breaks form reloading (errors are</span>
+        <span class="c1"># no more available), they have to be deleted by application&#39;s publish</span>
+        <span class="c1"># method on successful commit</span>
+        <span class="n">forminfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">sessionkey</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">forminfo</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_form_previous_values</span> <span class="o">=</span> <span class="n">forminfo</span><span class="p">[</span><span class="s1">&#39;values&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_form_valerror</span> <span class="o">=</span> <span class="n">forminfo</span><span class="p">[</span><span class="s1">&#39;error&#39;</span><span class="p">]</span>
+            <span class="c1"># if some validation error occurred on entity creation, we have to</span>
+            <span class="c1"># get the original variable name from its attributed eid</span>
+            <span class="n">foreid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valerror</span><span class="o">.</span><span class="n">entity</span>
+            <span class="k">for</span> <span class="n">var</span><span class="p">,</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">forminfo</span><span class="p">[</span><span class="s1">&#39;eidmap&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">foreid</span> <span class="o">==</span> <span class="n">eid</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">form_valerror</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">var</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">form_valerror</span><span class="o">.</span><span class="n">eid</span> <span class="o">=</span> <span class="n">foreid</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_form_previous_values</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_form_valerror</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">field_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">field</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return field&#39;s error if specified in current validation exception&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valerror</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">eidparam</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">eid</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valerror</span><span class="o">.</span><span class="n">eid</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valerror</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">role_name</span><span class="p">())</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">role</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valerror</span><span class="p">:</span>
+                    <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: errors key of attribute/relation should be suffixed by &quot;-&lt;role&gt;&quot;&#39;</span>
+                         <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valerror</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">form_valerror</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">remaining_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">form_valerror</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer">
+    </div>
+  </div>
+  
+</div>
+
+<div class="footer">
+    &copy; 2015, NSAp developers &lt;antoine.grigis@cea.fr&gt;.
+</div>
+  </body>
+</html>

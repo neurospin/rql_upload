@@ -1,0 +1,47 @@
+:orphan:
+
+rql_upload.hooks.ServerStartupHook
+==================================
+
+.. currentmodule:: rql_upload.hooks
+
+.. autoclass:: ServerStartupHook
+    :members:
+    :private-members:
+    :special-members: __module__, __regid__, __call__
+    :undoc-members:
+    
+    .. automethod:: __init__
+    
+    .. rubric:: Methods
+    .. autosummary::
+    
+      ~ServerStartupHook.__init__
+      ~ServerStartupHook.check_events
+      ~ServerStartupHook.critical
+      ~ServerStartupHook.cw_propval
+      ~ServerStartupHook.debug
+      ~ServerStartupHook.error
+      ~ServerStartupHook.exception
+      ~ServerStartupHook.filterable_selectors
+      ~ServerStartupHook.info
+      ~ServerStartupHook.warning
+    
+    
+    
+    
+    .. rubric:: Attributes
+    .. autosummary::
+    
+      ~ServerStartupHook.category
+      ~ServerStartupHook.eidfrom
+      ~ServerStartupHook.eidto
+      ~ServerStartupHook.entity
+      ~ServerStartupHook.events
+      ~ServerStartupHook.known_args
+      ~ServerStartupHook.order
+      ~ServerStartupHook.repo
+      ~ServerStartupHook.rtype
+    
+    
+

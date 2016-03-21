@@ -1,0 +1,296 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+    <title>RQL Upload &mdash; Rql upload</title>
+  <!-- htmltitle is before nature.css - we use this hack to load bootstrap first -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../_static/css/bootstrap.min.css" media="screen" />
+  <link rel="stylesheet" href="../../_static/css/bootstrap-responsive.css"/>
+
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Rql upload" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+  
+   
+       <script type="text/javascript" src="../../_static/sidebar.js"></script>
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../../_static/js/bootstrap.min.js" type="text/javascript"></script>
+  <!-- <link rel="canonical" href="https://bioproj.extra.cea.fr/redmine/projects/nsap/_modules/cubicweb/appobject.html" /> -->
+
+  <script type="text/javascript">
+    $("div.buttonNext, div.buttonPrevious").hover(
+       function () {
+           $(this).css('background-color', '#FF9C34');
+       },
+       function () {
+           $(this).css('background-color', '#A7D6E2');
+       }
+    );
+    var bodywrapper = $('.bodywrapper');
+    var sidebarbutton = $('#sidebarbutton');
+    sidebarbutton.css({'height': '900px'});
+  </script>
+
+  </head>
+  <body role="document">
+
+<div class="header-wrapper">
+  <div class="header">
+    <p class="logo">
+      <a href="../../index.html">
+        <img src="../../_static/nsap.png" alt="Logo"/>
+      </a>
+    </p><div class="navbar">
+      <ul>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../installation.html">Installation</a></li>
+        <li class="btn-li">
+          <div class="btn-group">
+		    <a href="../../documentation.html">Documentation</a>
+		    <a class="btn dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </a>
+		    <ul class="dropdown-menu">
+	          <li class="link-title">RQL Upload</li>
+			  <li class="divider"></li>
+			  <li><a href="../../schema.html">Schema modifications</a></li>
+			  <li><a href="../../view.html">Views</a></li>
+			  <li class="divider"></li>
+		    </ul>
+		  </div>
+        </li>
+        <li><a href="http://neurospin-wiki.org/">NeuroSpin Wiki</a></li>
+      </ul>
+    </div> <!-- end navbar --></div>
+</div>
+
+
+<div class="content-wrapper">
+    <div class="sphinxsidebar">
+      <div class="sphinxsidebarwrapper">
+
+        <!-- info setup -->
+          <p class="doc-version">
+           This documentation is for Rql Upload <strong>version 2.0.0</strong>
+          </p>
+        <p class="citing">
+          If you use the software, please do not hesitate to
+          <a href="https://github.com/neurospin/rql_upload">report a bug</a>.
+        </p>
+
+      <!-- toc tree -->
+      
+
+      </div>
+    </div>
+  
+
+  <div class="content">
+      
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cubicweb.appobject</h1><div class="highlight"><pre>
+<span></span><span class="c1"># copyright 2003-2012 LOGILAB S.A. (Paris, FRANCE), all rights reserved.</span>
+<span class="c1"># contact http://www.logilab.fr/ -- mailto:contact@logilab.fr</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of CubicWeb.</span>
+<span class="c1">#</span>
+<span class="c1"># CubicWeb is free software: you can redistribute it and/or modify it under the</span>
+<span class="c1"># terms of the GNU Lesser General Public License as published by the Free</span>
+<span class="c1"># Software Foundation, either version 2.1 of the License, or (at your option)</span>
+<span class="c1"># any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># CubicWeb is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License along</span>
+<span class="c1"># with CubicWeb.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. _appobject:</span>
+
+<span class="sd">The `AppObject` class</span>
+<span class="sd">---------------------</span>
+
+<span class="sd">The AppObject class is the base class for all dynamically loaded objects</span>
+<span class="sd">(application objects) accessible through the vregistry.</span>
+
+<span class="sd">We can find a certain number of attributes and methods defined in this class and</span>
+<span class="sd">common to all the application objects.</span>
+
+<span class="sd">.. autoclass:: AppObject</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__docformat__</span> <span class="o">=</span> <span class="s2">&quot;restructuredtext en&quot;</span>
+
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+
+<span class="kn">from</span> <span class="nn">logilab.common.deprecation</span> <span class="kn">import</span> <span class="n">deprecated</span><span class="p">,</span> <span class="n">class_renamed</span>
+<span class="kn">from</span> <span class="nn">logilab.common.logging_ext</span> <span class="kn">import</span> <span class="n">set_log_methods</span>
+
+<span class="c1"># first line imports for bw compat</span>
+<span class="kn">from</span> <span class="nn">logilab.common.registry</span> <span class="kn">import</span> <span class="p">(</span><span class="n">objectify_predicate</span><span class="p">,</span> <span class="n">traced_selection</span><span class="p">,</span> <span class="n">Predicate</span><span class="p">,</span>
+                                     <span class="n">RegistrableObject</span><span class="p">,</span> <span class="n">yes</span><span class="p">)</span>
+
+
+<span class="n">objectify_selector</span> <span class="o">=</span> <span class="n">deprecated</span><span class="p">(</span><span class="s1">&#39;[3.15] objectify_selector has been &#39;</span>
+                                <span class="s1">&#39;renamed to objectify_predicates in &#39;</span>
+                                <span class="s1">&#39;logilab.common.registry&#39;</span><span class="p">)(</span><span class="n">objectify_predicate</span><span class="p">)</span>
+<span class="n">traced_selection</span> <span class="o">=</span> <span class="n">deprecated</span><span class="p">(</span><span class="s1">&#39;[3.15] traced_selection has been &#39;</span>
+                              <span class="s1">&#39;moved to logilab.common.registry&#39;</span><span class="p">)(</span><span class="n">traced_selection</span><span class="p">)</span>
+<span class="n">Selector</span> <span class="o">=</span> <span class="n">class_renamed</span><span class="p">(</span><span class="s1">&#39;Selector&#39;</span><span class="p">,</span> <span class="n">Predicate</span><span class="p">,</span>
+                         <span class="s1">&#39;[3.15] Selector has been renamed to Predicate &#39;</span>
+                         <span class="s1">&#39;in logilab.common.registry&#39;</span><span class="p">)</span>
+
+<span class="nd">@deprecated</span><span class="p">(</span><span class="s1">&#39;[3.15] lltrace decorator can now be removed&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">lltrace</span><span class="p">(</span><span class="n">func</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">func</span>
+
+<span class="c1"># the base class for all appobjects ############################################</span>
+
+<span class="k">class</span> <span class="nc">AppObject</span><span class="p">(</span><span class="n">RegistrableObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This is the base class for CubicWeb application objects which are</span>
+<span class="sd">    selected in a request context.</span>
+
+<span class="sd">    The following attributes should be set on concrete appobject classes:</span>
+
+<span class="sd">    At selection time, the following attributes are set on the instance:</span>
+
+<span class="sd">    :attr:`_cw`</span>
+<span class="sd">      current request</span>
+<span class="sd">    :attr:`cw_extra_kwargs`</span>
+<span class="sd">      other received arguments</span>
+
+<span class="sd">    And also the following, only if `rset` is found in arguments (in which case</span>
+<span class="sd">    rset/row/col will be removed from `cwextra_kwargs`):</span>
+
+<span class="sd">    :attr:`cw_rset`</span>
+<span class="sd">      context result set or None</span>
+
+<span class="sd">    :attr:`cw_row`</span>
+<span class="sd">      if a result set is set and the context is about a particular cell in the</span>
+<span class="sd">      result set, and not the result set as a whole, specify the row number we</span>
+<span class="sd">      are interested in, else None</span>
+
+<span class="sd">    :attr:`cw_col`</span>
+<span class="sd">      if a result set is set and the context is about a particular cell in the</span>
+<span class="sd">      result set, and not the result set as a whole, specify the col number we</span>
+<span class="sd">      are interested in, else None</span>
+
+
+<span class="sd">    .. Note::</span>
+
+<span class="sd">      * do not inherit directly from this class but from a more specific class</span>
+<span class="sd">        such as `AnyEntity`, `EntityView`, `AnyRsetView`, `Action`...</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__select__</span> <span class="o">=</span> <span class="n">yes</span><span class="p">()</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__registered__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">registry</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;called by the registry when the appobject has been registered.</span>
+
+<span class="sd">        It must return the object that will be actually registered (this may be</span>
+<span class="sd">        the right hook to create an instance for example). By default the</span>
+<span class="sd">        appobject is returned without any transformation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pdefs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;cw_property_defs&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">for</span> <span class="n">propid</span><span class="p">,</span> <span class="n">pdef</span> <span class="ow">in</span> <span class="n">pdefs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">pdef</span> <span class="o">=</span> <span class="n">pdef</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="c1"># may be shared</span>
+            <span class="n">pdef</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">propid</span><span class="p">,</span> <span class="n">pdef</span><span class="p">[</span><span class="s1">&#39;default&#39;</span><span class="p">])</span>
+            <span class="n">pdef</span><span class="p">[</span><span class="s1">&#39;sitewide&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;site_wide&#39;</span><span class="p">,</span> <span class="n">pdef</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;sitewide&#39;</span><span class="p">))</span>
+            <span class="n">registry</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">register_property</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">_cwpropkey</span><span class="p">(</span><span class="n">propid</span><span class="p">),</span> <span class="o">**</span><span class="n">pdef</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">callable</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__select__</span><span class="p">),</span> <span class="n">cls</span>
+        <span class="k">return</span> <span class="n">cls</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="o">**</span><span class="n">extra</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AppObject</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span> <span class="o">=</span> <span class="n">req</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cw_rset</span> <span class="o">=</span> <span class="n">extra</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;rset&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cw_row</span> <span class="o">=</span> <span class="n">extra</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;row&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cw_col</span> <span class="o">=</span> <span class="n">extra</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;col&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cw_extra_kwargs</span> <span class="o">=</span> <span class="n">extra</span>
+
+    <span class="c1"># persistent class properties ##############################################</span>
+    <span class="c1">#</span>
+    <span class="c1"># optional `cw_property_defs` dict on a class defines available persistent</span>
+    <span class="c1"># properties for this class:</span>
+    <span class="c1">#</span>
+    <span class="c1"># * key: id of the property (the actual CWProperty key is build using</span>
+    <span class="c1">#        &lt;registry name&gt;.&lt;obj id&gt;.&lt;property id&gt;</span>
+    <span class="c1"># * value: tuple (property type, vocabfunc, default value, property description)</span>
+    <span class="c1">#         possible types are those used by `logilab.common.configuration`</span>
+    <span class="c1">#</span>
+    <span class="c1"># notice that when it exists multiple objects with the same id (adaptation,</span>
+    <span class="c1"># overriding) only the first encountered definition is considered, so those</span>
+    <span class="c1"># objects can&#39;t try to have different default values for instance.</span>
+    <span class="c1">#</span>
+    <span class="c1"># you can then access to a property value using self.cw_propval, where self</span>
+    <span class="c1"># is an instance of class</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_cwpropkey</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">propid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return cw property key for the property of the given id for this</span>
+<span class="sd">        class</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__registry__</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__regid__</span><span class="p">,</span> <span class="n">propid</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">cw_propval</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">propid</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return cw property value associated to key</span>
+
+<span class="sd">        &lt;cls.__registry__&gt;.&lt;cls.id&gt;.&lt;propid&gt;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">property_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cwpropkey</span><span class="p">(</span><span class="n">propid</span><span class="p">))</span>
+
+    <span class="c1"># these are overridden by set_log_methods below</span>
+    <span class="c1"># only defining here to prevent pylint from complaining</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">warning</span> <span class="o">=</span> <span class="n">error</span> <span class="o">=</span> <span class="n">critical</span> <span class="o">=</span> <span class="n">exception</span> <span class="o">=</span> <span class="n">debug</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">msg</span><span class="p">,</span><span class="o">*</span><span class="n">a</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="bp">None</span>
+
+<span class="n">set_log_methods</span><span class="p">(</span><span class="n">AppObject</span><span class="p">,</span> <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;cubicweb.appobject&#39;</span><span class="p">))</span>
+
+<span class="c1"># defined here to avoid warning on usage on the AppObject class</span>
+<span class="n">yes</span> <span class="o">=</span> <span class="n">deprecated</span><span class="p">(</span><span class="s1">&#39;[3.15] yes has been moved to logilab.common.registry&#39;</span><span class="p">)(</span><span class="n">yes</span><span class="p">)</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer">
+    </div>
+  </div>
+  
+</div>
+
+<div class="footer">
+    &copy; 2015, NSAp developers &lt;antoine.grigis@cea.fr&gt;.
+</div>
+  </body>
+</html>

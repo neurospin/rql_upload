@@ -1,0 +1,63 @@
+:orphan:
+
+rql_upload.views.cwupload.CWUploadView
+======================================
+
+.. currentmodule:: rql_upload.views.cwupload
+
+.. autoclass:: CWUploadView
+    :members:
+    :private-members:
+    :special-members: __module__, __regid__, __call__
+    :undoc-members:
+    
+    .. automethod:: __init__
+    
+    .. rubric:: Methods
+    .. autosummary::
+    
+      ~CWUploadView.__init__
+      ~CWUploadView.call
+      ~CWUploadView.cell_call
+      ~CWUploadView.critical
+      ~CWUploadView.cw_propval
+      ~CWUploadView.debug
+      ~CWUploadView.error
+      ~CWUploadView.exception
+      ~CWUploadView.field
+      ~CWUploadView.html_headers
+      ~CWUploadView.info
+      ~CWUploadView.is_primary
+      ~CWUploadView.last_modified
+      ~CWUploadView.linkable
+      ~CWUploadView.page_title
+      ~CWUploadView.render
+      ~CWUploadView.set_http_cache_headers
+      ~CWUploadView.set_request_content_type
+      ~CWUploadView.set_stream
+      ~CWUploadView.tal_render
+      ~CWUploadView.url
+      ~CWUploadView.warning
+      ~CWUploadView.wdata
+      ~CWUploadView.whead
+      ~CWUploadView.wview
+    
+    
+    
+    
+    .. rubric:: Attributes
+    .. autosummary::
+    
+      ~CWUploadView.add_div_section
+      ~CWUploadView.add_to_breadcrumbs
+      ~CWUploadView.binary
+      ~CWUploadView.bool_map
+      ~CWUploadView.cache_max_age
+      ~CWUploadView.category
+      ~CWUploadView.content_type
+      ~CWUploadView.paginable
+      ~CWUploadView.templatable
+      ~CWUploadView.title
+    
+    
+

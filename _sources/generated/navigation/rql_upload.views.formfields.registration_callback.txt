@@ -1,0 +1,9 @@
+:orphan:
+
+rql_upload.views.formfields.registration_callback
+=================================================
+
+.. currentmodule:: rql_upload.views.formfields
+
+.. autofunction:: registration_callback
+

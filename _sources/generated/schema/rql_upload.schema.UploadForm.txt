@@ -1,0 +1,43 @@
+:orphan:
+
+rql_upload.schema.UploadForm
+============================
+
+.. currentmodule:: rql_upload.schema
+
+.. autoclass:: UploadForm
+    :members:
+    :private-members:
+    :special-members: __module__, __regid__, __call__
+    :undoc-members:
+    
+    .. automethod:: __init__
+    
+    .. rubric:: Methods
+    .. autosummary::
+    
+      ~UploadForm.__init__
+      ~UploadForm.add_relation
+      ~UploadForm.expand_relation_definitions
+      ~UploadForm.expand_type_definitions
+      ~UploadForm.extend
+      ~UploadForm.get_permissions
+      ~UploadForm.get_relation
+      ~UploadForm.get_relations
+      ~UploadForm.insert_relation_after
+      ~UploadForm.remove_relation
+      ~UploadForm.set_permissions
+    
+    
+    
+    
+    .. rubric:: Attributes
+    .. autosummary::
+    
+      ~UploadForm.description
+      ~UploadForm.meta
+      ~UploadForm.package
+      ~UploadForm.specialized_by
+    
+    
+

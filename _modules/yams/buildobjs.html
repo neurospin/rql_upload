@@ -1,0 +1,895 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+    <title>RQL Upload &mdash; Rql upload</title>
+  <!-- htmltitle is before nature.css - we use this hack to load bootstrap first -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../_static/css/bootstrap.min.css" media="screen" />
+  <link rel="stylesheet" href="../../_static/css/bootstrap-responsive.css"/>
+
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Rql upload" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+  
+   
+       <script type="text/javascript" src="../../_static/sidebar.js"></script>
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../../_static/js/bootstrap.min.js" type="text/javascript"></script>
+  <!-- <link rel="canonical" href="https://bioproj.extra.cea.fr/redmine/projects/nsap/_modules/yams/buildobjs.html" /> -->
+
+  <script type="text/javascript">
+    $("div.buttonNext, div.buttonPrevious").hover(
+       function () {
+           $(this).css('background-color', '#FF9C34');
+       },
+       function () {
+           $(this).css('background-color', '#A7D6E2');
+       }
+    );
+    var bodywrapper = $('.bodywrapper');
+    var sidebarbutton = $('#sidebarbutton');
+    sidebarbutton.css({'height': '900px'});
+  </script>
+
+  </head>
+  <body role="document">
+
+<div class="header-wrapper">
+  <div class="header">
+    <p class="logo">
+      <a href="../../index.html">
+        <img src="../../_static/nsap.png" alt="Logo"/>
+      </a>
+    </p><div class="navbar">
+      <ul>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../installation.html">Installation</a></li>
+        <li class="btn-li">
+          <div class="btn-group">
+		    <a href="../../documentation.html">Documentation</a>
+		    <a class="btn dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </a>
+		    <ul class="dropdown-menu">
+	          <li class="link-title">RQL Upload</li>
+			  <li class="divider"></li>
+			  <li><a href="../../schema.html">Schema modifications</a></li>
+			  <li><a href="../../view.html">Views</a></li>
+			  <li class="divider"></li>
+		    </ul>
+		  </div>
+        </li>
+        <li><a href="http://neurospin-wiki.org/">NeuroSpin Wiki</a></li>
+      </ul>
+    </div> <!-- end navbar --></div>
+</div>
+
+
+<div class="content-wrapper">
+    <div class="sphinxsidebar">
+      <div class="sphinxsidebarwrapper">
+
+        <!-- info setup -->
+          <p class="doc-version">
+           This documentation is for Rql Upload <strong>version 2.0.0</strong>
+          </p>
+        <p class="citing">
+          If you use the software, please do not hesitate to
+          <a href="https://github.com/neurospin/rql_upload">report a bug</a>.
+        </p>
+
+      <!-- toc tree -->
+      
+
+      </div>
+    </div>
+  
+
+  <div class="content">
+      
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for yams.buildobjs</h1><div class="highlight"><pre>
+<span></span><span class="c1"># copyright 2004-2014 LOGILAB S.A. (Paris, FRANCE), all rights reserved.</span>
+<span class="c1"># contact http://www.logilab.fr/ -- mailto:contact@logilab.fr</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of yams.</span>
+<span class="c1">#</span>
+<span class="c1"># yams is free software: you can redistribute it and/or modify it under the</span>
+<span class="c1"># terms of the GNU Lesser General Public License as published by the Free</span>
+<span class="c1"># Software Foundation, either version 2.1 of the License, or (at your option)</span>
+<span class="c1"># any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># yams is distributed in the hope that it will be useful, but WITHOUT ANY</span>
+<span class="c1"># WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR</span>
+<span class="c1"># A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License along</span>
+<span class="c1"># with yams. If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;Classes used to build a schema.&quot;&quot;&quot;</span>
+
+<span class="n">__docformat__</span> <span class="o">=</span> <span class="s2">&quot;restructuredtext en&quot;</span>
+
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">copy</span>
+
+<span class="kn">from</span> <span class="nn">six</span> <span class="kn">import</span> <span class="n">add_metaclass</span><span class="p">,</span> <span class="n">string_types</span>
+
+<span class="kn">from</span> <span class="nn">logilab.common</span> <span class="kn">import</span> <span class="n">attrdict</span>
+
+<span class="kn">from</span> <span class="nn">yams</span> <span class="kn">import</span> <span class="p">(</span><span class="n">BASE_TYPES</span><span class="p">,</span> <span class="n">MARKER</span><span class="p">,</span> <span class="n">BadSchemaDefinition</span><span class="p">,</span> <span class="n">KNOWN_METAATTRIBUTES</span><span class="p">,</span>
+                  <span class="n">DEFAULT_ETYPEPERMS</span><span class="p">,</span> <span class="n">DEFAULT_RELPERMS</span><span class="p">,</span> <span class="n">DEFAULT_ATTRPERMS</span><span class="p">,</span>
+                  <span class="n">DEFAULT_COMPUTED_ATTRPERMS</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">yams.constraints</span> <span class="kn">import</span> <span class="p">(</span><span class="n">SizeConstraint</span><span class="p">,</span> <span class="n">UniqueConstraint</span><span class="p">,</span>
+                              <span class="n">StaticVocabularyConstraint</span><span class="p">,</span> <span class="n">FORMAT_CONSTRAINT</span><span class="p">)</span>
+<span class="kn">from</span> <span class="nn">yams.schema</span> <span class="kn">import</span> <span class="n">RelationDefinitionSchema</span>
+
+<span class="n">PACKAGE</span> <span class="o">=</span> <span class="s1">&#39;&lt;builtin&gt;&#39;</span> <span class="c1"># will be modified by the yams&#39;reader when schema is</span>
+                      <span class="c1"># beeing read</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;EntityType&#39;</span><span class="p">,</span> <span class="s1">&#39;RelationType&#39;</span><span class="p">,</span> <span class="s1">&#39;RelationDefinition&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;SubjectRelation&#39;</span><span class="p">,</span> <span class="s1">&#39;ObjectRelation&#39;</span><span class="p">,</span>
+           <span class="s1">&#39;RichString&#39;</span><span class="p">,</span> <span class="p">)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">BASE_TYPES</span><span class="p">)</span>
+
+<span class="c1"># EntityType properties</span>
+<span class="n">ETYPE_PROPERTIES</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;__permissions__&#39;</span><span class="p">,</span> <span class="s1">&#39;__unique_together__&#39;</span><span class="p">)</span>
+<span class="c1"># RelationType properties. Don&#39;t put description inside, handled specifically</span>
+<span class="n">RTYPE_PROPERTIES</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;symmetric&#39;</span><span class="p">,</span> <span class="s1">&#39;inlined&#39;</span><span class="p">,</span> <span class="s1">&#39;fulltext_container&#39;</span><span class="p">)</span>
+<span class="c1"># RelationDefinition properties have to be computed dynamically since new ones</span>
+<span class="c1"># may be added at runtime</span>
+<span class="k">def</span> <span class="nf">_RDEF_PROPERTIES</span><span class="p">():</span>
+    <span class="n">base</span> <span class="o">=</span> <span class="n">RelationDefinitionSchema</span><span class="o">.</span><span class="n">ALL_PROPERTIES</span><span class="p">()</span>
+    <span class="c1"># infered is an internal property and should not be specified explicitly</span>
+    <span class="n">base</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;infered&#39;</span><span class="p">)</span>
+    <span class="c1"># replace permissions by __permissions__ as it&#39;s spelled that way in schema</span>
+    <span class="c1"># definition files</span>
+    <span class="n">base</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">&#39;permissions&#39;</span><span class="p">)</span>
+    <span class="n">base</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;__permissions__&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+<span class="c1"># regroup all rtype/rdef properties as they may be defined one on each other in</span>
+<span class="c1"># some cases</span>
+<span class="k">def</span> <span class="nf">_REL_PROPERTIES</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">RTYPE_PROPERTIES</span> <span class="o">+</span> <span class="n">_RDEF_PROPERTIES</span><span class="p">()</span>
+
+<span class="c1"># pre 0.37 backward compat</span>
+<span class="n">RDEF_PROPERTIES</span> <span class="o">=</span> <span class="p">()</span> <span class="c1"># stuff added here is also added to underlying dict, nevermind</span>
+
+
+<span class="n">CREATION_RANK</span> <span class="o">=</span> <span class="mi">0</span>
+
+<span class="k">def</span> <span class="nf">_add_constraint</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">constraint</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add constraint to param kwargs.&quot;&quot;&quot;</span>
+    <span class="n">constraints</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;constraints&#39;</span><span class="p">,</span> <span class="p">[])</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">existingconstraint</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">constraints</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">existingconstraint</span><span class="o">.</span><span class="n">__class__</span> <span class="ow">is</span> <span class="n">constraint</span><span class="o">.</span><span class="n">__class__</span><span class="p">:</span>
+            <span class="n">constraints</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">constraint</span>
+            <span class="k">return</span>
+    <span class="n">constraints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">constraint</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_add_relation</span><span class="p">(</span><span class="n">relations</span><span class="p">,</span> <span class="n">rdef</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">insertidx</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add relation (param rdef) to list of relations (param relations).&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">rdef</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+    <span class="k">if</span> <span class="n">insertidx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">insertidx</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">relations</span><span class="p">)</span>
+    <span class="n">relations</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">insertidx</span><span class="p">,</span> <span class="n">rdef</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rdef</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{}):</span>
+        <span class="k">for</span> <span class="n">meta_name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">rdef</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="n">meta_name</span> <span class="ow">in</span> <span class="n">KNOWN_METAATTRIBUTES</span>
+            <span class="n">insertidx</span> <span class="o">+=</span> <span class="mi">1</span> <span class="c1"># insert meta after main</span>
+            <span class="n">meta_rel_name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(((</span><span class="n">name</span> <span class="ow">or</span> <span class="n">rdef</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">meta_name</span><span class="p">))</span>
+            <span class="n">_add_relation</span><span class="p">(</span><span class="n">relations</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">meta_rel_name</span><span class="p">,</span> <span class="n">insertidx</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_check_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">attributes</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check that all keys of kwargs are actual attributes.&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">BadSchemaDefinition</span><span class="p">(</span><span class="s1">&#39;no such property </span><span class="si">%r</span><span class="s1"> in </span><span class="si">%r</span><span class="s1">&#39;</span>
+                                      <span class="o">%</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">attributes</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_copy_attributes</span><span class="p">(</span><span class="n">fromobj</span><span class="p">,</span> <span class="n">toobj</span><span class="p">,</span> <span class="n">attributes</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="n">attributes</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">fromobj</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">MARKER</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="n">MARKER</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="n">ovalue</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">toobj</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">MARKER</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ovalue</span> <span class="ow">is</span> <span class="n">MARKER</span> <span class="ow">and</span> <span class="n">value</span> <span class="o">!=</span> <span class="n">ovalue</span><span class="p">:</span>
+            <span class="n">rname</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">toobj</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">or</span> <span class="n">toobj</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="k">raise</span> <span class="n">BadSchemaDefinition</span><span class="p">(</span>
+                <span class="s1">&#39;conflicting values </span><span class="si">%r</span><span class="s1">/</span><span class="si">%r</span><span class="s1"> for property </span><span class="si">%s</span><span class="s1"> of relation </span><span class="si">%r</span><span class="s1">&#39;</span>
+                <span class="o">%</span> <span class="p">(</span><span class="n">ovalue</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">rname</span><span class="p">))</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">toobj</span><span class="p">,</span> <span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">register_base_types</span><span class="p">(</span><span class="n">schema</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;add base (final) entity types to the given schema&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">BASE_TYPES</span><span class="p">:</span>
+        <span class="n">edef</span> <span class="o">=</span> <span class="n">EntityType</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">etype</span><span class="p">)</span>
+        <span class="n">schema</span><span class="o">.</span><span class="n">add_entity_type</span><span class="p">(</span><span class="n">edef</span><span class="p">)</span>
+
+
+<span class="c1"># first class schema definition objects #######################################</span>
+
+<span class="k">class</span> <span class="nc">autopackage</span><span class="p">(</span><span class="nb">type</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">classdict</span><span class="p">):</span>
+        <span class="n">classdict</span><span class="p">[</span><span class="s1">&#39;package&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">PACKAGE</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">autopackage</span><span class="p">,</span> <span class="n">mcs</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">classdict</span><span class="p">)</span>
+
+<span class="nd">@add_metaclass</span><span class="p">(</span><span class="n">autopackage</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">Definition</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract class for entity / relation definition classes.&quot;&quot;&quot;</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">description</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">__permissions__</span> <span class="o">=</span> <span class="n">MARKER</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="p">(</span><span class="n">name</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+                     <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__doc__</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%r</span><span class="s1"> @</span><span class="si">%x</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">expand_type_definitions</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">defined</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Schema building step 1: register definition objects by adding them</span>
+<span class="sd">        to the `defined` dictionnary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">expand_relation_definitions</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">defined</span><span class="p">,</span> <span class="n">schema</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Schema building step 2: register all relations definition,</span>
+<span class="sd">        expanding wildcard if necessary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_permissions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">final</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__permissions__</span> <span class="ow">is</span> <span class="n">MARKER</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">final</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">DEFAULT_ATTRPERMS</span>
+            <span class="k">return</span> <span class="n">DEFAULT_RELPERMS</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__permissions__</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_permissions</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">perms</span><span class="p">):</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">__permissions__</span> <span class="o">=</span> <span class="n">perms</span>
+
+
+<span class="c1"># classes used to define relationships within entity type classes ##################</span>
+
+<span class="c1"># has to be defined before the metadefinition metaclass which &quot;isinstance&quot; this</span>
+<span class="c1"># class</span>
+<span class="k">class</span> <span class="nc">ObjectRelation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">__permissions__</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">cardinality</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">constraints</span> <span class="o">=</span> <span class="n">MARKER</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">etype</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;ObjectRelation&#39;</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;[yams 0.29] ObjectRelation is deprecated, &#39;</span>
+                 <span class="s1">&#39;use RelationDefinition subclass&#39;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">,</span>
+                 <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">global</span> <span class="n">CREATION_RANK</span>
+        <span class="n">CREATION_RANK</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">creation_rank</span> <span class="o">=</span> <span class="n">CREATION_RANK</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">package</span> <span class="o">=</span> <span class="n">PACKAGE</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;&lt;undefined&gt;&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">etype</span> <span class="o">=</span> <span class="n">etype</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">override</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;override&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;meta&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;[yams 0.37.0] meta is deprecated&#39;</span><span class="p">,</span>
+                 <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">_check_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">_REL_PROPERTIES</span><span class="p">())</span>
+        <span class="k">except</span> <span class="n">BadSchemaDefinition</span> <span class="k">as</span> <span class="n">bad</span><span class="p">:</span>
+            <span class="c1"># XXX (auc) bad field name + required attribute can lead there instead of schema.py ~ 920</span>
+            <span class="n">bsd_ex</span> <span class="o">=</span> <span class="n">BadSchemaDefinition</span><span class="p">((</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> in relation to entity </span><span class="si">%r</span><span class="s1"> (also is </span><span class="si">%r</span><span class="s1"> defined ? (check two &#39;</span>
+                                          <span class="s1">&#39;lines above in the backtrace))&#39;</span><span class="p">)</span> <span class="o">%</span> <span class="p">(</span><span class="n">bad</span><span class="o">.</span><span class="n">args</span><span class="p">,</span> <span class="n">etype</span><span class="p">,</span> <span class="n">etype</span><span class="p">))</span>
+            <span class="n">bsd_ex</span><span class="o">.</span><span class="n">tb_offset</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="k">raise</span> <span class="n">bsd_ex</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%(name)s</span><span class="s1"> </span><span class="si">%(etype)s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+
+<span class="k">class</span> <span class="nc">SubjectRelation</span><span class="p">(</span><span class="n">ObjectRelation</span><span class="p">):</span>
+    <span class="n">uid</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">indexed</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">fulltextindexed</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">internationalizable</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">default</span> <span class="o">=</span> <span class="n">MARKER</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%(etype)s</span><span class="s1"> </span><span class="si">%(name)s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+
+<span class="k">class</span> <span class="nc">AbstractTypedAttribute</span><span class="p">(</span><span class="n">SubjectRelation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;AbstractTypedAttribute is not directly instantiable</span>
+
+<span class="sd">    subclasses must provide a &lt;etype&gt; attribute to be instantiable</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># Store metadata</span>
+        <span class="k">if</span> <span class="n">metadata</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata</span>
+        <span class="c1"># transform &quot;required&quot; into &quot;cardinality&quot;</span>
+        <span class="n">required</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;required&#39;</span><span class="p">,</span> <span class="bp">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">required</span><span class="p">:</span>
+            <span class="n">cardinality</span> <span class="o">=</span> <span class="s1">&#39;11&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cardinality</span> <span class="o">=</span> <span class="s1">&#39;?1&#39;</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;cardinality&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cardinality</span>
+        <span class="c1"># transform maxsize into SizeConstraint</span>
+        <span class="n">maxsize</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;maxsize&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">maxsize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">_add_constraint</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">SizeConstraint</span><span class="p">(</span><span class="nb">max</span><span class="o">=</span><span class="n">maxsize</span><span class="p">))</span>
+        <span class="c1"># formula</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">formula</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;formula&#39;</span><span class="p">,</span> <span class="n">MARKER</span><span class="p">)</span>
+        <span class="c1"># transform vocabulary into StaticVocabularyConstraint</span>
+        <span class="n">vocabulary</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;vocabulary&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">vocabulary</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_vocabulary</span><span class="p">(</span><span class="n">vocabulary</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># transform unique into UniqueConstraint</span>
+        <span class="n">unique</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;unique&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">unique</span><span class="p">:</span>
+            <span class="n">_add_constraint</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">UniqueConstraint</span><span class="p">())</span>
+        <span class="c1"># use the etype attribute provided by subclasses</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">AbstractTypedAttribute</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">etype</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="c1"># reassign creation rank</span>
+        <span class="c1">#</span>
+        <span class="c1"># Main attribute are marked as created before it&#39;s metadata.</span>
+        <span class="c1"># order in meta data is preserved.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="p">:</span>
+            <span class="n">meta</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">metadata</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">creation_rank</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">meta</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">creation_rank</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">creation_rank</span><span class="p">:</span>
+                <span class="n">m_iter</span> <span class="o">=</span> <span class="nb">iter</span><span class="p">(</span><span class="n">meta</span><span class="p">)</span>
+                <span class="n">previous</span> <span class="o">=</span> <span class="bp">self</span>
+                <span class="k">for</span> <span class="nb">next</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">previous</span><span class="o">.</span><span class="n">creation_rank</span> <span class="o">&lt;</span> <span class="nb">next</span><span class="o">.</span><span class="n">creation_rank</span><span class="p">:</span>
+                        <span class="k">break</span>
+                    <span class="n">previous</span><span class="o">.</span><span class="n">creation_rank</span><span class="p">,</span> <span class="nb">next</span><span class="o">.</span><span class="n">creation_rank</span> <span class="o">=</span> <span class="nb">next</span><span class="o">.</span><span class="n">creation_rank</span><span class="p">,</span> <span class="n">previous</span><span class="o">.</span><span class="n">creation_rank</span>
+                    <span class="nb">next</span> <span class="o">=</span> <span class="n">previous</span>
+
+    <span class="k">def</span> <span class="nf">set_vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vocabulary</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+        <span class="c1">#constraints = kwargs.setdefault(&#39;constraints&#39;, [])</span>
+        <span class="n">_add_constraint</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">StaticVocabularyConstraint</span><span class="p">(</span><span class="n">vocabulary</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;String&#39;</span><span class="p">:</span> <span class="c1"># XXX</span>
+            <span class="n">maxsize</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">vocabulary</span><span class="p">)</span>
+            <span class="n">_add_constraint</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">SizeConstraint</span><span class="p">(</span><span class="nb">max</span><span class="o">=</span><span class="n">maxsize</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%(name)s</span><span class="s1">(</span><span class="si">%(etype)s</span><span class="s1">)&gt;&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+
+<span class="k">def</span> <span class="nf">make_type</span><span class="p">(</span><span class="n">etype</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;create a python class for a Yams base type.</span>
+
+<span class="sd">    Notice it is now possible to create a specific type with user-defined</span>
+<span class="sd">    behaviour, e.g.:</span>
+
+<span class="sd">        Geometry = make_type(&#39;Geometry&#39;) # (c.f. postgis)</span>
+
+<span class="sd">    will allow the use of:</span>
+
+<span class="sd">        Geometry(geom_type=&#39;POINT&#39;)</span>
+
+<span class="sd">    in a Yams schema, provided in this example that `geom_type` is specified to</span>
+<span class="sd">    the :func:`yams.register_base_type` function which should be called prior to</span>
+<span class="sd">    make_type.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">assert</span> <span class="n">etype</span> <span class="ow">in</span> <span class="n">BASE_TYPES</span>
+    <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">etype</span><span class="p">,</span> <span class="p">(</span><span class="n">AbstractTypedAttribute</span><span class="p">,),</span> <span class="p">{</span><span class="s1">&#39;etype&#39;</span> <span class="p">:</span> <span class="n">etype</span><span class="p">})</span>
+
+
+<span class="c1"># build a specific class for each base type</span>
+<span class="n">String</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;String&#39;</span><span class="p">)</span>
+<span class="n">Password</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;Password&#39;</span><span class="p">)</span>
+<span class="n">Bytes</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;Bytes&#39;</span><span class="p">)</span>
+<span class="n">Int</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;Int&#39;</span><span class="p">)</span>
+<span class="n">BigInt</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;BigInt&#39;</span><span class="p">)</span>
+<span class="n">Float</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;Float&#39;</span><span class="p">)</span>
+<span class="n">Boolean</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;Boolean&#39;</span><span class="p">)</span>
+<span class="n">Decimal</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;Decimal&#39;</span><span class="p">)</span>
+<span class="n">Time</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;Time&#39;</span><span class="p">)</span>
+<span class="n">Date</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;Date&#39;</span><span class="p">)</span>
+<span class="n">Datetime</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;Datetime&#39;</span><span class="p">)</span>
+<span class="n">TZTime</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;TZTime&#39;</span><span class="p">)</span>
+<span class="n">TZDatetime</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;TZDatetime&#39;</span><span class="p">)</span>
+<span class="n">Interval</span> <span class="o">=</span> <span class="n">make_type</span><span class="p">(</span><span class="s1">&#39;Interval&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># provides a RichString factory for convenience</span>
+<span class="k">def</span> <span class="nf">RichString</span><span class="p">(</span><span class="n">default_format</span><span class="o">=</span><span class="s1">&#39;text/plain&#39;</span><span class="p">,</span> <span class="n">format_constraints</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;RichString is a convenience attribute type for attribute containing text</span>
+<span class="sd">    in a format that should be specified in another attribute.</span>
+
+<span class="sd">    The following declaration::</span>
+
+<span class="sd">      class Card(EntityType):</span>
+<span class="sd">          content = RichString(fulltextindexed=True, default_format=&#39;text/rest&#39;)</span>
+
+<span class="sd">    is equivalent to::</span>
+
+<span class="sd">      class Card(EntityType):</span>
+<span class="sd">          content_format = String(internationalizable=True,</span>
+<span class="sd">                                  default=&#39;text/rest&#39;, constraints=[FORMAT_CONSTRAINT])</span>
+<span class="sd">          content  = String(fulltextindexed=True)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">format_args</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="n">default_format</span><span class="p">,</span>
+                   <span class="s1">&#39;maxsize&#39;</span><span class="p">:</span> <span class="mi">50</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">format_constraints</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">format_args</span><span class="p">[</span><span class="s1">&#39;constraints&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">FORMAT_CONSTRAINT</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">format_args</span><span class="p">[</span><span class="s1">&#39;constraints&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">format_constraints</span>
+    <span class="n">meta</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;format&#39;</span><span class="p">:</span><span class="n">String</span><span class="p">(</span><span class="n">internationalizable</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="o">**</span><span class="n">format_args</span><span class="p">)}</span>
+    <span class="k">return</span> <span class="n">String</span><span class="p">(</span><span class="n">metadata</span><span class="o">=</span><span class="n">meta</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="c1"># other schema definition classes ##############################################</span>
+
+<span class="k">class</span> <span class="nc">metadefinition</span><span class="p">(</span><span class="n">autopackage</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Metaclass that builds the __relations__ attribute of EntityType&#39;s</span>
+<span class="sd">    subclasses.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">stacklevel</span> <span class="o">=</span> <span class="mi">3</span>
+    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">classdict</span><span class="p">):</span>
+        <span class="c1">### Move (any) relation from the class dict to __relations__ attribute</span>
+        <span class="n">rels</span> <span class="o">=</span> <span class="n">classdict</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;__relations__&#39;</span><span class="p">,</span> <span class="p">[])</span>
+        <span class="n">relations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">((</span><span class="n">rdef</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">rdef</span><span class="p">)</span> <span class="k">for</span> <span class="n">rdef</span> <span class="ow">in</span> <span class="n">rels</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rname</span><span class="p">,</span> <span class="n">rdef</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">classdict</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rdef</span><span class="p">,</span> <span class="n">ObjectRelation</span><span class="p">):</span>
+                <span class="c1"># relation&#39;s name **must** be removed from class namespace</span>
+                <span class="c1"># to avoid conflicts with instance&#39;s potential attributes</span>
+                <span class="k">del</span> <span class="n">classdict</span><span class="p">[</span><span class="n">rname</span><span class="p">]</span>
+                <span class="n">relations</span><span class="p">[</span><span class="n">rname</span><span class="p">]</span> <span class="o">=</span> <span class="n">rdef</span>
+        <span class="c1">### handle logical inheritance</span>
+        <span class="k">if</span> <span class="s1">&#39;__specializes_schema__&#39;</span> <span class="ow">in</span> <span class="n">classdict</span><span class="p">:</span>
+            <span class="n">specialized</span> <span class="o">=</span> <span class="n">bases</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">classdict</span><span class="p">[</span><span class="s1">&#39;__specializes__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">specialized</span><span class="o">.</span><span class="n">__name__</span>
+            <span class="k">if</span> <span class="s1">&#39;__specialized_by__&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">specialized</span><span class="o">.</span><span class="n">__dict__</span><span class="p">:</span>
+                <span class="n">specialized</span><span class="o">.</span><span class="n">__specialized_by__</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">specialized</span><span class="o">.</span><span class="n">__specialized_by__</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="c1">### Initialize processed class</span>
+        <span class="n">defclass</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">metadefinition</span><span class="p">,</span> <span class="n">mcs</span><span class="p">)</span><span class="o">.</span><span class="n">__new__</span><span class="p">(</span><span class="n">mcs</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">classdict</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">rname</span><span class="p">,</span> <span class="n">rdef</span> <span class="ow">in</span> <span class="n">relations</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">_add_relation</span><span class="p">(</span><span class="n">defclass</span><span class="o">.</span><span class="n">__relations__</span><span class="p">,</span> <span class="n">rdef</span><span class="p">,</span> <span class="n">rname</span><span class="p">)</span>
+        <span class="c1">### take base classes&#39;relations into account</span>
+        <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">rdef</span> <span class="ow">in</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">&#39;__relations__&#39;</span><span class="p">,</span> <span class="p">()):</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">rdef</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">relations</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">relations</span><span class="p">[</span><span class="n">rdef</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">override</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rdef</span><span class="p">,</span> <span class="n">RelationDefinition</span><span class="p">):</span>
+                        <span class="n">rdef</span> <span class="o">=</span> <span class="n">copy</span><span class="p">(</span><span class="n">rdef</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">rdef</span><span class="o">.</span><span class="n">subject</span> <span class="o">==</span> <span class="n">base</span><span class="o">.</span><span class="n">__name__</span><span class="p">:</span>
+                            <span class="n">rdef</span><span class="o">.</span><span class="n">subject</span> <span class="o">=</span> <span class="n">name</span>
+                        <span class="k">if</span> <span class="n">rdef</span><span class="o">.</span><span class="n">object</span> <span class="o">==</span> <span class="n">base</span><span class="o">.</span><span class="n">__name__</span><span class="p">:</span>
+                            <span class="n">rdef</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="n">name</span>
+                    <span class="n">rels</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rdef</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">relations</span><span class="p">[</span><span class="n">rdef</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">creation_rank</span> <span class="o">=</span> <span class="n">rdef</span><span class="o">.</span><span class="n">creation_rank</span>
+        <span class="c1">### sort relations by creation rank</span>
+        <span class="n">defclass</span><span class="o">.</span><span class="n">__relations__</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">rels</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">r</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">creation_rank</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">defclass</span>
+
+
+<span class="nd">@add_metaclass</span><span class="p">(</span><span class="n">metadefinition</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">EntityType</span><span class="p">(</span><span class="n">Definition</span><span class="p">):</span>
+    <span class="c1">#::FIXME reader magic forbids to define a docstring...</span>
+    <span class="c1">#: an entity has attributes and can be linked to other entities by</span>
+    <span class="c1">#: relations. Both entity attributes and relationships are defined by</span>
+    <span class="c1">#: class attributes.</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: kwargs keys must have values in ETYPE_PROPERTIES</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: Example:</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: &gt;&gt;&gt; class Project(EntityType):</span>
+    <span class="c1">#: ...     name = String()</span>
+    <span class="c1">#: &gt;&gt;&gt;</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: After instanciation, EntityType can we altered with dedicated class methods:</span>
+    <span class="c1">#:</span>
+    <span class="c1">#: .. currentmodule:: yams.buildobjs</span>
+    <span class="c1">#:</span>
+    <span class="c1">#:  .. automethod:: EntityType.extend</span>
+    <span class="c1">#:  .. automethod:: EntityType.add_relation</span>
+    <span class="c1">#:  .. automethod:: EntityType.insert_relation_after</span>
+    <span class="c1">#:  .. automethod:: EntityType.remove_relation</span>
+    <span class="c1">#:  .. automethod:: EntityType.get_relation</span>
+    <span class="c1">#:  .. automethod:: EntityType.get_relations</span>
+
+    <span class="n">__permissions__</span> <span class="o">=</span> <span class="n">DEFAULT_ETYPEPERMS</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">EntityType</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">_check_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">ETYPE_PROPERTIES</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">specialized_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__specializes__&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;entity type </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">specialized_by</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;__specialized_by__&#39;</span><span class="p">,</span> <span class="p">[])</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">expand_type_definitions</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">defined</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Schema building step 1: register definition objects by adding</span>
+<span class="sd">        them to the `defined` dictionnary.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">defined</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="s1">&#39;duplicate registration: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">name</span>
+        <span class="k">assert</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">defined</span><span class="p">,</span> \
+            <span class="s2">&quot;type &#39;</span><span class="si">%s</span><span class="s2">&#39; was already defined here </span><span class="si">%s</span><span class="s2">, new definition here </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> \
+            <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">defined</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span> <span class="n">cls</span><span class="p">)</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">_defined</span> <span class="o">=</span> <span class="n">defined</span> <span class="c1"># XXX may be used later (eg .add_relation())</span>
+        <span class="n">defined</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls</span>
+        <span class="k">for</span> <span class="n">relation</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">__relations__</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">_ensure_relation_type</span><span class="p">(</span><span class="n">relation</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">_ensure_relation_type</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">relation</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check the type the relation</span>
+
+<span class="sd">        return False if the class is not yet finalized</span>
+<span class="sd">        (XXX raise excep instead ?)&quot;&quot;&quot;</span>
+        <span class="n">rtype</span> <span class="o">=</span> <span class="n">RelationType</span><span class="p">(</span><span class="n">relation</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">_copy_attributes</span><span class="p">(</span><span class="n">relation</span><span class="p">,</span> <span class="n">rtype</span><span class="p">,</span> <span class="n">RTYPE_PROPERTIES</span><span class="p">)</span>
+        <span class="c1">#assert hasattr(cls, &#39;_defined&#39;), &quot;Type definition for %s not yet expanded. you can&#39;t register new type through it&quot; % cls</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;_defined&#39;</span><span class="p">):</span>
+            <span class="n">defined</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_defined</span>
+            <span class="k">if</span> <span class="n">relation</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">defined</span><span class="p">:</span>
+                <span class="n">_copy_attributes</span><span class="p">(</span><span class="n">rtype</span><span class="p">,</span> <span class="n">defined</span><span class="p">[</span><span class="n">relation</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">RTYPE_PROPERTIES</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">defined</span><span class="p">[</span><span class="n">relation</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">rtype</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">expand_relation_definitions</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">defined</span><span class="p">,</span> <span class="n">schema</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;schema building step 2:</span>
+
+<span class="sd">        register all relations definition, expanding wildcards if necessary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">order</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">rdefprops</span> <span class="o">=</span> <span class="n">_RDEF_PROPERTIES</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">relation</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">__relations__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">relation</span><span class="p">,</span> <span class="n">SubjectRelation</span><span class="p">):</span>
+                <span class="n">rdef</span> <span class="o">=</span> <span class="n">RelationDefinition</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">relation</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                          <span class="nb">object</span><span class="o">=</span><span class="n">relation</span><span class="o">.</span><span class="n">etype</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+                                          <span class="n">package</span><span class="o">=</span><span class="n">relation</span><span class="o">.</span><span class="n">package</span><span class="p">)</span>
+                <span class="n">_copy_attributes</span><span class="p">(</span><span class="n">relation</span><span class="p">,</span> <span class="n">rdef</span><span class="p">,</span> <span class="n">rdefprops</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">relation</span><span class="p">,</span> <span class="n">ObjectRelation</span><span class="p">):</span>
+                <span class="n">rdef</span> <span class="o">=</span> <span class="n">RelationDefinition</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="n">relation</span><span class="o">.</span><span class="n">etype</span><span class="p">,</span>
+                                          <span class="n">name</span><span class="o">=</span><span class="n">relation</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+                                          <span class="nb">object</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
+                                          <span class="n">package</span><span class="o">=</span><span class="n">relation</span><span class="o">.</span><span class="n">package</span><span class="p">)</span>
+                <span class="n">_copy_attributes</span><span class="p">(</span><span class="n">relation</span><span class="p">,</span> <span class="n">rdef</span><span class="p">,</span> <span class="n">rdefprops</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">relation</span><span class="p">,</span> <span class="n">RelationDefinition</span><span class="p">):</span>
+                <span class="n">rdef</span> <span class="o">=</span> <span class="n">relation</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">BadSchemaDefinition</span><span class="p">(</span><span class="s1">&#39;dunno how to handle </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">relation</span><span class="p">)</span>
+            <span class="n">order</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">rdef</span><span class="o">.</span><span class="n">_add_relations</span><span class="p">(</span><span class="n">defined</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+
+    <span class="c1"># methods that can be used to extend an existant schema definition ########</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">extend</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">othermetadefcls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;add all relations of ``othermetadefcls`` to the current class&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">rdef</span> <span class="ow">in</span> <span class="n">othermetadefcls</span><span class="o">.</span><span class="n">__relations__</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">add_relation</span><span class="p">(</span><span class="n">rdef</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">add_relation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">rdef</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add ``rdef`` relation to the class&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">rdef</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">_ensure_relation_type</span><span class="p">(</span><span class="n">rdef</span><span class="p">):</span>
+            <span class="n">_add_relation</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__relations__</span><span class="p">,</span> <span class="n">rdef</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">rdef</span><span class="p">,</span> <span class="s1">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rdef</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">_defined</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">meta_name</span> <span class="ow">in</span> <span class="n">rdef</span><span class="o">.</span><span class="n">metadata</span><span class="p">:</span>
+                    <span class="n">meta_rel_name</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(((</span><span class="n">name</span> <span class="ow">or</span> <span class="n">rdef</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">name_name</span><span class="p">))</span>
+                    <span class="n">rdef</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">get_relations</span><span class="p">(</span><span class="n">format_attr_name</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                    <span class="n">cls</span><span class="o">.</span><span class="n">_ensure_relation_type</span><span class="p">(</span><span class="n">rdef</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+           <span class="n">_add_relation</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__relations__</span><span class="p">,</span> <span class="n">rdef</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">insert_relation_after</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">afterrelname</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">rdef</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add ``rdef`` relation to the class right after another&quot;&quot;&quot;</span>
+        <span class="c1"># FIXME change order of arguments to rdef, name, afterrelname ?</span>
+        <span class="n">rdef</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">_ensure_relation_type</span><span class="p">(</span><span class="n">rdef</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">rel</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__relations__</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">rel</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">afterrelname</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">BadSchemaDefinition</span><span class="p">(</span><span class="s2">&quot;can&#39;t find </span><span class="si">%s</span><span class="s2"> relation on </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+                    <span class="n">afterrelname</span><span class="p">,</span> <span class="n">cls</span><span class="p">))</span>
+        <span class="n">_add_relation</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__relations__</span><span class="p">,</span> <span class="n">rdef</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">remove_relation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove relation from the class&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">rdef</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">get_relations</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">__relations__</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">rdef</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_relations</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterate over relations definitions that match the ``name`` parameters</span>
+
+<span class="sd">        It may iterate multiple definitions when the class is both object and</span>
+<span class="sd">        sujet of a relation:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">rdef</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">__relations__</span><span class="p">[:]:</span>
+            <span class="k">if</span> <span class="n">rdef</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">rdef</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_relation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return relation definitions by name. Fails if there is multiple one.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">relations</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">get_relations</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
+        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">relations</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;can&#39;t use get_relation for relation with multiple definitions&quot;</span>
+        <span class="k">return</span> <span class="n">relations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">RelationType</span><span class="p">(</span><span class="n">Definition</span><span class="p">):</span>
+    <span class="n">symmetric</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">inlined</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">fulltext_container</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">rule</span> <span class="o">=</span> <span class="n">MARKER</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;kwargs must have values in RTYPE_PROPERTIES&quot;&quot;&quot;</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RelationType</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;meta&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;[yams 0.37] meta is deprecated&#39;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">_check_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">RTYPE_PROPERTIES</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;__permissions__&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;relation type </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">expand_type_definitions</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">defined</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;schema building step 1:</span>
+
+<span class="sd">        register definition objects by adding them to the `defined` dictionnary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">__doc__</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">cls</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+            <span class="n">cls</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__doc__</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">defined</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">defined</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">__class__</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">RelationType</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">BadSchemaDefinition</span><span class="p">(</span><span class="s1">&#39;duplicated relation type for </span><span class="si">%s</span><span class="s1">&#39;</span>
+                                          <span class="o">%</span> <span class="n">name</span><span class="p">)</span>
+            <span class="c1"># relation type created from a relation definition, override it</span>
+            <span class="n">allprops</span> <span class="o">=</span> <span class="n">_REL_PROPERTIES</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">)</span>
+            <span class="n">_copy_attributes</span><span class="p">(</span><span class="n">defined</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">cls</span><span class="p">,</span> <span class="n">allprops</span><span class="p">)</span>
+        <span class="n">defined</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">expand_relation_definitions</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">defined</span><span class="p">,</span> <span class="n">schema</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;schema building step 2:</span>
+
+<span class="sd">        register all relations definition, expanding wildcard if necessary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;object&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">rdef</span> <span class="o">=</span> <span class="n">RelationDefinition</span><span class="p">(</span><span class="n">subject</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">subject</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+                                      <span class="nb">object</span><span class="o">=</span><span class="n">cls</span><span class="o">.</span><span class="n">object</span><span class="p">)</span>
+            <span class="n">_copy_attributes</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">rdef</span><span class="p">,</span> <span class="n">_RDEF_PROPERTIES</span><span class="p">())</span>
+            <span class="n">rdef</span><span class="o">.</span><span class="n">_add_relations</span><span class="p">(</span><span class="n">defined</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">ComputedRelation</span><span class="p">(</span><span class="n">RelationType</span><span class="p">):</span>
+    <span class="n">__permissions__</span> <span class="o">=</span> <span class="n">MARKER</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">rule</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">rule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">rule</span> <span class="o">=</span> <span class="n">rule</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">ComputedRelation</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">RelationDefinition</span><span class="p">(</span><span class="n">Definition</span><span class="p">):</span>
+    <span class="c1"># FIXME reader magic forbids to define a docstring...</span>
+    <span class="c1">#&quot;&quot;&quot;a relation is defined by a name, the entity types that can be</span>
+    <span class="c1">#subject or object the relation, the cardinality, the constraints</span>
+    <span class="c1">#and the symmetric property.</span>
+    <span class="c1">#&quot;&quot;&quot;</span>
+
+    <span class="n">subject</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="nb">object</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">cardinality</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">constraints</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">symmetric</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">inlined</span> <span class="o">=</span> <span class="n">MARKER</span>
+    <span class="n">formula</span> <span class="o">=</span> <span class="n">MARKER</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subject</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">object</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">package</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;kwargs keys must have values in _RDEF_PROPERTIES()&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">subject</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subject</span> <span class="o">=</span> <span class="n">subject</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">subject</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">subject</span>
+        <span class="k">if</span> <span class="nb">object</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="nb">object</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">object</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RelationDefinition</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">global</span> <span class="n">CREATION_RANK</span>
+        <span class="n">CREATION_RANK</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">creation_rank</span> <span class="o">=</span> <span class="n">CREATION_RANK</span>
+        <span class="k">if</span> <span class="n">package</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">package</span> <span class="o">=</span> <span class="n">package</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">package</span> <span class="o">==</span> <span class="s1">&#39;&lt;builtin&gt;&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">package</span> <span class="o">=</span> <span class="n">PACKAGE</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;meta&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">):</span>
+            <span class="n">warn</span><span class="p">(</span><span class="s1">&#39;[yams 0.37] meta is deprecated&#39;</span><span class="p">,</span> <span class="ne">DeprecationWarning</span><span class="p">)</span>
+        <span class="n">rdefprops</span> <span class="o">=</span> <span class="n">_RDEF_PROPERTIES</span><span class="p">()</span>
+        <span class="n">_check_kwargs</span><span class="p">(</span><span class="n">kwargs</span><span class="p">,</span> <span class="n">rdefprops</span><span class="p">)</span>
+        <span class="n">_copy_attributes</span><span class="p">(</span><span class="n">attrdict</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">),</span> <span class="bp">self</span><span class="p">,</span> <span class="n">rdefprops</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;relation definition (</span><span class="si">%(subject)s</span><span class="s1"> </span><span class="si">%(name)s</span><span class="s1"> </span><span class="si">%(object)s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">expand_type_definitions</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">defined</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;schema building step 1:</span>
+
+<span class="sd">        register definition objects by adding them to the `defined` dictionnary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">rtype</span> <span class="o">=</span> <span class="n">RelationType</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">_copy_attributes</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">rtype</span><span class="p">,</span> <span class="n">RTYPE_PROPERTIES</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">defined</span><span class="p">:</span>
+            <span class="n">_copy_attributes</span><span class="p">(</span><span class="n">rtype</span><span class="p">,</span> <span class="n">defined</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">RTYPE_PROPERTIES</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">defined</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">rtype</span>
+
+        <span class="c1"># subject and object in defined&#39;s keys are only strings not tuples</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">subject</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">subjects</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">subject</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">subjects</span> <span class="o">=</span> <span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">subject</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">object</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="n">objects</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">object</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">objects</span> <span class="o">=</span> <span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">object</span><span class="p">,</span> <span class="p">)</span>
+        <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">subjects</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">objects</span><span class="p">:</span>
+                <span class="n">key</span> <span class="o">=</span> <span class="p">(</span><span class="n">sub</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">defined</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="n">BadSchemaDefinition</span><span class="p">(</span>
+                        <span class="s1">&#39;duplicated relation definition (</span><span class="si">%s</span><span class="s1">) </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">)&#39;</span>
+                        <span class="o">%</span> <span class="p">(</span><span class="n">defined</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">key</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+                <span class="n">defined</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls</span>
+
+        <span class="c1"># XXX keep this for bw compat</span>
+        <span class="n">defined</span><span class="p">[(</span><span class="n">cls</span><span class="o">.</span><span class="n">subject</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">object</span><span class="p">)]</span> <span class="o">=</span> <span class="n">cls</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">expand_relation_definitions</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">defined</span><span class="p">,</span> <span class="n">schema</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;schema building step 2:</span>
+
+<span class="sd">        register all relations definition, expanding wildcard if necessary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">cls</span><span class="o">.</span><span class="n">subject</span> <span class="ow">and</span> <span class="n">cls</span><span class="o">.</span><span class="n">object</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">; check the schema (</span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">subject</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">object</span><span class="p">)</span>
+        <span class="n">cls</span><span class="p">()</span><span class="o">.</span><span class="n">_add_relations</span><span class="p">(</span><span class="n">defined</span><span class="p">,</span> <span class="n">schema</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_add_relations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">defined</span><span class="p">,</span> <span class="n">schema</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+        <span class="n">rtype</span> <span class="o">=</span> <span class="n">defined</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+        <span class="n">rdefprops</span> <span class="o">=</span> <span class="n">_RDEF_PROPERTIES</span><span class="p">()</span>
+        <span class="c1"># copy relation definition attributes set on the relation type, beside</span>
+        <span class="c1"># description</span>
+        <span class="n">_copy_attributes</span><span class="p">(</span><span class="n">rtype</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">rdefprops</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">((</span><span class="s1">&#39;description&#39;</span><span class="p">,)))</span>
+        <span class="c1"># process default cardinality and constraints if not set yet</span>
+        <span class="n">cardinality</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cardinality</span>
+        <span class="k">if</span> <span class="n">cardinality</span> <span class="ow">is</span> <span class="n">MARKER</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span> <span class="ow">in</span> <span class="n">BASE_TYPES</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cardinality</span> <span class="o">=</span> <span class="s1">&#39;?1&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cardinality</span> <span class="o">=</span> <span class="s1">&#39;**&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">cardinality</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span>
+            <span class="k">assert</span> <span class="n">cardinality</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="s1">&#39;1?+*&#39;</span>
+            <span class="k">assert</span> <span class="n">cardinality</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="s1">&#39;1?+*&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">constraints</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="n">rschema</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="n">rschema</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rschema</span><span class="o">.</span><span class="n">rule</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">BadSchemaDefinition</span><span class="p">(</span>
+                <span class="s1">&#39;Cannot add relation definition on a computed relation&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__permissions__</span> <span class="ow">is</span> <span class="n">MARKER</span><span class="p">:</span>
+            <span class="n">final</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">_actual_types</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="p">)))</span> <span class="ow">in</span> <span class="n">BASE_TYPES</span>
+            <span class="k">if</span> <span class="n">final</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">formula</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">MARKER</span><span class="p">:</span>
+                    <span class="n">permissions</span> <span class="o">=</span> <span class="n">DEFAULT_COMPUTED_ATTRPERMS</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">permissions</span> <span class="o">=</span> <span class="n">DEFAULT_ATTRPERMS</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">permissions</span> <span class="o">=</span> <span class="n">DEFAULT_RELPERMS</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">permissions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__permissions__</span>
+        <span class="k">for</span> <span class="n">subj</span> <span class="ow">in</span> <span class="n">_actual_types</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">subject</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">_actual_types</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">object</span><span class="p">):</span>
+                <span class="n">rdef</span> <span class="o">=</span> <span class="n">RelationDefinition</span><span class="p">(</span><span class="n">subj</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span>
+                                          <span class="n">__permissions__</span><span class="o">=</span><span class="n">permissions</span><span class="p">,</span>
+                                          <span class="n">package</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">package</span><span class="p">)</span>
+                <span class="n">_copy_attributes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rdef</span><span class="p">,</span> <span class="n">rdefprops</span><span class="p">)</span>
+                <span class="n">schema</span><span class="o">.</span><span class="n">add_relation_def</span><span class="p">(</span><span class="n">rdef</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_actual_types</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">etype</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">etype</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_pow_etypes</span><span class="p">(</span><span class="n">schema</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">etype</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">etype</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">etype</span><span class="p">,</span> <span class="n">string_types</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s1">&#39;Entity types must not be instances but strings &#39;</span>
+                           <span class="s1">&#39;or list/tuples thereof. Ex. (bad, good) : &#39;</span>
+                           <span class="s1">&#39;SubjectRelation(Foo), SubjectRelation(&quot;Foo&quot;). &#39;</span>
+                           <span class="s1">&#39;Hence, </span><span class="si">%r</span><span class="s1"> is not acceptable.&#39;</span> <span class="o">%</span> <span class="n">etype</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">etype</span><span class="p">,)</span>
+
+<span class="k">def</span> <span class="nf">_pow_etypes</span><span class="p">(</span><span class="n">schema</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">eschema</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">entities</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">eschema</span><span class="o">.</span><span class="n">final</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">yield</span> <span class="n">eschema</span><span class="o">.</span><span class="n">type</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer">
+    </div>
+  </div>
+  
+</div>
+
+<div class="footer">
+    &copy; 2015, NSAp developers &lt;antoine.grigis@cea.fr&gt;.
+</div>
+  </body>
+</html>

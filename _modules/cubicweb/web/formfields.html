@@ -1,0 +1,1397 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+    <title>RQL Upload &mdash; Rql upload</title>
+  <!-- htmltitle is before nature.css - we use this hack to load bootstrap first -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../../_static/css/bootstrap.min.css" media="screen" />
+  <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive.css"/>
+
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Rql upload" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+  
+   
+       <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../../../_static/js/bootstrap.min.js" type="text/javascript"></script>
+  <!-- <link rel="canonical" href="https://bioproj.extra.cea.fr/redmine/projects/nsap/_modules/cubicweb/web/formfields.html" /> -->
+
+  <script type="text/javascript">
+    $("div.buttonNext, div.buttonPrevious").hover(
+       function () {
+           $(this).css('background-color', '#FF9C34');
+       },
+       function () {
+           $(this).css('background-color', '#A7D6E2');
+       }
+    );
+    var bodywrapper = $('.bodywrapper');
+    var sidebarbutton = $('#sidebarbutton');
+    sidebarbutton.css({'height': '900px'});
+  </script>
+
+  </head>
+  <body role="document">
+
+<div class="header-wrapper">
+  <div class="header">
+    <p class="logo">
+      <a href="../../../index.html">
+        <img src="../../../_static/nsap.png" alt="Logo"/>
+      </a>
+    </p><div class="navbar">
+      <ul>
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../../installation.html">Installation</a></li>
+        <li class="btn-li">
+          <div class="btn-group">
+		    <a href="../../../documentation.html">Documentation</a>
+		    <a class="btn dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </a>
+		    <ul class="dropdown-menu">
+	          <li class="link-title">RQL Upload</li>
+			  <li class="divider"></li>
+			  <li><a href="../../../schema.html">Schema modifications</a></li>
+			  <li><a href="../../../view.html">Views</a></li>
+			  <li class="divider"></li>
+		    </ul>
+		  </div>
+        </li>
+        <li><a href="http://neurospin-wiki.org/">NeuroSpin Wiki</a></li>
+      </ul>
+    </div> <!-- end navbar --></div>
+</div>
+
+
+<div class="content-wrapper">
+    <div class="sphinxsidebar">
+      <div class="sphinxsidebarwrapper">
+
+        <!-- info setup -->
+          <p class="doc-version">
+           This documentation is for Rql Upload <strong>version 2.0.0</strong>
+          </p>
+        <p class="citing">
+          If you use the software, please do not hesitate to
+          <a href="https://github.com/neurospin/rql_upload">report a bug</a>.
+        </p>
+
+      <!-- toc tree -->
+      
+
+      </div>
+    </div>
+  
+
+  <div class="content">
+      
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cubicweb.web.formfields</h1><div class="highlight"><pre>
+<span></span><span class="c1"># copyright 2003-2013 LOGILAB S.A. (Paris, FRANCE), all rights reserved.</span>
+<span class="c1"># contact http://www.logilab.fr/ -- mailto:contact@logilab.fr</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of CubicWeb.</span>
+<span class="c1">#</span>
+<span class="c1"># CubicWeb is free software: you can redistribute it and/or modify it under the</span>
+<span class="c1"># terms of the GNU Lesser General Public License as published by the Free</span>
+<span class="c1"># Software Foundation, either version 2.1 of the License, or (at your option)</span>
+<span class="c1"># any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># CubicWeb is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License along</span>
+<span class="c1"># with CubicWeb.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">The Field class and basic fields</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="sd">.. Note::</span>
+<span class="sd">  Fields are used to control what&#39;s edited in forms. They makes the link between</span>
+<span class="sd">  something to edit and its display in the form. Actual display is handled by a</span>
+<span class="sd">  widget associated to the field.</span>
+
+<span class="sd">Let first see the base class for fields:</span>
+
+<span class="sd">.. autoclass:: cubicweb.web.formfields.Field</span>
+
+<span class="sd">Now, you usually don&#39;t use that class but one of the concrete field classes</span>
+<span class="sd">described below, according to what you want to edit.</span>
+
+<span class="sd">Basic fields</span>
+<span class="sd">&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;</span>
+
+<span class="sd">.. autoclass:: cubicweb.web.formfields.StringField()</span>
+<span class="sd">.. autoclass:: cubicweb.web.formfields.PasswordField()</span>
+<span class="sd">.. autoclass:: cubicweb.web.formfields.IntField()</span>
+<span class="sd">.. autoclass:: cubicweb.web.formfields.BigIntField()</span>
+<span class="sd">.. autoclass:: cubicweb.web.formfields.FloatField()</span>
+<span class="sd">.. autoclass:: cubicweb.web.formfields.BooleanField()</span>
+<span class="sd">.. autoclass:: cubicweb.web.formfields.DateField()</span>
+<span class="sd">.. autoclass:: cubicweb.web.formfields.DateTimeField()</span>
+<span class="sd">.. autoclass:: cubicweb.web.formfields.TimeField()</span>
+<span class="sd">.. autoclass:: cubicweb.web.formfields.TimeIntervalField()</span>
+
+<span class="sd">Compound fields</span>
+<span class="sd">&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;</span>
+
+<span class="sd">.. autoclass:: cubicweb.web.formfields.RichTextField()</span>
+<span class="sd">.. autoclass:: cubicweb.web.formfields.FileField()</span>
+<span class="sd">.. autoclass:: cubicweb.web.formfields.CompoundField()</span>
+
+<span class="sd">.. autoclass cubicweb.web.formfields.EditableFileField() XXX should be a widget</span>
+
+<span class="sd">Entity specific fields and function</span>
+<span class="sd">&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;&#39;</span>
+
+<span class="sd">.. autoclass:: cubicweb.web.formfields.RelationField()</span>
+<span class="sd">.. autofunction:: cubicweb.web.formfields.guess_field</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__docformat__</span> <span class="o">=</span> <span class="s2">&quot;restructuredtext en&quot;</span>
+
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span><span class="p">,</span> <span class="n">timedelta</span>
+
+<span class="kn">from</span> <span class="nn">logilab.mtconverter</span> <span class="kn">import</span> <span class="n">xml_escape</span>
+<span class="kn">from</span> <span class="nn">logilab.common</span> <span class="kn">import</span> <span class="n">nullobject</span>
+<span class="kn">from</span> <span class="nn">logilab.common.date</span> <span class="kn">import</span> <span class="n">ustrftime</span>
+<span class="kn">from</span> <span class="nn">logilab.common.configuration</span> <span class="kn">import</span> <span class="n">format_time</span>
+<span class="kn">from</span> <span class="nn">logilab.common.textutils</span> <span class="kn">import</span> <span class="n">apply_units</span><span class="p">,</span> <span class="n">TIME_UNITS</span>
+
+<span class="kn">from</span> <span class="nn">yams.schema</span> <span class="kn">import</span> <span class="n">KNOWN_METAATTRIBUTES</span><span class="p">,</span> <span class="n">role_name</span>
+<span class="kn">from</span> <span class="nn">yams.constraints</span> <span class="kn">import</span> <span class="p">(</span><span class="n">SizeConstraint</span><span class="p">,</span> <span class="n">StaticVocabularyConstraint</span><span class="p">,</span>
+                              <span class="n">FormatConstraint</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">cubicweb</span> <span class="kn">import</span> <span class="n">Binary</span><span class="p">,</span> <span class="n">tags</span><span class="p">,</span> <span class="n">uilib</span>
+<span class="kn">from</span> <span class="nn">cubicweb.utils</span> <span class="kn">import</span> <span class="n">support_args</span>
+<span class="kn">from</span> <span class="nn">cubicweb.web</span> <span class="kn">import</span> <span class="n">INTERNAL_FIELD_VALUE</span><span class="p">,</span> <span class="n">ProcessFormError</span><span class="p">,</span> <span class="n">eid_param</span><span class="p">,</span> \
+     <span class="n">formwidgets</span> <span class="k">as</span> <span class="n">fw</span>
+<span class="kn">from</span> <span class="nn">cubicweb.web.views</span> <span class="kn">import</span> <span class="n">uicfg</span>
+
+<span class="k">class</span> <span class="nc">UnmodifiedField</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;raise this when a field has not actually been edited and you want to skip</span>
+<span class="sd">    it</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+<span class="k">def</span> <span class="nf">normalize_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">filename</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="k">def</span> <span class="nf">vocab_sort</span><span class="p">(</span><span class="n">vocab</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;sort vocabulary, considering option groups&quot;&quot;&quot;</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">partresult</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">vocab</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="c1"># opt group start</span>
+            <span class="k">if</span> <span class="n">partresult</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">+=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">partresult</span><span class="p">)</span>
+                <span class="n">partresult</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">result</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">partresult</span><span class="o">.</span><span class="n">append</span><span class="p">(</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="p">)</span>
+    <span class="n">result</span> <span class="o">+=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">partresult</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span>
+
+<span class="n">_MARKER</span> <span class="o">=</span> <span class="n">nullobject</span><span class="p">()</span>
+
+<span class="k">class</span> <span class="nc">Field</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This class is the abstract base class for all fields. It hold a bunch</span>
+<span class="sd">    of attributes which may be used for fine control of the behaviour of a</span>
+<span class="sd">    concrete field.</span>
+
+<span class="sd">    **Attributes**</span>
+
+<span class="sd">    All the attributes described below have sensible default value which may be</span>
+<span class="sd">    overriden by named arguments given to field&#39;s constructor.</span>
+
+<span class="sd">    :attr:`name`</span>
+<span class="sd">       base name of the field (basestring). The actual input name is returned by</span>
+<span class="sd">       the :meth:`input_name` method and may differ from that name (for instance</span>
+<span class="sd">       if `eidparam` is true).</span>
+<span class="sd">    :attr:`id`</span>
+<span class="sd">       DOM identifier (default to the same value as `name`), should be unique in</span>
+<span class="sd">       a form.</span>
+<span class="sd">    :attr:`label`</span>
+<span class="sd">       label of the field (default to the same value as `name`).</span>
+<span class="sd">    :attr:`help`</span>
+<span class="sd">       help message about this field.</span>
+<span class="sd">    :attr:`widget`</span>
+<span class="sd">       widget associated to the field. Each field class has a default widget</span>
+<span class="sd">       class which may be overriden per instance.</span>
+<span class="sd">    :attr:`value`</span>
+<span class="sd">       field value. May be an actual value or a callable which should take the</span>
+<span class="sd">       form as argument and return a value.</span>
+<span class="sd">    :attr:`choices`</span>
+<span class="sd">       static vocabulary for this field. May be a list of values, a list of</span>
+<span class="sd">       (label, value) tuples or a callable which should take the form and field</span>
+<span class="sd">       as arguments and return a list of values or a list of (label, value).</span>
+<span class="sd">    :attr:`required`</span>
+<span class="sd">       bool flag telling if the field is required or not.</span>
+<span class="sd">    :attr:`sort`</span>
+<span class="sd">       bool flag telling if the vocabulary (either static vocabulary specified</span>
+<span class="sd">       in `choices` or dynamic vocabulary fetched from the form) should be</span>
+<span class="sd">       sorted on label.</span>
+<span class="sd">    :attr:`internationalizable`</span>
+<span class="sd">       bool flag telling if the vocabulary labels should be translated using the</span>
+<span class="sd">       current request language.</span>
+<span class="sd">    :attr:`eidparam`</span>
+<span class="sd">       bool flag telling if this field is linked to a specific entity</span>
+<span class="sd">    :attr:`role`</span>
+<span class="sd">       when the field is linked to an entity attribute or relation, tells the</span>
+<span class="sd">       role of the entity in the relation (eg &#39;subject&#39; or &#39;object&#39;). If this is</span>
+<span class="sd">       not an attribute or relation of the edited entity, `role` should be</span>
+<span class="sd">       `None`.</span>
+<span class="sd">    :attr:`fieldset`</span>
+<span class="sd">       optional fieldset to which this field belongs to</span>
+<span class="sd">    :attr:`order`</span>
+<span class="sd">       key used by automatic forms to sort fields</span>
+<span class="sd">    :attr:`ignore_req_params`</span>
+<span class="sd">       when true, this field won&#39;t consider value potentialy specified using</span>
+<span class="sd">       request&#39;s form parameters (eg you won&#39;t be able to specify a value using for</span>
+<span class="sd">       instance url like http://mywebsite.com/form?field=value)</span>
+
+<span class="sd">    .. currentmodule:: cubicweb.web.formfields</span>
+
+<span class="sd">    **Generic methods**</span>
+
+<span class="sd">    .. automethod:: Field.input_name</span>
+<span class="sd">    .. automethod:: Field.dom_id</span>
+<span class="sd">    .. automethod:: Field.actual_fields</span>
+
+<span class="sd">    **Form generation methods**</span>
+
+<span class="sd">    .. automethod:: form_init</span>
+<span class="sd">    .. automethod:: typed_value</span>
+
+<span class="sd">    **Post handling methods**</span>
+
+<span class="sd">    .. automethod:: process_posted</span>
+<span class="sd">    .. automethod:: process_form_value</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># default widget associated to this class of fields. May be overriden per</span>
+    <span class="c1"># instance</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">TextInput</span>
+    <span class="c1"># does this field requires a multipart form</span>
+    <span class="n">needs_multipart</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="c1"># class attribute used for ordering of fields in a form</span>
+    <span class="n">__creation_rank</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">eidparam</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">role</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="nb">id</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">help</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">required</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">choices</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">sort</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">internationalizable</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">fieldset</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">_MARKER</span>
+    <span class="n">fallback_on_none_attribute</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="n">ignore_req_params</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">_MARKER</span><span class="p">,</span> <span class="n">widget</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">assert</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">key</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span> <span class="n">key</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="n">_MARKER</span><span class="p">:</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">name</span> <span class="ow">or</span> <span class="n">_MARKER</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">label</span>
+        <span class="c1"># has to be done after other attributes initialization</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">init_widget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="c1"># ordering number for this field instance</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">creation_rank</span> <span class="o">=</span> <span class="n">Field</span><span class="o">.</span><span class="n">__creation_rank</span>
+        <span class="n">Field</span><span class="o">.</span><span class="n">__creation_rank</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">as_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="bp">True</span><span class="p">):</span>
+        <span class="n">l</span> <span class="o">=</span> <span class="p">[</span><span class="s1">u&#39;&lt;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="o">.</span><span class="n">__name__</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">attr</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="s1">&#39;eidparam&#39;</span><span class="p">,</span> <span class="s1">&#39;role&#39;</span><span class="p">,</span> <span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">attr</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_MARKER</span><span class="p">:</span>
+                <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">=</span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">repr</span><span class="p">:</span>
+            <span class="n">l</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;@</span><span class="si">%#x</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">u&#39;</span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__unicode__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_string</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_string</span><span class="p">(</span><span class="bp">False</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;UTF8&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">as_string</span><span class="p">(</span><span class="bp">True</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;UTF8&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">init_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">widget</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">widget</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">vocabulary_widget</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">Select</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;automatically set .label when name is set&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="ow">is</span> <span class="n">_MARKER</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">label</span> <span class="o">=</span> <span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">is_visible</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return true if the field is not an hidden field&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">fw</span><span class="o">.</span><span class="n">HiddenInput</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">actual_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Fields may be composed of other fields. For instance the</span>
+<span class="sd">        :class:`~cubicweb.web.formfields.RichTextField` is containing a format</span>
+<span class="sd">        field to define the text format. This method returns actual fields that</span>
+<span class="sd">        should be considered for display / edition. It usually simply return</span>
+<span class="sd">        self.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">yield</span> <span class="bp">self</span>
+
+    <span class="k">def</span> <span class="nf">format_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return value suitable for display where value may be a list or tuple</span>
+<span class="sd">        of values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">format_single_value</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_single_value</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">format_single_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return value suitable for display&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">u&#39;&#39;</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">True</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">u&#39;1&#39;</span>
+        <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the widget instance associated to this field&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span>
+
+    <span class="k">def</span> <span class="nf">input_name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the &#39;qualified name&#39; for this field, e.g. something suitable</span>
+<span class="sd">        to use as HTML input name. You can specify a suffix that will be</span>
+<span class="sd">        included in the name when widget needs several inputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># caching is necessary else we get some pb on entity creation :</span>
+        <span class="c1"># entity.eid is modified from creation mark (eg &#39;X&#39;) to its actual eid</span>
+        <span class="c1"># (eg 123), and then `field.input_name()` won&#39;t return the right key</span>
+        <span class="c1"># anymore if not cached (first call to input_name done *before* eventual</span>
+        <span class="c1"># eid affectation).</span>
+        <span class="c1">#</span>
+        <span class="c1"># note that you should NOT use @cached else it will create a memory leak</span>
+        <span class="c1"># on persistent fields (eg created once for all on a form class) because</span>
+        <span class="c1"># of the &#39;form&#39; appobject argument: the cache will keep growing as new</span>
+        <span class="c1"># form are created...</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">form</span><span class="o">.</span><span class="n">formvalues</span><span class="p">[(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;input_name&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">role_name</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">suffix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">+=</span> <span class="n">suffix</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">eid_param</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">form</span><span class="o">.</span><span class="n">formvalues</span><span class="p">[(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;input_name&#39;</span><span class="p">,</span> <span class="n">suffix</span><span class="p">)]</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="k">return</span> <span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">role_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return &lt;field.name&gt;-&lt;field.role&gt; if role is specified, else field.name&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;field without a name (give it to constructor for explicitly built fields)&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">role_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+
+    <span class="k">def</span> <span class="nf">dom_id</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the HTML DOM identifier for this field, e.g. something</span>
+<span class="sd">        suitable to use as HTML input id. You can specify a suffix that will be</span>
+<span class="sd">        included in the name when widget needs several inputs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="nb">id</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">id</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">role_name</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">suffix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="nb">id</span> <span class="o">+=</span> <span class="n">suffix</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">eid_param</span><span class="p">(</span><span class="nb">id</span><span class="p">,</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">id</span>
+
+    <span class="k">def</span> <span class="nf">typed_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">load_bytes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the correctly typed value for this field in the form context.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">entity</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">rschema</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">final</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">entity</span><span class="o">.</span><span class="n">has_eid</span><span class="p">()</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">entity</span><span class="o">.</span><span class="n">cw_attr_cache</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">entity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fallback_on_none_attribute</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">value</span>
+            <span class="k">elif</span> <span class="n">entity</span><span class="o">.</span><span class="n">has_eid</span><span class="p">()</span> <span class="ow">or</span> <span class="n">entity</span><span class="o">.</span><span class="n">cw_relation_cached</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">entity</span><span class="o">.</span><span class="n">related</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">)]</span>
+                <span class="k">if</span> <span class="n">value</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">fallback_on_none_attribute</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_typed_value</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">load_bytes</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">initial_typed_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">load_bytes</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_MARKER</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">value</span>
+        <span class="n">formattr</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_</span><span class="si">%s</span><span class="s1">_default&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">rschema</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">final</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">e_schema</span><span class="o">.</span><span class="n">default</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">form</span><span class="o">.</span><span class="n">linked_to</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">),</span> <span class="p">())</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">example_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return a sample string describing what can be given as input for this</span>
+<span class="sd">        field</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">u&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">renderer</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;render this field, which is part of form, using the given form</span>
+<span class="sd">        renderer</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_widget</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">widget</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">renderer</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return vocabulary for this field. This method will be</span>
+<span class="sd">        called by widgets which requires a vocabulary.</span>
+
+<span class="sd">        It should return a list of tuple (label, value), where value</span>
+<span class="sd">        *must be a unicode string*, not a typed value.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">):</span>
+            <span class="c1"># pylint: disable=E1102</span>
+            <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">,</span> <span class="s1">&#39;im_self&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="n">vocab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">vocab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">(</span><span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vocab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span>
+        <span class="k">if</span> <span class="n">vocab</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">vocab</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="n">vocab</span> <span class="o">=</span> <span class="p">[(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">vocab</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">internationalizable</span><span class="p">:</span>
+            <span class="c1"># the short-cirtcuit &#39;and&#39; boolean operator is used here</span>
+            <span class="c1"># to permit a valid empty string in vocabulary without</span>
+            <span class="c1"># attempting to translate it by gettext (which can lead to</span>
+            <span class="c1"># weird strings display)</span>
+            <span class="n">vocab</span> <span class="o">=</span> <span class="p">[(</span><span class="n">label</span> <span class="ow">and</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="n">label</span><span class="p">),</span> <span class="n">value</span><span class="p">)</span>
+                     <span class="k">for</span> <span class="n">label</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">vocab</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">:</span>
+            <span class="n">vocab</span> <span class="o">=</span> <span class="n">vocab_sort</span><span class="p">(</span><span class="n">vocab</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vocab</span>
+
+    <span class="c1"># support field as argument to avoid warning when used as format field value</span>
+    <span class="c1"># callback</span>
+    <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return MIME type used for the given (text or bytes) field&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s1">&#39;subject&#39;</span><span class="p">:</span>
+            <span class="n">entity</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span>
+            <span class="k">if</span> <span class="n">entity</span><span class="o">.</span><span class="n">e_schema</span><span class="o">.</span><span class="n">has_metadata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">entity</span><span class="o">.</span><span class="n">has_eid</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_format&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">entity</span><span class="o">.</span><span class="n">cw_attr_cache</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">cw_attr_metadata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">property_value</span><span class="p">(</span><span class="s1">&#39;ui.default-text-format&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">encoding</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return encoding used for the given (text) field&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span><span class="p">:</span>
+            <span class="n">entity</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span>
+            <span class="k">if</span> <span class="n">entity</span><span class="o">.</span><span class="n">e_schema</span><span class="o">.</span><span class="n">has_metadata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;encoding&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">entity</span><span class="o">.</span><span class="n">has_eid</span><span class="p">()</span> <span class="ow">or</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_encoding&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">entity</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">cw_attr_metadata</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;encoding&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">encoding</span>
+
+    <span class="k">def</span> <span class="nf">form_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Method called at form initialization to trigger potential field</span>
+<span class="sd">        initialization requiring the form instance. Do nothing by default.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">has_been_modified</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actual_fields</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">_has_been_modified</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
+                <span class="k">return</span> <span class="bp">True</span> <span class="c1"># XXX</span>
+        <span class="k">return</span> <span class="bp">False</span> <span class="c1"># not modified</span>
+
+    <span class="k">def</span> <span class="nf">_has_been_modified</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="c1"># fields not corresponding to an entity attribute / relations</span>
+        <span class="c1"># are considered modified</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">has_eid</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">True</span> <span class="c1"># XXX</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s1">&#39;subject&#39;</span><span class="p">:</span>
+                <span class="n">previous_value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">previous_value</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="p">,</span>
+                                         <span class="s1">&#39;reverse_</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="c1"># fields with eidparam=True but not corresponding to an actual</span>
+            <span class="c1"># attribute or relation</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="c1"># if it&#39;s a non final relation, we need the eids</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">previous_value</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)):</span>
+            <span class="c1"># widget should return a set of untyped eids</span>
+            <span class="n">previous_value</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">eid</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">previous_value</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">new_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_form_value</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">ProcessFormError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">True</span>
+        <span class="k">except</span> <span class="n">UnmodifiedField</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span> <span class="c1"># not modified</span>
+        <span class="k">if</span> <span class="n">previous_value</span> <span class="o">==</span> <span class="n">new_value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">False</span> <span class="c1"># not modified</span>
+        <span class="k">return</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">process_form_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return the correctly typed value posted for this field.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">form</span><span class="o">.</span><span class="n">formvalues</span><span class="p">[(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">)]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">formvalues</span><span class="p">[(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">)]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_form_value</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">_process_form_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_widget</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">process_field_data</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ensure_correctly_typed</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_ensure_correctly_typed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;widget might to return date as a correctly formatted string or as</span>
+<span class="sd">        correctly typed objects, but process_for_value must return a typed value.</span>
+<span class="sd">        Override this method to type the value if necessary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="ow">or</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">process_posted</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an iterator on (field, value) that has been posted for</span>
+<span class="sd">        field returned by :meth:`~cubicweb.web.formfields.Field.actual_fields`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">actual_fields</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">field</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">process_form_value</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">no_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="ow">and</span> <span class="n">field</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="n">ProcessFormError</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s2">&quot;required field&quot;</span><span class="p">))</span>
+                    <span class="k">yield</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span>
+                <span class="k">except</span> <span class="n">UnmodifiedField</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># recursive function: we might have compound fields</span>
+                <span class="c1"># of compound fields (of compound fields of ...)</span>
+                <span class="k">for</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">field</span><span class="o">.</span><span class="n">process_posted</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
+                    <span class="k">yield</span> <span class="n">field</span><span class="p">,</span> <span class="n">value</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">no_value</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return True if the value can be considered as no value for the field&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span>
+
+
+<span class="k">class</span> <span class="nc">StringField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use this field to edit unicode string (`String` yams type). This field</span>
+<span class="sd">    additionaly support a `max_length` attribute that specify a maximum size for</span>
+<span class="sd">    the string (`None` meaning no limit).</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be:</span>
+
+<span class="sd">    * :class:`~cubicweb.web.formwidgets.Select` if some vocabulary is specified</span>
+<span class="sd">      using `choices` attribute</span>
+
+<span class="sd">    * :class:`~cubicweb.web.formwidgets.TextInput` if maximum size is specified</span>
+<span class="sd">      using `max_length` attribute and this length is inferior to 257.</span>
+
+<span class="sd">    * :class:`~cubicweb.web.formwidgets.TextArea` in all other cases</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">TextArea</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="mi">45</span>
+    <span class="n">placeholder</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">max_length</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">=</span> <span class="n">max_length</span> <span class="c1"># must be set before super call</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">StringField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">init_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">widget</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">:</span>
+                <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">Select</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">&lt;</span> <span class="mi">257</span><span class="p">:</span>
+                <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">TextInput</span><span class="p">()</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">StringField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">init_widget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">fw</span><span class="o">.</span><span class="n">TextArea</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init_text_area</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">fw</span><span class="o">.</span><span class="n">TextInput</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init_text_input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;placeholder&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">init_text_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span><span class="p">:</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;size&#39;</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">size</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span><span class="p">))</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;maxlength&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">init_text_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">max_length</span> <span class="o">&lt;</span> <span class="mi">513</span><span class="p">:</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;cols&#39;</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+            <span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;rows&#39;</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">set_placeholder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">placeholder</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">placeholder</span> <span class="o">=</span> <span class="n">placeholder</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;placeholder&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">placeholder</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">PasswordField</span><span class="p">(</span><span class="n">StringField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use this field to edit password (`Password` yams type, encoded python</span>
+<span class="sd">    string).</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be</span>
+<span class="sd">    a :class:`~cubicweb.web.formwidgets.PasswordInput`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">PasswordInput</span>
+    <span class="k">def</span> <span class="nf">form_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span> <span class="ow">and</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">has_eid</span><span class="p">():</span>
+            <span class="c1"># see below: value is probably set but we can&#39;t retreive it. Ensure</span>
+            <span class="c1"># the field isn&#39;t show as a required field on modification</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">required</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">typed_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">load_bytes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span><span class="p">:</span>
+            <span class="c1"># no way to fetch actual password value with cw</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">has_eid</span><span class="p">():</span>
+                <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_typed_value</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">load_bytes</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">PasswordField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">typed_value</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">load_bytes</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">RichTextField</span><span class="p">(</span><span class="n">StringField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This compound field allow edition of text (unicode string) in</span>
+<span class="sd">    a particular format. It has an inner field holding the text format,</span>
+<span class="sd">    that can be specified using `format_field` argument. If not specified</span>
+<span class="sd">    one will be automaticall generated.</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be a</span>
+<span class="sd">    :class:`~cubicweb.web.formwidgets.FCKEditor` or a</span>
+<span class="sd">    :class:`~cubicweb.web.formwidgets.TextArea`. according to the field&#39;s</span>
+<span class="sd">    format and to user&#39;s preferences.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">widget</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">format_field</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">RichTextField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_field</span> <span class="o">=</span> <span class="n">format_field</span>
+
+    <span class="k">def</span> <span class="nf">init_text_area</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="k">def</span> <span class="nf">get_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_fckeditor</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">fw</span><span class="o">.</span><span class="n">FCKEditor</span><span class="p">()</span>
+            <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">TextArea</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init_text_area</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">widget</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">widget</span>
+
+    <span class="k">def</span> <span class="nf">get_format_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_field</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_field</span>
+        <span class="c1"># we have to cache generated field since it&#39;s use as key in the</span>
+        <span class="c1"># context dictionary</span>
+        <span class="n">req</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">req</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">fkwargs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;eidparam&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span><span class="p">,</span> <span class="s1">&#39;role&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">}</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">use_fckeditor</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
+                <span class="c1"># if fckeditor is used and format field isn&#39;t explicitly</span>
+                <span class="c1"># deactivated, we want an hidden field for the format</span>
+                <span class="n">fkwargs</span><span class="p">[</span><span class="s1">&#39;widget&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">HiddenInput</span><span class="p">()</span>
+                <span class="n">fkwargs</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;text/html&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># else we want a format selector</span>
+                <span class="n">fkwargs</span><span class="p">[</span><span class="s1">&#39;widget&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">Select</span><span class="p">()</span>
+                <span class="n">fcstr</span> <span class="o">=</span> <span class="n">FormatConstraint</span><span class="p">()</span>
+                <span class="n">fkwargs</span><span class="p">[</span><span class="s1">&#39;choices&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">fcstr</span><span class="o">.</span><span class="n">vocabulary</span><span class="p">(</span><span class="n">form</span><span class="o">=</span><span class="n">form</span><span class="p">)</span>
+                <span class="n">fkwargs</span><span class="p">[</span><span class="s1">&#39;internationalizable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">fkwargs</span><span class="p">[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span>
+            <span class="n">fkwargs</span><span class="p">[</span><span class="s1">&#39;eidparam&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span>
+            <span class="n">field</span> <span class="o">=</span> <span class="n">StringField</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;_format&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">fkwargs</span><span class="p">)</span>
+            <span class="n">req</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span>
+            <span class="k">return</span> <span class="n">field</span>
+
+    <span class="k">def</span> <span class="nf">actual_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="bp">self</span>
+        <span class="n">format_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_format_field</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">format_field</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="n">format_field</span>
+
+    <span class="k">def</span> <span class="nf">use_fckeditor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return True if fckeditor should be used to edit entity&#39;s attribute named</span>
+<span class="sd">        `attr`, according to user preferences</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">use_fckeditor</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">form</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;text/html&#39;</span>
+        <span class="k">return</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">renderer</span><span class="p">):</span>
+        <span class="n">format_field</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_format_field</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">format_field</span><span class="p">:</span>
+            <span class="c1"># XXX we want both fields to remain vertically aligned</span>
+            <span class="k">if</span> <span class="n">format_field</span><span class="o">.</span><span class="n">is_visible</span><span class="p">():</span>
+                <span class="n">format_field</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s1">&#39;style&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;display: block&#39;</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="n">format_field</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">renderer</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">result</span> <span class="o">=</span> <span class="s1">u&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">result</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_widget</span><span class="p">(</span><span class="n">form</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">renderer</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">FileField</span><span class="p">(</span><span class="n">StringField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This compound field allow edition of binary stream (`Bytes` yams</span>
+<span class="sd">    type). Three inner fields may be specified:</span>
+
+<span class="sd">    * `format_field`, holding the file&#39;s format.</span>
+<span class="sd">    * `encoding_field`, holding the file&#39;s content encoding.</span>
+<span class="sd">    * `name_field`, holding the file&#39;s name.</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be a</span>
+<span class="sd">    :class:`~cubicweb.web.formwidgets.FileInput`. Inner fields, if any,</span>
+<span class="sd">    will be added to a drop down menu at the right of the file input.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">FileInput</span>
+    <span class="n">needs_multipart</span> <span class="o">=</span> <span class="bp">True</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">format_field</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">encoding_field</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">name_field</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">FileField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">format_field</span> <span class="o">=</span> <span class="n">format_field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">encoding_field</span> <span class="o">=</span> <span class="n">encoding_field</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name_field</span> <span class="o">=</span> <span class="n">name_field</span>
+
+    <span class="k">def</span> <span class="nf">actual_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="bp">self</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_field</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_field</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding_field</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding_field</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_field</span><span class="p">:</span>
+            <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_field</span>
+
+    <span class="k">def</span> <span class="nf">typed_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">load_bytes</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidparam</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">has_eid</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">load_bytes</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+                <span class="c1"># don&#39;t actually load data</span>
+                <span class="c1"># XXX value should reflect if some file is already attached</span>
+                <span class="c1"># * try to display name metadata</span>
+                <span class="c1"># * check length(data) / data != null</span>
+                <span class="k">return</span> <span class="bp">True</span>
+            <span class="k">return</span> <span class="bp">False</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">FileField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">typed_value</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">load_bytes</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">renderer</span><span class="p">):</span>
+        <span class="n">wdgs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">get_widget</span><span class="p">(</span><span class="n">form</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">renderer</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_field</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding_field</span><span class="p">:</span>
+            <span class="n">divid</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">-advanced&#39;</span> <span class="o">%</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_name</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+            <span class="n">wdgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">u&#39;&lt;a href=&quot;</span><span class="si">%s</span><span class="s1">&quot; title=&quot;</span><span class="si">%s</span><span class="s1">&quot;&gt;&lt;img src=&quot;</span><span class="si">%s</span><span class="s1">&quot; alt=&quot;</span><span class="si">%s</span><span class="s1">&quot;/&gt;&lt;/a&gt;&#39;</span> <span class="o">%</span>
+                        <span class="p">(</span><span class="n">xml_escape</span><span class="p">(</span><span class="n">uilib</span><span class="o">.</span><span class="n">toggle_action</span><span class="p">(</span><span class="n">divid</span><span class="p">)),</span>
+                         <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;show advanced fields&#39;</span><span class="p">),</span>
+                         <span class="n">xml_escape</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">data_url</span><span class="p">(</span><span class="s1">&#39;puce_down.png&#39;</span><span class="p">)),</span>
+                         <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;show advanced fields&#39;</span><span class="p">)))</span>
+            <span class="n">wdgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">u&#39;&lt;div id=&quot;</span><span class="si">%s</span><span class="s1">&quot; class=&quot;hidden&quot;&gt;&#39;</span> <span class="o">%</span> <span class="n">divid</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_field</span><span class="p">:</span>
+                <span class="n">wdgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render_subfield</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name_field</span><span class="p">,</span> <span class="n">renderer</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_field</span><span class="p">:</span>
+                <span class="n">wdgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render_subfield</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_field</span><span class="p">,</span> <span class="n">renderer</span><span class="p">))</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding_field</span><span class="p">:</span>
+                <span class="n">wdgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">render_subfield</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding_field</span><span class="p">,</span> <span class="n">renderer</span><span class="p">))</span>
+            <span class="n">wdgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">u&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">typed_value</span><span class="p">(</span><span class="n">form</span><span class="p">):</span>
+            <span class="c1"># trick to be able to delete an uploaded file</span>
+            <span class="n">wdgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">u&#39;&lt;br/&gt;&#39;</span><span class="p">)</span>
+            <span class="n">wdgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tags</span><span class="o">.</span><span class="n">input</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_name</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="s1">u&#39;__detach&#39;</span><span class="p">),</span>
+                                   <span class="nb">type</span><span class="o">=</span><span class="s1">u&#39;checkbox&#39;</span><span class="p">))</span>
+            <span class="n">wdgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;detach attached file&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">u&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">wdgs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">render_subfield</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">,</span> <span class="n">renderer</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">renderer</span><span class="o">.</span><span class="n">render_label</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">field</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">renderer</span><span class="p">)</span>
+                <span class="o">+</span> <span class="n">renderer</span><span class="o">.</span><span class="n">render_help</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+                <span class="o">+</span> <span class="s1">u&#39;&lt;br/&gt;&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_form_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="n">posted</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">form</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_name</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="s1">u&#39;__detach&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">posted</span><span class="p">:</span>
+            <span class="c1"># drop current file value on explictily asked to detach</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">posted</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input_name</span><span class="p">(</span><span class="n">form</span><span class="p">)]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="c1"># raise UnmodifiedField instead of returning None, since the later</span>
+            <span class="c1"># will try to remove already attached file if any</span>
+            <span class="k">raise</span> <span class="n">UnmodifiedField</span><span class="p">()</span>
+        <span class="c1"># value is a 2-uple (filename, stream) or a list of such</span>
+        <span class="c1"># tuples (multiple files)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">form</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;mutiple files provided, however &#39;</span>
+                             <span class="s1">&#39;only the first will be picked&#39;</span><span class="p">)</span>
+            <span class="n">filename</span><span class="p">,</span> <span class="n">stream</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">UnmodifiedField</span><span class="p">()</span>
+        <span class="c1"># XXX avoid in memory loading of posted files. Requires Binary handling changes...</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">Binary</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="o">.</span><span class="n">getvalue</span><span class="p">():</span> <span class="c1"># usually an unexistant file</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># set filename on the Binary instance, may be used later in hooks</span>
+            <span class="n">value</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">normalize_filename</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="c1"># XXX turn into a widget</span>
+<span class="k">class</span> <span class="nc">EditableFileField</span><span class="p">(</span><span class="n">FileField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This compound field allow edition of binary stream as</span>
+<span class="sd">    :class:`~cubicweb.web.formfields.FileField` but expect that stream to</span>
+<span class="sd">    actually contains some text.</span>
+
+<span class="sd">    If the stream format is one of text/plain, text/html, text/rest,</span>
+<span class="sd">    text/markdown</span>
+<span class="sd">    then a :class:`~cubicweb.web.formwidgets.TextArea` will be additionaly</span>
+<span class="sd">    displayed, allowing to directly the file&#39;s content when desired, instead</span>
+<span class="sd">    of choosing a file from user&#39;s file system.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">editable_formats</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s1">&#39;text/plain&#39;</span><span class="p">,</span> <span class="s1">&#39;text/html&#39;</span><span class="p">,</span> <span class="s1">&#39;text/rest&#39;</span><span class="p">,</span> <span class="s1">&#39;text/markdown&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">render</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">renderer</span><span class="p">):</span>
+        <span class="n">wdgs</span> <span class="o">=</span> <span class="p">[</span><span class="nb">super</span><span class="p">(</span><span class="n">EditableFileField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">renderer</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">form</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">editable_formats</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">typed_value</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">load_bytes</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">data</span><span class="p">:</span>
+                <span class="n">encoding</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">form</span><span class="o">.</span><span class="n">formvalues</span><span class="p">[(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">)]</span> <span class="o">=</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">getvalue</span><span class="p">(),</span> <span class="n">encoding</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">UnicodeError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span>
+                            <span class="s1">&#39;You can either submit a new file using the browse button above&#39;</span>
+                            <span class="s1">&#39;, or choose to remove already uploaded file by checking the &#39;</span>
+                            <span class="s1">&#39;&quot;detach attached file&quot; check-box, or edit file content online &#39;</span>
+                            <span class="s1">&#39;with the widget below.&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">msg</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span>
+                            <span class="s1">&#39;You can either submit a new file using the browse button above&#39;</span>
+                            <span class="s1">&#39;, or edit file content online with the widget below.&#39;</span><span class="p">)</span>
+                    <span class="n">wdgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">u&#39;&lt;p&gt;&lt;b&gt;</span><span class="si">%s</span><span class="s1">&lt;/b&gt;&lt;/p&gt;&#39;</span> <span class="o">%</span> <span class="n">msg</span><span class="p">)</span>
+                    <span class="n">wdgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fw</span><span class="o">.</span><span class="n">TextArea</span><span class="p">(</span><span class="n">setdomid</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">renderer</span><span class="p">))</span>
+                    <span class="c1"># XXX restore form context?</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">wdgs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_process_form_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">form</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_name</span><span class="p">(</span><span class="n">form</span><span class="p">))</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">unicode</span><span class="p">):</span>
+            <span class="c1"># file modified using a text widget</span>
+            <span class="k">return</span> <span class="n">Binary</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">encoding</span><span class="p">(</span><span class="n">form</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">EditableFileField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">_process_form_value</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">BigIntField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use this field to edit big integers (`BigInt` yams type). This field</span>
+<span class="sd">    additionaly support `min` and `max` attributes that specify a minimum and/or</span>
+<span class="sd">    maximum value for the integer (`None` meaning no boundary).</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be a</span>
+<span class="sd">    :class:`~cubicweb.web.formwidgets.TextInput`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_text_input_size</span> <span class="o">=</span> <span class="mi">10</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BigIntField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="nb">min</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="nb">max</span>
+
+    <span class="k">def</span> <span class="nf">init_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BigIntField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">init_widget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">fw</span><span class="o">.</span><span class="n">TextInput</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;size&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_text_input_size</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_ensure_correctly_typed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProcessFormError</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;an integer is expected&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">class</span> <span class="nc">IntField</span><span class="p">(</span><span class="n">BigIntField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use this field to edit integers (`Int` yams type). Similar to</span>
+<span class="sd">    :class:`~cubicweb.web.formfields.BigIntField` but set max length when text</span>
+<span class="sd">    input widget is used (the default).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">default_text_input_size</span> <span class="o">=</span> <span class="mi">5</span>
+
+    <span class="k">def</span> <span class="nf">init_widget</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">widget</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">IntField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">init_widget</span><span class="p">(</span><span class="n">widget</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="p">,</span> <span class="n">fw</span><span class="o">.</span><span class="n">TextInput</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">attrs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;maxlength&#39;</span><span class="p">,</span> <span class="mi">15</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">BooleanField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use this field to edit booleans (`Boolean` yams type).</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be a</span>
+<span class="sd">    :class:`~cubicweb.web.formwidgets.Radio` with yes/no values. You</span>
+<span class="sd">    can change that values by specifing `choices`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">Radio</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">allow_none</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">BooleanField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">allow_none</span> <span class="o">=</span> <span class="n">allow_none</span>
+
+    <span class="k">def</span> <span class="nf">vocabulary</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">choices</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BooleanField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">vocabulary</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_none</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;indifferent&#39;</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">),</span>
+                    <span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;yes&#39;</span><span class="p">),</span> <span class="s1">&#39;1&#39;</span><span class="p">),</span>
+                    <span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;no&#39;</span><span class="p">),</span> <span class="s1">&#39;0&#39;</span><span class="p">)]</span>
+        <span class="c1"># XXX empty string for &#39;no&#39; in that case for bw compat</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;yes&#39;</span><span class="p">),</span> <span class="s1">&#39;1&#39;</span><span class="p">),</span> <span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;no&#39;</span><span class="p">),</span> <span class="s1">&#39;&#39;</span><span class="p">)]</span>
+
+    <span class="k">def</span> <span class="nf">format_single_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return value suitable for display&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_none</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">u&#39;&#39;</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">False</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;0&#39;</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">(</span><span class="n">BooleanField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">format_single_value</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_ensure_correctly_typed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">allow_none</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">FloatField</span><span class="p">(</span><span class="n">IntField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use this field to edit floats (`Float` yams type). This field additionaly</span>
+<span class="sd">    support `min` and `max` attributes as the</span>
+<span class="sd">    :class:`~cubicweb.web.formfields.IntField`.</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be a</span>
+<span class="sd">    :class:`~cubicweb.web.formwidgets.TextInput`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">format_single_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">formatstr</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">property_value</span><span class="p">(</span><span class="s1">&#39;ui.float-format&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s1">u&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">formatstr</span> <span class="o">%</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">render_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_single_value</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="mf">1.234</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_ensure_correctly_typed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProcessFormError</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;a float is expected&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+
+<span class="k">class</span> <span class="nc">TimeIntervalField</span><span class="p">(</span><span class="n">StringField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use this field to edit time interval (`Interval` yams type).</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be a</span>
+<span class="sd">    :class:`~cubicweb.web.formwidgets.TextInput`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">TextInput</span>
+
+    <span class="k">def</span> <span class="nf">format_single_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">format_time</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">days</span> <span class="o">*</span> <span class="mi">24</span> <span class="o">*</span> <span class="mi">3600</span> <span class="o">+</span> <span class="n">value</span><span class="o">.</span><span class="n">seconds</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">return</span> <span class="s1">u&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">example_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return a sample string describing what can be given as input for this</span>
+<span class="sd">        field</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="s1">u&#39;20s, 10min, 24h, 4d&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_ensure_correctly_typed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">apply_units</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">TIME_UNITS</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProcessFormError</span><span class="p">(</span><span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">_</span><span class="p">(</span><span class="s1">&#39;a number (in seconds) or 20s, 10min, 24h or 4d are expected&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">timedelta</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">DateField</span><span class="p">(</span><span class="n">StringField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use this field to edit date (`Date` yams type).</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be a</span>
+<span class="sd">    :class:`~cubicweb.web.formwidgets.JQueryDatePicker`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">JQueryDatePicker</span>
+    <span class="n">format_prop</span> <span class="o">=</span> <span class="s1">&#39;ui.date-format&#39;</span>
+    <span class="n">etype</span> <span class="o">=</span> <span class="s1">&#39;Date&#39;</span>
+
+    <span class="k">def</span> <span class="nf">format_single_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">value</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">ustrftime</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">req</span><span class="o">.</span><span class="n">property_value</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">format_prop</span><span class="p">))</span>
+        <span class="k">return</span> <span class="s1">u&#39;&#39;</span>
+
+    <span class="k">def</span> <span class="nf">render_example</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_single_value</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">_ensure_correctly_typed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">basestring</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">parse_datetime</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">etype</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">ex</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ProcessFormError</span><span class="p">(</span><span class="nb">unicode</span><span class="p">(</span><span class="n">ex</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+
+<span class="k">class</span> <span class="nc">DateTimeField</span><span class="p">(</span><span class="n">DateField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use this field to edit datetime (`Datetime` yams type).</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be a</span>
+<span class="sd">    :class:`~cubicweb.web.formwidgets.JQueryDateTimePicker`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">JQueryDateTimePicker</span>
+    <span class="n">format_prop</span> <span class="o">=</span> <span class="s1">&#39;ui.datetime-format&#39;</span>
+    <span class="n">etype</span> <span class="o">=</span> <span class="s1">&#39;Datetime&#39;</span>
+
+
+<span class="k">class</span> <span class="nc">TimeField</span><span class="p">(</span><span class="n">DateField</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use this field to edit time (`Time` yams type).</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be a</span>
+<span class="sd">    :class:`~cubicweb.web.formwidgets.JQueryTimePicker`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">widget</span> <span class="o">=</span> <span class="n">fw</span><span class="o">.</span><span class="n">JQueryTimePicker</span>
+    <span class="n">format_prop</span> <span class="o">=</span> <span class="s1">&#39;ui.time-format&#39;</span>
+    <span class="n">etype</span> <span class="o">=</span> <span class="s1">&#39;Time&#39;</span>
+
+
+<span class="c1"># XXX use cases where we don&#39;t actually want a better widget?</span>
+<span class="k">class</span> <span class="nc">CompoundField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This field shouldn&#39;t be used directly, it&#39;s designed to hold inner</span>
+<span class="sd">    fields that should be conceptually groupped together.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fields</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">CompoundField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">fields</span> <span class="o">=</span> <span class="n">fields</span>
+
+    <span class="k">def</span> <span class="nf">subfields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span>
+
+    <span class="k">def</span> <span class="nf">actual_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="c1"># don&#39;t add [self] to actual fields, compound field is usually kinda</span>
+        <span class="c1"># virtual, all interesting values are in subfield. Skipping it may avoid</span>
+        <span class="c1"># error when processed by the editcontroller : it may be marked as required</span>
+        <span class="c1"># while it has no value, hence generating a false error.</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">needs_multipart</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">needs_multipart</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">fields</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">RelationField</span><span class="p">(</span><span class="n">Field</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use this field to edit a relation of an entity.</span>
+
+<span class="sd">    Unless explicitly specified, the widget for this field will be a</span>
+<span class="sd">    :class:`~cubicweb.web.formwidgets.Select`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">fromcardinality</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;widget&#39;</span><span class="p">,</span> <span class="n">fw</span><span class="o">.</span><span class="n">Select</span><span class="p">(</span><span class="n">multiple</span><span class="o">=</span><span class="n">card</span> <span class="ow">in</span> <span class="s1">&#39;*+&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">RelationField</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">choices</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Take care, choices function for relation field instance should take</span>
+<span class="sd">        an extra &#39;limit&#39; argument, with default to None.</span>
+
+<span class="sd">        This argument is used by the &#39;unrelateddivs&#39; view (see in autoform) and</span>
+<span class="sd">        when it&#39;s specified (eg not None), vocabulary returned should:</span>
+<span class="sd">        * not include already related entities</span>
+<span class="sd">        * have a max size of `limit` entities</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">entity</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span>
+        <span class="c1"># first see if its specified by __linkto form parameters</span>
+        <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">linkedto</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relvoc_linkedto</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">linkedto</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">linkedto</span>
+            <span class="c1"># it isn&#39;t, search more vocabulary</span>
+            <span class="n">vocab</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relvoc_init</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vocab</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">vocab</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relvoc_unrelated</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">limit</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">sort</span><span class="p">:</span>
+            <span class="n">vocab</span> <span class="o">=</span> <span class="n">vocab_sort</span><span class="p">(</span><span class="n">vocab</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">vocab</span>
+
+    <span class="k">def</span> <span class="nf">relvoc_linkedto</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="n">linkedto</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">linked_to</span><span class="o">.</span><span class="n">get</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">linkedto</span><span class="p">:</span>
+            <span class="n">buildent</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">entity_from_eid</span>
+            <span class="k">return</span> <span class="p">[(</span><span class="n">buildent</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s1">&#39;combobox&#39;</span><span class="p">),</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">eid</span><span class="p">))</span>
+                    <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">linkedto</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+    <span class="k">def</span> <span class="nf">relvoc_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="n">entity</span><span class="p">,</span> <span class="n">rtype</span><span class="p">,</span> <span class="n">role</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span>
+        <span class="n">vocab</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">required</span><span class="p">:</span>
+            <span class="n">vocab</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">INTERNAL_FIELD_VALUE</span><span class="p">))</span>
+        <span class="c1"># vocabulary doesn&#39;t include current values, add them</span>
+        <span class="k">if</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">has_eid</span><span class="p">():</span>
+            <span class="n">rset</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span><span class="o">.</span><span class="n">related</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">)</span>
+            <span class="n">vocab</span> <span class="o">+=</span> <span class="p">[(</span><span class="n">e</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s1">&#39;combobox&#39;</span><span class="p">),</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">eid</span><span class="p">))</span>
+                      <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">rset</span><span class="o">.</span><span class="n">entities</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="n">vocab</span>
+
+    <span class="k">def</span> <span class="nf">relvoc_unrelated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="n">entity</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span>
+        <span class="n">rtype</span> <span class="o">=</span> <span class="n">entity</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">rschema</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">entity</span><span class="o">.</span><span class="n">has_eid</span><span class="p">():</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">entity</span><span class="o">.</span><span class="n">related</span><span class="p">(</span><span class="n">rtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">rsetsize</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">objtype</span> <span class="ow">in</span> <span class="n">rtype</span><span class="o">.</span><span class="n">targets</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">e_schema</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">rsetsize</span> <span class="o">=</span> <span class="n">limit</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="n">result</span> <span class="o">+=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_relvoc_unrelated</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="n">objtype</span><span class="p">,</span> <span class="n">rsetsize</span><span class="p">,</span> <span class="n">done</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">limit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">limit</span><span class="p">:</span>
+                <span class="k">break</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span> <span class="nf">_relvoc_unrelated</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">targettype</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span> <span class="n">done</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return unrelated entities for a given relation and target entity type</span>
+<span class="sd">        for use in vocabulary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">done</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">done</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">entity</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">edited_entity</span>
+        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entity</span><span class="o">.</span><span class="n">unrelated</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">targettype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span><span class="p">,</span> <span class="n">limit</span><span class="p">,</span>
+                                       <span class="n">lt_infos</span><span class="o">=</span><span class="n">form</span><span class="o">.</span><span class="n">linked_to</span><span class="p">)</span><span class="o">.</span><span class="n">entities</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">entity</span><span class="o">.</span><span class="n">eid</span> <span class="ow">in</span> <span class="n">done</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">done</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+            <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">entity</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="s1">&#39;combobox&#39;</span><span class="p">),</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">entity</span><span class="o">.</span><span class="n">eid</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="k">def</span> <span class="nf">format_single_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">unicode</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">process_form_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;process posted form and return correctly typed value&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">form</span><span class="o">.</span><span class="n">formvalues</span><span class="p">[(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">)]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_form_value</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+            <span class="c1"># if value is None, there are some remaining pending fields, we&#39;ll</span>
+            <span class="c1"># have to recompute this later -&gt; don&#39;t cache in formvalues</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">form</span><span class="o">.</span><span class="n">formvalues</span><span class="p">[(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">)]</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="k">return</span> <span class="n">value</span>
+
+    <span class="k">def</span> <span class="nf">_process_form_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">form</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;process posted form and return correctly typed value&quot;&quot;&quot;</span>
+        <span class="n">widget</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_widget</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">widget</span><span class="o">.</span><span class="n">process_field_data</span><span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">()</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="p">(</span><span class="n">values</span><span class="p">,)</span>
+        <span class="n">eids</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">rschema</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">rschema</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">eid</span> <span class="ow">or</span> <span class="n">eid</span> <span class="o">==</span> <span class="n">INTERNAL_FIELD_VALUE</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">typed_eid</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">actual_eid</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span>
+            <span class="c1"># if entity doesn&#39;t exist yet</span>
+            <span class="k">if</span> <span class="n">typed_eid</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="c1"># inlined relations of to-be-created **subject entities** have</span>
+                <span class="c1"># to be handled separatly</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">role</span> <span class="o">==</span> <span class="s1">&#39;object&#39;</span> <span class="ow">and</span> <span class="n">rschema</span><span class="o">.</span><span class="n">inlined</span><span class="p">:</span>
+                    <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;pending_inlined&#39;</span><span class="p">][</span><span class="n">eid</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span> <span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> <span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">form</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;pending_others&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span> <span class="p">(</span><span class="n">form</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span> <span class="p">)</span>
+                <span class="k">return</span> <span class="bp">None</span>
+            <span class="n">eids</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">typed_eid</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">eids</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">no_value</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return True if the value can be considered as no value for the field&quot;&quot;&quot;</span>
+        <span class="c1"># value is None is the &#39;not yet ready value, consider the empty set</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">value</span>
+
+
+<span class="n">_AFF_KWARGS</span> <span class="o">=</span> <span class="n">uicfg</span><span class="o">.</span><span class="n">autoform_field_kwargs</span>
+
+<span class="k">def</span> <span class="nf">guess_field</span><span class="p">(</span><span class="n">eschema</span><span class="p">,</span> <span class="n">rschema</span><span class="p">,</span> <span class="n">role</span><span class="o">=</span><span class="s1">&#39;subject&#39;</span><span class="p">,</span> <span class="n">req</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;This function return the most adapted field to edit the given relation</span>
+<span class="sd">    (`rschema`) where the given entity type (`eschema`) is the subject or object</span>
+<span class="sd">    (`role`).</span>
+
+<span class="sd">    The field is initialized according to information found in the schema,</span>
+<span class="sd">    though any value can be explicitly specified using `kwargs`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">fieldclass</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">rdef</span> <span class="o">=</span> <span class="n">eschema</span><span class="o">.</span><span class="n">rdef</span><span class="p">(</span><span class="n">rschema</span><span class="p">,</span> <span class="n">role</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">role</span> <span class="o">==</span> <span class="s1">&#39;subject&#39;</span><span class="p">:</span>
+        <span class="n">targetschema</span> <span class="o">=</span> <span class="n">rdef</span><span class="o">.</span><span class="n">object</span>
+        <span class="k">if</span> <span class="n">rschema</span><span class="o">.</span><span class="n">final</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rdef</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;internationalizable&#39;</span><span class="p">):</span>
+                <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;internationalizable&#39;</span><span class="p">,</span> <span class="bp">True</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">targetschema</span> <span class="o">=</span> <span class="n">rdef</span><span class="o">.</span><span class="n">subject</span>
+    <span class="n">card</span> <span class="o">=</span> <span class="n">rdef</span><span class="o">.</span><span class="n">role_cardinality</span><span class="p">(</span><span class="n">role</span><span class="p">)</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rschema</span><span class="o">.</span><span class="n">type</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;role&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">role</span>
+    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;eidparam&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;required&#39;</span><span class="p">,</span> <span class="n">card</span> <span class="ow">in</span> <span class="s1">&#39;1+&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">role</span> <span class="o">==</span> <span class="s1">&#39;object&#39;</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">eschema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">rschema</span><span class="o">.</span><span class="n">type</span> <span class="o">+</span> <span class="s1">&#39;_object&#39;</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;label&#39;</span><span class="p">,</span> <span class="p">(</span><span class="n">eschema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">rschema</span><span class="o">.</span><span class="n">type</span><span class="p">))</span>
+    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;help&#39;</span><span class="p">,</span> <span class="n">rdef</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">rschema</span><span class="o">.</span><span class="n">final</span><span class="p">:</span>
+        <span class="n">fieldclass</span> <span class="o">=</span> <span class="n">FIELDS</span><span class="p">[</span><span class="n">targetschema</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">fieldclass</span> <span class="ow">is</span> <span class="n">StringField</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">eschema</span><span class="o">.</span><span class="n">has_metadata</span><span class="p">(</span><span class="n">rschema</span><span class="p">,</span> <span class="s1">&#39;format&#39;</span><span class="p">):</span>
+                <span class="c1"># use RichTextField instead of StringField if the attribute has</span>
+                <span class="c1"># a &quot;format&quot; metadata. But getting information from constraints</span>
+                <span class="c1"># may be useful anyway...</span>
+                <span class="k">for</span> <span class="n">cstr</span> <span class="ow">in</span> <span class="n">rdef</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cstr</span><span class="p">,</span> <span class="n">StaticVocabularyConstraint</span><span class="p">):</span>
+                        <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;rich text field with static vocabulary&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">RichTextField</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="c1"># init StringField parameters according to constraints</span>
+            <span class="k">for</span> <span class="n">cstr</span> <span class="ow">in</span> <span class="n">rdef</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cstr</span><span class="p">,</span> <span class="n">StaticVocabularyConstraint</span><span class="p">):</span>
+                    <span class="n">kwargs</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">&#39;choices&#39;</span><span class="p">,</span> <span class="n">cstr</span><span class="o">.</span><span class="n">vocabulary</span><span class="p">)</span>
+                    <span class="k">break</span>
+            <span class="k">for</span> <span class="n">cstr</span> <span class="ow">in</span> <span class="n">rdef</span><span class="o">.</span><span class="n">constraints</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cstr</span><span class="p">,</span> <span class="n">SizeConstraint</span><span class="p">)</span> <span class="ow">and</span> <span class="n">cstr</span><span class="o">.</span><span class="n">max</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;max_length&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cstr</span><span class="o">.</span><span class="n">max</span>
+            <span class="k">return</span> <span class="n">StringField</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fieldclass</span> <span class="ow">is</span> <span class="n">FileField</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">req</span><span class="p">:</span>
+                <span class="n">aff_kwargs</span> <span class="o">=</span> <span class="n">req</span><span class="o">.</span><span class="n">vreg</span><span class="p">[</span><span class="s1">&#39;uicfg&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="s1">&#39;autoform_field_kwargs&#39;</span><span class="p">,</span> <span class="n">req</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">aff_kwargs</span> <span class="o">=</span> <span class="n">_AFF_KWARGS</span>
+            <span class="k">for</span> <span class="n">metadata</span> <span class="ow">in</span> <span class="n">KNOWN_METAATTRIBUTES</span><span class="p">:</span>
+                <span class="n">metaschema</span> <span class="o">=</span> <span class="n">eschema</span><span class="o">.</span><span class="n">has_metadata</span><span class="p">(</span><span class="n">rschema</span><span class="p">,</span> <span class="n">metadata</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">metaschema</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">metakwargs</span> <span class="o">=</span> <span class="n">aff_kwargs</span><span class="o">.</span><span class="n">etype_get</span><span class="p">(</span><span class="n">eschema</span><span class="p">,</span> <span class="n">metaschema</span><span class="p">,</span> <span class="s1">&#39;subject&#39;</span><span class="p">)</span>
+                    <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_field&#39;</span> <span class="o">%</span> <span class="n">metadata</span><span class="p">]</span> <span class="o">=</span> <span class="n">guess_field</span><span class="p">(</span><span class="n">eschema</span><span class="p">,</span> <span class="n">metaschema</span><span class="p">,</span>
+                                                                <span class="n">req</span><span class="o">=</span><span class="n">req</span><span class="p">,</span> <span class="o">**</span><span class="n">metakwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">fieldclass</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">RelationField</span><span class="o">.</span><span class="n">fromcardinality</span><span class="p">(</span><span class="n">card</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="n">FIELDS</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;String&#39;</span> <span class="p">:</span>  <span class="n">StringField</span><span class="p">,</span>
+    <span class="s1">&#39;Bytes&#39;</span><span class="p">:</span>    <span class="n">FileField</span><span class="p">,</span>
+    <span class="s1">&#39;Password&#39;</span><span class="p">:</span> <span class="n">PasswordField</span><span class="p">,</span>
+
+    <span class="s1">&#39;Boolean&#39;</span><span class="p">:</span>  <span class="n">BooleanField</span><span class="p">,</span>
+    <span class="s1">&#39;Int&#39;</span><span class="p">:</span>      <span class="n">IntField</span><span class="p">,</span>
+    <span class="s1">&#39;BigInt&#39;</span><span class="p">:</span>   <span class="n">BigIntField</span><span class="p">,</span>
+    <span class="s1">&#39;Float&#39;</span><span class="p">:</span>    <span class="n">FloatField</span><span class="p">,</span>
+    <span class="s1">&#39;Decimal&#39;</span><span class="p">:</span>  <span class="n">StringField</span><span class="p">,</span>
+
+    <span class="s1">&#39;Date&#39;</span><span class="p">:</span>       <span class="n">DateField</span><span class="p">,</span>
+    <span class="s1">&#39;Datetime&#39;</span><span class="p">:</span>   <span class="n">DateTimeField</span><span class="p">,</span>
+    <span class="s1">&#39;TZDatetime&#39;</span><span class="p">:</span> <span class="n">DateTimeField</span><span class="p">,</span>
+    <span class="s1">&#39;Time&#39;</span><span class="p">:</span>       <span class="n">TimeField</span><span class="p">,</span>
+    <span class="s1">&#39;TZTime&#39;</span><span class="p">:</span>     <span class="n">TimeField</span><span class="p">,</span>
+    <span class="s1">&#39;Interval&#39;</span><span class="p">:</span>   <span class="n">TimeIntervalField</span><span class="p">,</span>
+    <span class="p">}</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer">
+    </div>
+  </div>
+  
+</div>
+
+<div class="footer">
+    &copy; 2015, NSAp developers &lt;antoine.grigis@cea.fr&gt;.
+</div>
+  </body>
+</html>

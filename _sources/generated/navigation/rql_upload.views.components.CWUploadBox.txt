@@ -1,0 +1,58 @@
+:orphan:
+
+rql_upload.views.components.CWUploadBox
+=======================================
+
+.. currentmodule:: rql_upload.views.components
+
+.. autoclass:: CWUploadBox
+    :members:
+    :private-members:
+    :special-members: __module__, __regid__, __call__
+    :undoc-members:
+    
+    .. automethod:: __init__
+    
+    .. rubric:: Methods
+    .. autosummary::
+    
+      ~CWUploadBox.__init__
+      ~CWUploadBox.action_link
+      ~CWUploadBox.append
+      ~CWUploadBox.critical
+      ~CWUploadBox.cw_propval
+      ~CWUploadBox.debug
+      ~CWUploadBox.error
+      ~CWUploadBox.exception
+      ~CWUploadBox.info
+      ~CWUploadBox.init_rendering
+      ~CWUploadBox.layout_render
+      ~CWUploadBox.layout_select_args
+      ~CWUploadBox.link
+      ~CWUploadBox.render
+      ~CWUploadBox.render_body
+      ~CWUploadBox.render_items
+      ~CWUploadBox.render_title
+      ~CWUploadBox.separator
+      ~CWUploadBox.warning
+    
+    
+    
+    
+    .. rubric:: Attributes
+    .. autosummary::
+    
+      ~CWUploadBox.categories_in_order
+      ~CWUploadBox.context
+      ~CWUploadBox.contextual
+      ~CWUploadBox.cssclass
+      ~CWUploadBox.cw_property_defs
+      ~CWUploadBox.domid
+      ~CWUploadBox.layout_args
+      ~CWUploadBox.layout_id
+      ~CWUploadBox.order
+      ~CWUploadBox.title
+      ~CWUploadBox.visible
+    
+    
+

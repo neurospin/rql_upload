@@ -1,0 +1,80 @@
+:orphan:
+
+rql_upload.views.cwupload.CWUploadForm
+======================================
+
+.. currentmodule:: rql_upload.views.cwupload
+
+.. autoclass:: CWUploadForm
+    :members:
+    :private-members:
+    :special-members: __module__, __regid__, __call__
+    :undoc-members:
+    
+    .. automethod:: __init__
+    
+    .. rubric:: Methods
+    .. autosummary::
+    
+      ~CWUploadForm.__init__
+      ~CWUploadForm.add_hidden
+      ~CWUploadForm.add_media
+      ~CWUploadForm.append_field
+      ~CWUploadForm.build_context
+      ~CWUploadForm.critical
+      ~CWUploadForm.cw_propval
+      ~CWUploadForm.debug
+      ~CWUploadForm.default_renderer
+      ~CWUploadForm.error
+      ~CWUploadForm.exception
+      ~CWUploadForm.field_by_name
+      ~CWUploadForm.field_error
+      ~CWUploadForm.fields_by_name
+      ~CWUploadForm.form_action
+      ~CWUploadForm.info
+      ~CWUploadForm.insert_field_after
+      ~CWUploadForm.insert_field_before
+      ~CWUploadForm.iter_modified_fields
+      ~CWUploadForm.process_posted
+      ~CWUploadForm.remaining_errors
+      ~CWUploadForm.remove_field
+      ~CWUploadForm.render
+      ~CWUploadForm.restore_previous_post
+      ~CWUploadForm.session_key
+      ~CWUploadForm.set_message
+      ~CWUploadForm.warning
+    
+    
+    
+    
+    .. rubric:: Attributes
+    .. autosummary::
+    
+      ~CWUploadForm.action
+      ~CWUploadForm.autocomplete
+      ~CWUploadForm.control_fields
+      ~CWUploadForm.copy_nav_params
+      ~CWUploadForm.cssclass
+      ~CWUploadForm.cssstyle
+      ~CWUploadForm.cwtarget
+      ~CWUploadForm.domid
+      ~CWUploadForm.fieldsets_in_order
+      ~CWUploadForm.force_session_key
+      ~CWUploadForm.form_buttons
+      ~CWUploadForm.form_previous_values
+      ~CWUploadForm.form_renderer_id
+      ~CWUploadForm.form_valerror
+      ~CWUploadForm.formvalues
+      ~CWUploadForm.needs_css
+      ~CWUploadForm.needs_js
+      ~CWUploadForm.needs_multipart
+      ~CWUploadForm.onsubmit
+      ~CWUploadForm.parent_form
+      ~CWUploadForm.posting
+      ~CWUploadForm.redirect_path
+      ~CWUploadForm.root_form
+      ~CWUploadForm.title
+      ~CWUploadForm.upload_title
+    
+    
+

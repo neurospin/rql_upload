@@ -1,0 +1,43 @@
+:orphan:
+
+rql_upload.schema.UploadFile
+============================
+
+.. currentmodule:: rql_upload.schema
+
+.. autoclass:: UploadFile
+    :members:
+    :private-members:
+    :special-members: __module__, __regid__, __call__
+    :undoc-members:
+    
+    .. automethod:: __init__
+    
+    .. rubric:: Methods
+    .. autosummary::
+    
+      ~UploadFile.__init__
+      ~UploadFile.add_relation
+      ~UploadFile.expand_relation_definitions
+      ~UploadFile.expand_type_definitions
+      ~UploadFile.extend
+      ~UploadFile.get_permissions
+      ~UploadFile.get_relation
+      ~UploadFile.get_relations
+      ~UploadFile.insert_relation_after
+      ~UploadFile.remove_relation
+      ~UploadFile.set_permissions
+    
+    
+    
+    
+    .. rubric:: Attributes
+    .. autosummary::
+    
+      ~UploadFile.description
+      ~UploadFile.meta
+      ~UploadFile.package
+      ~UploadFile.specialized_by
+    
+    
+

@@ -1,0 +1,47 @@
+:orphan:
+
+rql_upload.hooks.UploadHook
+===========================
+
+.. currentmodule:: rql_upload.hooks
+
+.. autoclass:: UploadHook
+    :members:
+    :private-members:
+    :special-members: __module__, __regid__, __call__
+    :undoc-members:
+    
+    .. automethod:: __init__
+    
+    .. rubric:: Methods
+    .. autosummary::
+    
+      ~UploadHook.__init__
+      ~UploadHook.check_events
+      ~UploadHook.critical
+      ~UploadHook.cw_propval
+      ~UploadHook.debug
+      ~UploadHook.error
+      ~UploadHook.exception
+      ~UploadHook.filterable_selectors
+      ~UploadHook.info
+      ~UploadHook.warning
+    
+    
+    
+    
+    .. rubric:: Attributes
+    .. autosummary::
+    
+      ~UploadHook.category
+      ~UploadHook.eidfrom
+      ~UploadHook.eidto
+      ~UploadHook.entity
+      ~UploadHook.events
+      ~UploadHook.known_args
+      ~UploadHook.order
+      ~UploadHook.repo
+      ~UploadHook.rtype
+    
+    
+

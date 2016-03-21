@@ -1,0 +1,387 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+    <title>RQL Upload &mdash; Rql upload</title>
+  <!-- htmltitle is before nature.css - we use this hack to load bootstrap first -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../../_static/css/bootstrap.min.css" media="screen" />
+  <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive.css"/>
+
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Rql upload" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+  
+   
+       <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../../../_static/js/bootstrap.min.js" type="text/javascript"></script>
+  <!-- <link rel="canonical" href="https://bioproj.extra.cea.fr/redmine/projects/nsap/_modules/rql_upload/views/cwupload.html" /> -->
+
+  <script type="text/javascript">
+    $("div.buttonNext, div.buttonPrevious").hover(
+       function () {
+           $(this).css('background-color', '#FF9C34');
+       },
+       function () {
+           $(this).css('background-color', '#A7D6E2');
+       }
+    );
+    var bodywrapper = $('.bodywrapper');
+    var sidebarbutton = $('#sidebarbutton');
+    sidebarbutton.css({'height': '900px'});
+  </script>
+
+  </head>
+  <body role="document">
+
+<div class="header-wrapper">
+  <div class="header">
+    <p class="logo">
+      <a href="../../../index.html">
+        <img src="../../../_static/nsap.png" alt="Logo"/>
+      </a>
+    </p><div class="navbar">
+      <ul>
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../../installation.html">Installation</a></li>
+        <li class="btn-li">
+          <div class="btn-group">
+		    <a href="../../../documentation.html">Documentation</a>
+		    <a class="btn dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </a>
+		    <ul class="dropdown-menu">
+	          <li class="link-title">RQL Upload</li>
+			  <li class="divider"></li>
+			  <li><a href="../../../schema.html">Schema modifications</a></li>
+			  <li><a href="../../../view.html">Views</a></li>
+			  <li class="divider"></li>
+		    </ul>
+		  </div>
+        </li>
+        <li><a href="http://neurospin-wiki.org/">NeuroSpin Wiki</a></li>
+      </ul>
+    </div> <!-- end navbar --></div>
+</div>
+
+
+<div class="content-wrapper">
+    <div class="sphinxsidebar">
+      <div class="sphinxsidebarwrapper">
+
+        <!-- info setup -->
+          <p class="doc-version">
+           This documentation is for Rql Upload <strong>version 2.0.0</strong>
+          </p>
+        <p class="citing">
+          If you use the software, please do not hesitate to
+          <a href="https://github.com/neurospin/rql_upload">report a bug</a>.
+        </p>
+
+      <!-- toc tree -->
+      
+
+      </div>
+    </div>
+  
+
+  <div class="content">
+      
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for rql_upload.views.cwupload</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/env python</span>
+<span class="c1">##########################################################################</span>
+<span class="c1"># NSAp - Copyright (C) CEA, 2013</span>
+<span class="c1"># Distributed under the terms of the CeCILL-B license, as published by</span>
+<span class="c1"># the CEA-CNRS-INRIA. Refer to the LICENSE file or to</span>
+<span class="c1"># http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html</span>
+<span class="c1"># for details.</span>
+<span class="c1">##########################################################################</span>
+
+<span class="c1"># System import</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">re</span>
+
+<span class="c1"># CW import</span>
+<span class="kn">from</span> <span class="nn">cgi</span> <span class="kn">import</span> <span class="n">parse_qs</span>
+<span class="kn">from</span> <span class="nn">logilab.mtconverter</span> <span class="kn">import</span> <span class="n">xml_escape</span>
+<span class="kn">from</span> <span class="nn">logilab.common.decorators</span> <span class="kn">import</span> <span class="n">monkeypatch</span>
+<span class="kn">from</span> <span class="nn">cubicweb</span> <span class="kn">import</span> <span class="n">Binary</span>
+<span class="kn">from</span> <span class="nn">cubicweb.view</span> <span class="kn">import</span> <span class="n">View</span>
+<span class="kn">from</span> <span class="nn">cubicweb.web</span> <span class="kn">import</span> <span class="n">Redirect</span>
+<span class="kn">from</span> <span class="nn">cubicweb.web</span> <span class="kn">import</span> <span class="n">formfields</span>
+<span class="kn">from</span> <span class="nn">cubicweb.web</span> <span class="kn">import</span> <span class="n">formwidgets</span>
+<span class="kn">from</span> <span class="nn">cubicweb.web</span> <span class="kn">import</span> <span class="n">RequestError</span>
+<span class="kn">from</span> <span class="nn">cubicweb.web.views.forms</span> <span class="kn">import</span> <span class="n">FieldsForm</span>
+<span class="kn">from</span> <span class="nn">cubicweb.web.views.formrenderers</span> <span class="kn">import</span> <span class="n">FormRenderer</span>
+
+<span class="c1"># RQL UPLOAD import</span>
+<span class="kn">from</span> <span class="nn">.utils</span> <span class="kn">import</span> <span class="n">load_forms</span>
+<span class="kn">from</span> <span class="nn">.formfields</span> <span class="kn">import</span> <span class="n">DECLARED_FIELDS</span>
+
+
+<span class="c1">###############################################################################</span>
+<span class="c1"># CWSearch Widgets</span>
+<span class="c1">###############################################################################</span>
+
+<div class="viewcode-block" id="CWUploadForm"><a class="viewcode-back" href="../../../generated/form/rql_upload.views.cwupload.CWUploadForm.html#rql_upload.views.cwupload.CWUploadForm">[docs]</a><span class="k">class</span> <span class="nc">CWUploadForm</span><span class="p">(</span><span class="n">FieldsForm</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Create a submit button.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__regid__</span> <span class="o">=</span> <span class="s2">&quot;upload-form&quot;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Upload form&quot;</span><span class="p">)</span>
+
+    <span class="n">form_buttons</span> <span class="o">=</span> <span class="p">[</span><span class="n">formwidgets</span><span class="o">.</span><span class="n">SubmitButton</span><span class="p">(</span><span class="n">cwaction</span><span class="o">=</span><span class="s2">&quot;apply&quot;</span><span class="p">)]</span>
+    <span class="n">upload_title</span> <span class="o">=</span> <span class="n">formfields</span><span class="o">.</span><span class="n">StringField</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s2">&quot;upload_title&quot;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Title&quot;</span><span class="p">,</span> <span class="n">required</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="s2">&quot;&lt;unique&gt;&quot;</span><span class="p">)</span></div>
+
+
+<span class="nd">@monkeypatch</span><span class="p">(</span><span class="n">FormRenderer</span><span class="p">)</span>
+<div class="viewcode-block" id="render_content"><a class="viewcode-back" href="../../../generated/form/rql_upload.views.cwupload.render_content.html#rql_upload.views.cwupload.render_content">[docs]</a><span class="k">def</span> <span class="nf">render_content</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">w</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Overwrite the original processing message when the upload is running.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">display_progress_div</span><span class="p">:</span>
+        <span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;div id=&quot;progress&quot; class=&quot;alert alert-warning&quot;&gt;&#39;</span><span class="p">)</span>
+        <span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;img width=&quot;50&quot; src=&quot;{0}&quot;/&gt;&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+              <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">build_url</span><span class="p">(</span><span class="s1">&#39;data/images/uploading.gif&#39;</span><span class="p">)))</span>
+        <span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;b&gt;Work in progress, please wait ...&lt;/b&gt;&#39;</span><span class="p">)</span>
+        <span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+
+    <span class="bp">self</span><span class="o">.</span><span class="n">render_fields</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">form</span><span class="p">,</span> <span class="n">values</span><span class="p">)</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">render_buttons</span><span class="p">(</span><span class="n">w</span><span class="p">,</span> <span class="n">form</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CWUploadView"><a class="viewcode-back" href="../../../generated/form/rql_upload.views.cwupload.CWUploadView.html#rql_upload.views.cwupload.CWUploadView">[docs]</a><span class="k">class</span> <span class="nc">CWUploadView</span><span class="p">(</span><span class="n">View</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Custom view to edit the form generated from the instance</span>
+<span class="sd">    configuration file.</span>
+
+<span class="sd">    .. note::</span>
+
+<span class="sd">        The authorized form fields are defined in the global parameter</span>
+<span class="sd">        &#39;DECLARED_FIELDS&#39; that can be found in the</span>
+<span class="sd">        &#39;rql_upload.views.formfields.formfields&#39; module.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__regid__</span> <span class="o">=</span> <span class="s2">&quot;upload-view&quot;</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">_</span><span class="p">(</span><span class="s2">&quot;Upload form&quot;</span><span class="p">)</span>
+
+    <span class="n">bool_map</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;True&quot;</span><span class="p">:</span> <span class="bp">True</span><span class="p">,</span>
+        <span class="s2">&quot;False&quot;</span><span class="p">:</span> <span class="bp">False</span>
+    <span class="p">}</span>
+
+<div class="viewcode-block" id="CWUploadView.call"><a class="viewcode-back" href="../../../generated/form/rql_upload.views.cwupload.CWUploadView.html#rql_upload.views.cwupload.CWUploadView.call">[docs]</a>    <span class="k">def</span> <span class="nf">call</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Create the form fields.</span>
+
+<span class="sd">        .. note::</span>
+
+<span class="sd">            At upload, all field inputs are checked to match the &#39;check_value&#39; </span>
+<span class="sd">            regular expressions defined in the &#39;upload_structure_json&#39; instance</span>
+<span class="sd">            parameter.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Get some parameters</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">relative_path</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;?&quot;</span> <span class="ow">in</span> <span class="n">path</span><span class="p">:</span>
+            <span class="n">path</span><span class="p">,</span> <span class="n">param</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;?&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">parse_qs</span><span class="p">(</span><span class="n">param</span><span class="p">))</span>
+        <span class="n">form_name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s2">&quot;form_name&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="c1"># Get the form fields from configuration file</span>
+        <span class="n">config</span> <span class="o">=</span> <span class="n">load_forms</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">config</span><span class="p">)</span>
+
+        <span class="c1"># Create a structure to store values that must be checked before the </span>
+        <span class="c1"># insertion in the data base</span>
+        <span class="n">check_struct</span> <span class="o">=</span> <span class="p">{}</span>
+    
+        <span class="c1"># If json file missing, generate error page</span>
+        <span class="k">if</span> <span class="n">config</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;div class=&quot;panel panel-danger&quot;&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;div class=&quot;panel-heading&quot;&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;h2 class=&quot;panel-title&quot;&gt;ERROR&lt;/h2&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;div class=&quot;panel-body&quot;&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s2">u&quot;&lt;h3&gt;Configuration file not found&lt;/h3&gt;&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s2">u&quot;Check that the path &#39;upload_structure_json&#39; &quot;</span>
+                    <span class="s2">&quot;declared in all-in-one.conf file is set.&lt;br&gt;&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s2">u&quot;Then check that the path declared &quot;</span>
+                    <span class="s2">&quot;(current path:&#39;{0}&#39;) corresponds to a &quot;</span>
+                    <span class="s2">&quot;json file and restart the instance.&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;upload_structure_json&quot;</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1"># If json can&#39;t be read, generate error page</span>
+        <span class="k">if</span> <span class="n">config</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;div class=&quot;panel panel-danger&quot;&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;div class=&quot;panel-heading&quot;&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;h2 class=&quot;panel-title&quot;&gt;ERROR&lt;/h2&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;div class=&quot;panel-body&quot;&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s2">u&quot;&lt;h3&gt;Configuration unknown&lt;/h3&gt;&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s2">u&quot;The json file configuring the form can&#39;t be &quot;</span>
+                    <span class="s2">&quot;read: {0}&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;upload_structure_json&quot;</span><span class="p">]))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+
+        <span class="c1"># Create the form       </span>
+        <span class="n">form</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="p">[</span><span class="s2">&quot;forms&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">select</span><span class="p">(</span>
+            <span class="s2">&quot;upload-form&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">form_name</span><span class="o">=</span><span class="n">form_name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">config</span><span class="p">[</span><span class="n">form_name</span><span class="p">]:</span>
+                <span class="n">field_type</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">field_type</span> <span class="o">==</span> <span class="s2">&quot;BooleanField&quot;</span> <span class="ow">and</span> <span class="s2">&quot;value&quot;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
+                    <span class="n">field</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bool_map</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="s2">&quot;value&quot;</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="s2">&quot;required&quot;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
+                    <span class="n">field</span><span class="p">[</span><span class="s2">&quot;required&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bool_map</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="s2">&quot;required&quot;</span><span class="p">]]</span>
+                <span class="k">if</span> <span class="s2">&quot;check_value&quot;</span> <span class="ow">in</span> <span class="n">field</span><span class="p">:</span>
+                    <span class="n">check_struct</span><span class="p">[</span><span class="n">field</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;check_value&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">field_type</span> <span class="o">==</span> <span class="s2">&quot;FileField&quot;</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;upload_directory&quot;</span><span class="p">]):</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s2">u&quot;&lt;p class=&#39;label label-danger&#39;&gt;{0}: File &quot;</span>
+                                <span class="s2">&quot;field can&#39;t&quot;</span>
+                                <span class="s2">&quot; be used because the  &#39;upload_directory&#39; &quot;</span>
+                                <span class="s2">&quot;has not been set in all-in-ine.conf file or its&quot;</span>
+                                <span class="s2">&quot; path cannot be created ({1})&lt;/p&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">field</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s2">&quot;label&quot;</span><span class="p">),</span>
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;upload_directory&quot;</span><span class="p">]))</span>
+                        <span class="k">continue</span>
+                <span class="c1"># Get the declared field and add it to the form</span>
+                <span class="k">if</span> <span class="n">field_type</span> <span class="ow">in</span> <span class="n">DECLARED_FIELDS</span><span class="p">:</span>
+                    <span class="n">form</span><span class="o">.</span><span class="n">append_field</span><span class="p">(</span><span class="n">DECLARED_FIELDS</span><span class="p">[</span><span class="n">field_type</span><span class="p">](</span><span class="o">**</span><span class="n">field</span><span class="p">))</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span>
+                        <span class="s2">u&quot;&lt;p class=&#39;label label-danger&#39;&gt;&#39;{0}&#39;: Unknown field &quot;</span>
+                         <span class="s2">&quot;&lt;/p&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">field_type</span><span class="p">))</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;div class=&quot;panel panel-danger&quot;&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;div class=&quot;panel-heading&quot;&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;h2 class=&quot;panel-title&quot;&gt;ERROR&lt;/h2&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;div class=&quot;panel-body&quot;&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s2">u&quot;&lt;h3&gt;Configuration file syntax error&lt;/h3&gt;&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s2">u&quot;The configuration file can&#39;t be read&lt;br&gt;&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s2">u&quot;Please refer to the documentation and make corrections&quot;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s1">u&#39;&lt;/div&gt;&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+            
+                
+        <span class="c1"># Form processings</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">posted</span> <span class="o">=</span> <span class="n">form</span><span class="o">.</span><span class="n">process_posted</span><span class="p">()</span>
+
+            <span class="c1"># Get the form parameters</span>
+            <span class="n">inline_params</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="n">deported_params</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">field_value</span> <span class="ow">in</span> <span class="n">posted</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>                  
+
+                <span class="c1"># Filter fields stored in the db or deported on the filesystem</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field_value</span><span class="p">,</span> <span class="n">Binary</span><span class="p">):</span>
+                    <span class="c1"># Check if the field value is valid</span>
+                    <span class="k">if</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">check_struct</span><span class="p">:</span>
+                        <span class="n">file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="n">field_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">check_struct</span><span class="p">[</span><span class="n">field_name</span><span class="p">],</span>
+                                    <span class="n">file_name</span><span class="p">)</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="n">RequestError</span><span class="p">(</span>
+                                <span class="s2">&quot;Find wrong file name &#39;{0}&#39; while searching &quot;</span>
+                                <span class="s2">&quot;for pattern &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">file_name</span><span class="p">,</span> <span class="n">check_struct</span><span class="p">[</span><span class="n">field_name</span><span class="p">]))</span>
+
+                    <span class="c1"># Add fs item</span>
+                    <span class="n">deported_params</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field_value</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Check if the field value is valid</span>
+                    <span class="k">if</span> <span class="n">field_name</span> <span class="ow">in</span> <span class="n">check_struct</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">check_struct</span><span class="p">[</span><span class="n">field_name</span><span class="p">],</span>
+                                    <span class="nb">str</span><span class="p">(</span><span class="n">field_value</span><span class="p">))</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                            <span class="k">raise</span> <span class="n">RequestError</span><span class="p">(</span>
+                                <span class="s2">&quot;Find wrong parameter value &#39;{0}&#39; while &quot;</span>
+                                <span class="s2">&quot;searching for pattern &#39;{1}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+                                    <span class="n">field_value</span><span class="p">,</span> <span class="n">check_struct</span><span class="p">[</span><span class="n">field_name</span><span class="p">]))</span>
+
+                    <span class="c1"># Add db item</span>
+                    <span class="n">inline_params</span><span class="p">[</span><span class="n">field_name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">field_value</span><span class="p">)</span>
+
+            <span class="c1"># Get the eid of the current user</span>
+            <span class="n">user_eid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+                <span class="s2">&quot;Any X Where X is CWUser, X login &quot;</span>
+                <span class="s2">&quot;&#39;{0}&#39;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">session</span><span class="o">.</span><span class="n">login</span><span class="p">))[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="c1"># Save the inline parameters in an UploadForm entity</span>
+            <span class="n">form_eid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">create_entity</span><span class="p">(</span>
+                <span class="s2">&quot;UploadForm&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">Binary</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">inline_params</span><span class="p">)),</span>
+                <span class="n">data_format</span><span class="o">=</span><span class="s2">u&quot;text/json&quot;</span><span class="p">,</span> <span class="n">data_name</span><span class="o">=</span><span class="s2">u&quot;form.json&quot;</span><span class="p">,</span>
+                <span class="n">uploaded_by</span><span class="o">=</span><span class="n">user_eid</span><span class="p">)</span><span class="o">.</span><span class="n">eid</span>
+
+            <span class="c1"># Save deported parameters in UploadFile entities</span>
+            <span class="n">upload_file_eids</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">field_name</span><span class="p">,</span> <span class="n">field_value</span> <span class="ow">in</span> <span class="n">deported_params</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="n">file_name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">form</span><span class="p">[</span><span class="n">field_name</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">basename</span><span class="p">,</span> <span class="n">extension</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">file_name</span><span class="p">)</span>
+                <span class="n">upload_file_eids</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">create_entity</span><span class="p">(</span>
+                    <span class="s2">&quot;UploadFile&quot;</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">field_value</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="nb">unicode</span><span class="p">(</span><span class="n">basename</span><span class="p">),</span>
+                    <span class="n">data_extension</span><span class="o">=</span><span class="nb">unicode</span><span class="p">(</span><span class="n">extension</span><span class="p">[</span><span class="mi">1</span><span class="p">:]),</span>
+                    <span class="n">data_name</span><span class="o">=</span><span class="nb">unicode</span><span class="p">(</span><span class="n">file_name</span><span class="p">),</span> <span class="n">uploaded_by</span><span class="o">=</span><span class="n">user_eid</span><span class="p">)</span><span class="o">.</span><span class="n">eid</span><span class="p">)</span>
+
+            <span class="c1"># Create the CWUpload entity</span>
+            <span class="n">upload_eid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">create_entity</span><span class="p">(</span>
+                <span class="s2">&quot;CWUpload&quot;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="nb">unicode</span><span class="p">(</span><span class="n">inline_params</span><span class="p">[</span><span class="s2">&quot;upload_title&quot;</span><span class="p">]),</span>
+                <span class="n">form_name</span><span class="o">=</span><span class="nb">unicode</span><span class="p">(</span><span class="n">form_name</span><span class="p">),</span> <span class="n">result_form</span><span class="o">=</span><span class="n">form_eid</span><span class="p">,</span>
+                <span class="n">result_data</span><span class="o">=</span><span class="n">upload_file_eids</span><span class="p">,</span> <span class="n">uploaded_by</span><span class="o">=</span><span class="n">user_eid</span><span class="p">)</span><span class="o">.</span><span class="n">eid</span>
+            
+            <span class="c1"># Redirection to the created CWUpload entity</span>
+            <span class="k">raise</span> <span class="n">Redirect</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">build_url</span><span class="p">(</span><span class="n">eid</span><span class="o">=</span><span class="n">upload_eid</span><span class="p">))</span>
+        <span class="k">except</span> <span class="n">RequestError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s2">u&quot;&lt;p class=&#39;label label-danger&#39;&gt;{0}&lt;/p&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">error</span><span class="p">))</span>
+
+        <span class="c1"># Form rendering</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">(</span><span class="s2">u&quot;&lt;legend&gt;&#39;{0}&#39; form&lt;/legend&gt;&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span>
+            <span class="n">form_name</span><span class="p">))</span>
+        
+        <span class="n">form</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">w</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">w</span><span class="p">,</span> <span class="n">formvalues</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">form</span><span class="p">)</span></div></div>
+
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer">
+    </div>
+  </div>
+  
+</div>
+
+<div class="footer">
+    &copy; 2015, NSAp developers &lt;antoine.grigis@cea.fr&gt;.
+</div>
+  </body>
+</html>

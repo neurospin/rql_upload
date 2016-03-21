@@ -1,0 +1,1150 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+    <title>RQL Upload &mdash; Rql upload</title>
+  <!-- htmltitle is before nature.css - we use this hack to load bootstrap first -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../../_static/css/bootstrap.min.css" media="screen" />
+  <link rel="stylesheet" href="../../../_static/css/bootstrap-responsive.css"/>
+
+    
+    <link rel="stylesheet" href="../../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../../_static/doctools.js"></script>
+    <link rel="top" title="Rql upload" href="../../../index.html" />
+    <link rel="up" title="Module code" href="../../index.html" />
+  
+   
+       <script type="text/javascript" src="../../../_static/sidebar.js"></script>
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../../../_static/js/bootstrap.min.js" type="text/javascript"></script>
+  <!-- <link rel="canonical" href="https://bioproj.extra.cea.fr/redmine/projects/nsap/_modules/cubicweb/server/hook.html" /> -->
+
+  <script type="text/javascript">
+    $("div.buttonNext, div.buttonPrevious").hover(
+       function () {
+           $(this).css('background-color', '#FF9C34');
+       },
+       function () {
+           $(this).css('background-color', '#A7D6E2');
+       }
+    );
+    var bodywrapper = $('.bodywrapper');
+    var sidebarbutton = $('#sidebarbutton');
+    sidebarbutton.css({'height': '900px'});
+  </script>
+
+  </head>
+  <body role="document">
+
+<div class="header-wrapper">
+  <div class="header">
+    <p class="logo">
+      <a href="../../../index.html">
+        <img src="../../../_static/nsap.png" alt="Logo"/>
+      </a>
+    </p><div class="navbar">
+      <ul>
+        <li><a href="../../../index.html">Home</a></li>
+        <li><a href="../../../installation.html">Installation</a></li>
+        <li class="btn-li">
+          <div class="btn-group">
+		    <a href="../../../documentation.html">Documentation</a>
+		    <a class="btn dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </a>
+		    <ul class="dropdown-menu">
+	          <li class="link-title">RQL Upload</li>
+			  <li class="divider"></li>
+			  <li><a href="../../../schema.html">Schema modifications</a></li>
+			  <li><a href="../../../view.html">Views</a></li>
+			  <li class="divider"></li>
+		    </ul>
+		  </div>
+        </li>
+        <li><a href="http://neurospin-wiki.org/">NeuroSpin Wiki</a></li>
+      </ul>
+    </div> <!-- end navbar --></div>
+</div>
+
+
+<div class="content-wrapper">
+    <div class="sphinxsidebar">
+      <div class="sphinxsidebarwrapper">
+
+        <!-- info setup -->
+          <p class="doc-version">
+           This documentation is for Rql Upload <strong>version 2.0.0</strong>
+          </p>
+        <p class="citing">
+          If you use the software, please do not hesitate to
+          <a href="https://github.com/neurospin/rql_upload">report a bug</a>.
+        </p>
+
+      <!-- toc tree -->
+      
+
+      </div>
+    </div>
+  
+
+  <div class="content">
+      
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for cubicweb.server.hook</h1><div class="highlight"><pre>
+<span></span><span class="c1"># copyright 2003-2014 LOGILAB S.A. (Paris, FRANCE), all rights reserved.</span>
+<span class="c1"># contact http://www.logilab.fr/ -- mailto:contact@logilab.fr</span>
+<span class="c1">#</span>
+<span class="c1"># This file is part of CubicWeb.</span>
+<span class="c1">#</span>
+<span class="c1"># CubicWeb is free software: you can redistribute it and/or modify it under the</span>
+<span class="c1"># terms of the GNU Lesser General Public License as published by the Free</span>
+<span class="c1"># Software Foundation, either version 2.1 of the License, or (at your option)</span>
+<span class="c1"># any later version.</span>
+<span class="c1">#</span>
+<span class="c1"># CubicWeb is distributed in the hope that it will be useful, but WITHOUT</span>
+<span class="c1"># ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS</span>
+<span class="c1"># FOR A PARTICULAR PURPOSE.  See the GNU Lesser General Public License for more</span>
+<span class="c1"># details.</span>
+<span class="c1">#</span>
+<span class="c1"># You should have received a copy of the GNU Lesser General Public License along</span>
+<span class="c1"># with CubicWeb.  If not, see &lt;http://www.gnu.org/licenses/&gt;.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Generalities</span>
+<span class="sd">------------</span>
+
+<span class="sd">Paraphrasing the `emacs`_ documentation, let us say that hooks are an important</span>
+<span class="sd">mechanism for customizing an application. A hook is basically a list of</span>
+<span class="sd">functions to be called on some well-defined occasion (this is called `running</span>
+<span class="sd">the hook`).</span>
+
+<span class="sd">.. _`emacs`: http://www.gnu.org/software/emacs/manual/html_node/emacs/Hooks.html</span>
+
+<span class="sd">Hooks</span>
+<span class="sd">~~~~~</span>
+
+<span class="sd">In |cubicweb|, hooks are subclasses of the :class:`~cubicweb.server.hook.Hook`</span>
+<span class="sd">class. They are selected over a set of pre-defined `events` (and possibly more</span>
+<span class="sd">conditions, hooks being selectable appobjects like views and components).  They</span>
+<span class="sd">should implement a :meth:`~cubicweb.server.hook.Hook.__call__` method that will</span>
+<span class="sd">be called when the hook is triggered.</span>
+
+<span class="sd">There are two families of events: data events (before / after any individual</span>
+<span class="sd">update of an entity / or a relation in the repository) and server events (such</span>
+<span class="sd">as server startup or shutdown).  In a typical application, most of the hooks are</span>
+<span class="sd">defined over data events.</span>
+
+<span class="sd">Also, some :class:`~cubicweb.server.hook.Operation` may be registered by hooks,</span>
+<span class="sd">which will be fired when the transaction is commited or rolled back.</span>
+
+<span class="sd">The purpose of data event hooks is usually to complement the data model as</span>
+<span class="sd">defined in the schema, which is static by nature and only provide a restricted</span>
+<span class="sd">builtin set of dynamic constraints, with dynamic or value driven behaviours.</span>
+<span class="sd">For instance they can serve the following purposes:</span>
+
+<span class="sd">* enforcing constraints that the static schema cannot express (spanning several</span>
+<span class="sd">  entities/relations, exotic value ranges and cardinalities, etc.)</span>
+
+<span class="sd">* implement computed attributes</span>
+
+<span class="sd">It is functionally equivalent to a `database trigger`_, except that database</span>
+<span class="sd">triggers definition languages are not standardized, hence not portable (for</span>
+<span class="sd">instance, PL/SQL works with Oracle and PostgreSQL but not SqlServer nor Sqlite).</span>
+
+<span class="sd">.. _`database trigger`: http://en.wikipedia.org/wiki/Database_trigger</span>
+
+
+<span class="sd">.. hint::</span>
+
+<span class="sd">   It is a good practice to write unit tests for each hook. See an example in</span>
+<span class="sd">   :ref:`hook_test`</span>
+
+<span class="sd">Operations</span>
+<span class="sd">~~~~~~~~~~</span>
+
+<span class="sd">Operations are subclasses of the :class:`~cubicweb.server.hook.Operation` class</span>
+<span class="sd">that may be created by hooks and scheduled to happen on `precommit`,</span>
+<span class="sd">`postcommit` or `rollback` event (i.e. respectivly before/after a commit or</span>
+<span class="sd">before a rollback of a transaction).</span>
+
+<span class="sd">Hooks are being fired immediately on data operations, and it is sometime</span>
+<span class="sd">necessary to delay the actual work down to a time where we can expect all</span>
+<span class="sd">information to be there, or when all other hooks have run (though take case</span>
+<span class="sd">since operations may themselves trigger hooks). Also while the order of</span>
+<span class="sd">execution of hooks is data dependant (and thus hard to predict), it is possible</span>
+<span class="sd">to force an order on operations.</span>
+
+<span class="sd">So, for such case where you may miss some information that may be set later in</span>
+<span class="sd">the transaction, you should instantiate an operation in the hook.</span>
+
+<span class="sd">Operations may be used to:</span>
+
+<span class="sd">* implements a validation check which needs that all relations be already set on</span>
+<span class="sd">  an entity</span>
+
+<span class="sd">* process various side effects associated with a transaction such as filesystem</span>
+<span class="sd">  udpates, mail notifications, etc.</span>
+
+
+<span class="sd">Events</span>
+<span class="sd">------</span>
+
+<span class="sd">Hooks are mostly defined and used to handle `dataflow`_ operations. It</span>
+<span class="sd">means as data gets in (entities added, updated, relations set or</span>
+<span class="sd">unset), specific events are issued and the Hooks matching these events</span>
+<span class="sd">are called.</span>
+
+<span class="sd">You can get the event that triggered a hook by accessing its `event`</span>
+<span class="sd">attribute.</span>
+
+<span class="sd">.. _`dataflow`: http://en.wikipedia.org/wiki/Dataflow</span>
+
+
+<span class="sd">Entity modification related events</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="sd">When called for one of these events, hook will have an `entity` attribute</span>
+<span class="sd">containing the entity instance.</span>
+
+<span class="sd">- `before_add_entity`, `before_update_entity`:</span>
+
+<span class="sd">  On those events, you can access the modified attributes of the entity using</span>
+<span class="sd">  the `entity.cw_edited` dictionary. The values can be modified and the old</span>
+<span class="sd">  values can be retrieved.</span>
+
+<span class="sd">  If you modify the `entity.cw_edited` dictionary in the hook, that is before</span>
+<span class="sd">  the database operations take place, you will avoid the need to process a whole</span>
+<span class="sd">  new rql query and the underlying backend query (eg usually sql) will contain</span>
+<span class="sd">  the modified data. For example:</span>
+
+<span class="sd">  .. sourcecode:: python</span>
+
+<span class="sd">     self.entity.cw_edited[&#39;age&#39;] = 42</span>
+
+<span class="sd">  will modify the age before it is written to the backend storage.</span>
+
+<span class="sd">  Similarly, removing an attribute from `cw_edited` will cancel its</span>
+<span class="sd">  modification:</span>
+
+<span class="sd">  .. sourcecode:: python</span>
+
+<span class="sd">     del self.entity.cw_edited[&#39;age&#39;]</span>
+
+<span class="sd">  On a `before_update_entity` event, you can access the old and new values:</span>
+
+<span class="sd">  .. sourcecode:: python</span>
+
+<span class="sd">     old, new = entity.cw_edited.oldnewvalue(&#39;age&#39;)</span>
+
+<span class="sd">- `after_add_entity`, `after_update_entity`</span>
+
+<span class="sd">  On those events, you can get the list of attributes that were modified using</span>
+<span class="sd">  the `entity.cw_edited` dictionary, but you can not modify it or get the old</span>
+<span class="sd">  value of an attribute.</span>
+
+<span class="sd">- `before_delete_entity`, `after_delete_entity`</span>
+
+<span class="sd">  On those events, the entity has no `cw_edited` dictionary.</span>
+
+<span class="sd">.. note:: `self.entity.cw_set(age=42)` will set the `age` attribute to</span>
+<span class="sd">  42. But to do so, it will generate a rql query that will have to be processed,</span>
+<span class="sd">  hence may trigger some hooks, etc. This could lead to infinitely looping hooks.</span>
+
+<span class="sd">Relation modification related events</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+
+<span class="sd">When called for one of these events, hook will have `eidfrom`, `rtype`, `eidto`</span>
+<span class="sd">attributes containing respectively the eid of the subject entity, the relation</span>
+<span class="sd">type and the eid of the object entity.</span>
+
+<span class="sd">* `before_add_relation`, `before_delete_relation`</span>
+
+<span class="sd">  On those events, you can still get the original relation by issuing a rql query.</span>
+
+<span class="sd">* `after_add_relation`, `after_delete_relation`</span>
+
+<span class="sd">Specific selectors are shipped for these kinds of events, see in particular</span>
+<span class="sd">:class:`~cubicweb.server.hook.match_rtype`.</span>
+
+<span class="sd">Also note that relations can be added or deleted, but not updated.</span>
+
+<span class="sd">Non data events</span>
+<span class="sd">~~~~~~~~~~~~~~~</span>
+
+<span class="sd">Hooks called on server start/maintenance/stop event (e.g.</span>
+<span class="sd">`server_startup`, `server_maintenance`, `before_server_shutdown`,</span>
+<span class="sd">`server_shutdown`) have a `repo` attribute, but *their `_cw` attribute</span>
+<span class="sd">is None*.  The `server_startup` is called on regular startup, while</span>
+<span class="sd">`server_maintenance` is called on cubicweb-ctl upgrade or shell</span>
+<span class="sd">commands. `server_shutdown` is called anyway but connections to the</span>
+<span class="sd">native source is impossible; `before_server_shutdown` handles that.</span>
+
+<span class="sd">Hooks called on backup/restore event (eg `server_backup`,</span>
+<span class="sd">`server_restore`) have a `repo` and a `timestamp` attributes, but</span>
+<span class="sd">*their `_cw` attribute is None*.</span>
+
+<span class="sd">Hooks called on session event (eg `session_open`, `session_close`) have no</span>
+<span class="sd">special attribute.</span>
+
+
+<span class="sd">API</span>
+<span class="sd">---</span>
+
+<span class="sd">Hooks control</span>
+<span class="sd">~~~~~~~~~~~~~</span>
+
+<span class="sd">It is sometimes convenient to explicitly enable or disable some hooks. For</span>
+<span class="sd">instance if you want to disable some integrity checking hook. This can be</span>
+<span class="sd">controlled more finely through the `category` class attribute, which is a string</span>
+<span class="sd">giving a category name.  One can then uses the</span>
+<span class="sd">:meth:`~cubicweb.server.session.Connection.deny_all_hooks_but` and</span>
+<span class="sd">:meth:`~cubicweb.server.session.Connection.allow_all_hooks_but` context managers to</span>
+<span class="sd">explicitly enable or disable some categories.</span>
+
+<span class="sd">The existing categories are:</span>
+
+<span class="sd">* ``security``, security checking hooks</span>
+
+<span class="sd">* ``worfklow``, workflow handling hooks</span>
+
+<span class="sd">* ``metadata``, hooks setting meta-data on newly created entities</span>
+
+<span class="sd">* ``notification``, email notification hooks</span>
+
+<span class="sd">* ``integrity``, data integrity checking hooks</span>
+
+<span class="sd">* ``activeintegrity``, data integrity consistency hooks, that you should **never**</span>
+<span class="sd">  want to disable</span>
+
+<span class="sd">* ``syncsession``, hooks synchronizing existing sessions</span>
+
+<span class="sd">* ``syncschema``, hooks synchronizing instance schema (including the physical database)</span>
+
+<span class="sd">* ``email``, email address handling hooks</span>
+
+<span class="sd">* ``bookmark``, bookmark entities handling hooks</span>
+
+
+<span class="sd">Nothing precludes one to invent new categories and use existing mechanisms to</span>
+<span class="sd">filter them in or out.</span>
+
+
+<span class="sd">Hooks specific predicates</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="sd">.. autoclass:: cubicweb.server.hook.match_rtype</span>
+<span class="sd">.. autoclass:: cubicweb.server.hook.match_rtype_sets</span>
+
+
+<span class="sd">Hooks and operations classes</span>
+<span class="sd">~~~~~~~~~~~~~~~~~~~~~~~~~~~~</span>
+<span class="sd">.. autoclass:: cubicweb.server.hook.Hook</span>
+<span class="sd">.. autoclass:: cubicweb.server.hook.Operation</span>
+<span class="sd">.. autoclass:: cubicweb.server.hook.LateOperation</span>
+<span class="sd">.. autoclass:: cubicweb.server.hook.DataOperationMixIn</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="n">__docformat__</span> <span class="o">=</span> <span class="s2">&quot;restructuredtext en&quot;</span>
+
+<span class="kn">from</span> <span class="nn">warnings</span> <span class="kn">import</span> <span class="n">warn</span>
+<span class="kn">from</span> <span class="nn">logging</span> <span class="kn">import</span> <span class="n">getLogger</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
+
+<span class="kn">from</span> <span class="nn">logilab.common.decorators</span> <span class="kn">import</span> <span class="n">classproperty</span><span class="p">,</span> <span class="n">cached</span>
+<span class="kn">from</span> <span class="nn">logilab.common.deprecation</span> <span class="kn">import</span> <span class="n">deprecated</span><span class="p">,</span> <span class="n">class_renamed</span>
+<span class="kn">from</span> <span class="nn">logilab.common.logging_ext</span> <span class="kn">import</span> <span class="n">set_log_methods</span>
+<span class="kn">from</span> <span class="nn">logilab.common.registry</span> <span class="kn">import</span> <span class="p">(</span><span class="n">NotPredicate</span><span class="p">,</span> <span class="n">OrPredicate</span><span class="p">,</span>
+                                     <span class="n">objectify_predicate</span><span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">cubicweb</span> <span class="kn">import</span> <span class="n">RegistryNotFound</span><span class="p">,</span> <span class="n">server</span>
+<span class="kn">from</span> <span class="nn">cubicweb.cwvreg</span> <span class="kn">import</span> <span class="n">CWRegistry</span><span class="p">,</span> <span class="n">CWRegistryStore</span>
+<span class="kn">from</span> <span class="nn">cubicweb.predicates</span> <span class="kn">import</span> <span class="n">ExpectedValuePredicate</span><span class="p">,</span> <span class="n">is_instance</span>
+<span class="kn">from</span> <span class="nn">cubicweb.appobject</span> <span class="kn">import</span> <span class="n">AppObject</span>
+
+<span class="n">ENTITIES_HOOKS</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="s1">&#39;before_add_entity&#39;</span><span class="p">,</span>    <span class="s1">&#39;after_add_entity&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;before_update_entity&#39;</span><span class="p">,</span> <span class="s1">&#39;after_update_entity&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;before_delete_entity&#39;</span><span class="p">,</span> <span class="s1">&#39;after_delete_entity&#39;</span><span class="p">))</span>
+<span class="n">RELATIONS_HOOKS</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="s1">&#39;before_add_relation&#39;</span><span class="p">,</span>   <span class="s1">&#39;after_add_relation&#39;</span> <span class="p">,</span>
+                       <span class="s1">&#39;before_delete_relation&#39;</span><span class="p">,</span><span class="s1">&#39;after_delete_relation&#39;</span><span class="p">))</span>
+<span class="n">SYSTEM_HOOKS</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="s1">&#39;server_backup&#39;</span><span class="p">,</span> <span class="s1">&#39;server_restore&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;server_startup&#39;</span><span class="p">,</span> <span class="s1">&#39;server_maintenance&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;server_shutdown&#39;</span><span class="p">,</span> <span class="s1">&#39;before_server_shutdown&#39;</span><span class="p">,</span>
+                    <span class="s1">&#39;session_open&#39;</span><span class="p">,</span> <span class="s1">&#39;session_close&#39;</span><span class="p">))</span>
+<span class="n">ALL_HOOKS</span> <span class="o">=</span> <span class="n">ENTITIES_HOOKS</span> <span class="o">|</span> <span class="n">RELATIONS_HOOKS</span> <span class="o">|</span> <span class="n">SYSTEM_HOOKS</span>
+
+<span class="k">def</span> <span class="nf">_iter_kwargs</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">eids_from_to</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">entities</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">eids_from_to</span><span class="p">:</span>
+        <span class="k">yield</span> <span class="n">kwargs</span>
+    <span class="k">elif</span> <span class="n">entities</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">entity</span> <span class="ow">in</span> <span class="n">entities</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;entity&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">entity</span>
+            <span class="k">yield</span> <span class="n">kwargs</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">subject</span><span class="p">,</span> <span class="nb">object</span> <span class="ow">in</span> <span class="n">eids_from_to</span><span class="p">:</span>
+            <span class="n">kwargs</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s1">&#39;eidfrom&#39;</span><span class="p">:</span> <span class="n">subject</span><span class="p">,</span> <span class="s1">&#39;eidto&#39;</span><span class="p">:</span> <span class="nb">object</span><span class="p">})</span>
+            <span class="k">yield</span> <span class="n">kwargs</span>
+
+
+<span class="k">class</span> <span class="nc">HooksRegistry</span><span class="p">(</span><span class="n">CWRegistry</span><span class="p">):</span>
+
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">check_events</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">HooksRegistry</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">call_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">cnx</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;call `event` hooks for an entity or a list of entities (passed</span>
+<span class="sd">        respectively as the `entity` or ``entities`` keyword argument).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">event</span>
+        <span class="k">if</span> <span class="n">cnx</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span> <span class="c1"># True for events such as server_start</span>
+            <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">possible_objects</span><span class="p">(</span><span class="n">cnx</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">),</span>
+                               <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">order</span><span class="p">):</span>
+                <span class="n">hook</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s1">&#39;entities&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="k">assert</span> <span class="s1">&#39;entity&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">,</span> \
+                       <span class="s1">&#39;can</span><span class="se">\&#39;</span><span class="s1">t pass &quot;entities&quot; and &quot;entity&quot; arguments simultaneously&#39;</span>
+                <span class="k">assert</span> <span class="s1">&#39;eids_from_to&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">,</span> \
+                       <span class="s1">&#39;can</span><span class="se">\&#39;</span><span class="s1">t pass &quot;entities&quot; and &quot;eids_from_to&quot; arguments simultaneously&#39;</span>
+                <span class="n">entities</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;entities&#39;</span><span class="p">)</span>
+                <span class="n">eids_from_to</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">elif</span> <span class="s1">&#39;eids_from_to&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="n">entities</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">eids_from_to</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;eids_from_to&#39;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">entities</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="n">eids_from_to</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">pruned</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_pruned_hooks</span><span class="p">(</span><span class="n">cnx</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span>
+                                           <span class="n">entities</span><span class="p">,</span> <span class="n">eids_from_to</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span>
+            <span class="c1"># by default, hooks are executed with security turned off</span>
+            <span class="k">with</span> <span class="n">cnx</span><span class="o">.</span><span class="n">security_enabled</span><span class="p">(</span><span class="n">read</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">_kwargs</span> <span class="ow">in</span> <span class="n">_iter_kwargs</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">eids_from_to</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+                    <span class="n">hooks</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filtered_possible_objects</span><span class="p">(</span><span class="n">pruned</span><span class="p">,</span> <span class="n">cnx</span><span class="p">,</span> <span class="o">**</span><span class="n">_kwargs</span><span class="p">),</span>
+                                   <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
+                    <span class="n">debug</span> <span class="o">=</span> <span class="n">server</span><span class="o">.</span><span class="n">DEBUG</span> <span class="o">&amp;</span> <span class="n">server</span><span class="o">.</span><span class="n">DBG_HOOKS</span>
+                    <span class="k">with</span> <span class="n">cnx</span><span class="o">.</span><span class="n">security_enabled</span><span class="p">(</span><span class="n">write</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+                        <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="n">hooks</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">debug</span><span class="p">:</span>
+                                <span class="k">print</span> <span class="n">event</span><span class="p">,</span> <span class="n">_kwargs</span><span class="p">,</span> <span class="n">hook</span>
+                            <span class="n">hook</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">get_pruned_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cnx</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">entities</span><span class="p">,</span> <span class="n">eids_from_to</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return a set of hooks that should not be considered by filtered_possible objects</span>
+
+<span class="sd">        the idea is to make a first pass over all the hooks in the</span>
+<span class="sd">        registry and to mark put some of them in a pruned list. The</span>
+<span class="sd">        pruned hooks are the one which:</span>
+
+<span class="sd">        * are disabled at the connection level</span>
+
+<span class="sd">        * have a selector containing a :class:`match_rtype` or an</span>
+<span class="sd">          :class:`is_instance` predicate which does not match the rtype / etype</span>
+<span class="sd">          of the relations / entities for which we are calling the hooks. This</span>
+<span class="sd">          works because the repository calls the hooks grouped by rtype or by</span>
+<span class="sd">          etype when using the entities or eids_to_from keyword arguments</span>
+
+<span class="sd">        Only hooks with a simple predicate or an AndPredicate of simple</span>
+<span class="sd">        predicates are considered for disabling.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s1">&#39;entity&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">entities</span> <span class="o">=</span> <span class="p">[</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;entity&#39;</span><span class="p">]]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">entities</span><span class="p">):</span>
+            <span class="n">look_for_selector</span> <span class="o">=</span> <span class="n">is_instance</span>
+            <span class="n">etype</span> <span class="o">=</span> <span class="n">entities</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">__regid__</span>
+        <span class="k">elif</span> <span class="s1">&#39;rtype&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">look_for_selector</span> <span class="o">=</span> <span class="n">match_rtype</span>
+            <span class="n">etype</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">else</span><span class="p">:</span> <span class="c1"># nothing to prune, how did we get there ???</span>
+            <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">cache_key</span> <span class="o">=</span> <span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rtype&#39;</span><span class="p">),</span> <span class="n">etype</span><span class="p">)</span>
+        <span class="n">pruned</span> <span class="o">=</span> <span class="n">cnx</span><span class="o">.</span><span class="n">pruned_hooks_cache</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">cache_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pruned</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pruned</span>
+        <span class="n">pruned</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">cnx</span><span class="o">.</span><span class="n">pruned_hooks_cache</span><span class="p">[</span><span class="n">cache_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">pruned</span>
+        <span class="k">if</span> <span class="n">look_for_selector</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="nb">id</span><span class="p">,</span> <span class="n">hooks</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">iteritems</span><span class="p">():</span>
+                <span class="k">for</span> <span class="n">hook</span> <span class="ow">in</span> <span class="n">hooks</span><span class="p">:</span>
+                    <span class="n">enabled_cat</span><span class="p">,</span> <span class="n">main_filter</span> <span class="o">=</span> <span class="n">hook</span><span class="o">.</span><span class="n">filterable_selectors</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">enabled_cat</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">enabled_cat</span><span class="p">(</span><span class="n">hook</span><span class="p">,</span> <span class="n">cnx</span><span class="p">):</span>
+                            <span class="n">pruned</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">hook</span><span class="p">)</span>
+                            <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">main_filter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">main_filter</span><span class="p">,</span> <span class="n">match_rtype</span><span class="p">)</span> <span class="ow">and</span> \
+                           <span class="p">(</span><span class="n">main_filter</span><span class="o">.</span><span class="n">frometypes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span>  <span class="ow">or</span> \
+                            <span class="n">main_filter</span><span class="o">.</span><span class="n">toetypes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+                            <span class="k">continue</span>
+                        <span class="n">first_kwargs</span> <span class="o">=</span> <span class="n">_iter_kwargs</span><span class="p">(</span><span class="n">entities</span><span class="p">,</span> <span class="n">eids_from_to</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span><span class="o">.</span><span class="n">next</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">main_filter</span><span class="p">(</span><span class="n">hook</span><span class="p">,</span> <span class="n">cnx</span><span class="p">,</span> <span class="o">**</span><span class="n">first_kwargs</span><span class="p">):</span>
+                            <span class="n">pruned</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">hook</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pruned</span>
+
+
+    <span class="k">def</span> <span class="nf">filtered_possible_objects</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pruned</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">appobjects</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">itervalues</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">pruned</span><span class="p">:</span>
+                <span class="n">filtered_objects</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span> <span class="k">for</span> <span class="n">obj</span> <span class="ow">in</span> <span class="n">appobjects</span> <span class="k">if</span> <span class="n">obj</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pruned</span><span class="p">]</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">filtered_objects</span><span class="p">:</span>
+                    <span class="k">continue</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">filtered_objects</span> <span class="o">=</span> <span class="n">appobjects</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_best</span><span class="p">(</span><span class="n">filtered_objects</span><span class="p">,</span>
+                                    <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="k">yield</span> <span class="n">obj</span>
+
+<span class="k">class</span> <span class="nc">HooksManager</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">vreg</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">vreg</span> <span class="o">=</span> <span class="n">vreg</span>
+
+    <span class="k">def</span> <span class="nf">call_hooks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="n">cnx</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">registry</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">vreg</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_hooks&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="p">]</span>
+        <span class="k">except</span> <span class="n">RegistryNotFound</span><span class="p">:</span>
+            <span class="k">return</span> <span class="c1"># no hooks for this event</span>
+        <span class="n">registry</span><span class="o">.</span><span class="n">call_hooks</span><span class="p">(</span><span class="n">event</span><span class="p">,</span> <span class="n">cnx</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+
+<span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">ALL_HOOKS</span><span class="p">:</span>
+    <span class="n">CWRegistryStore</span><span class="o">.</span><span class="n">REGISTRY_FACTORY</span><span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_hooks&#39;</span> <span class="o">%</span> <span class="n">event</span><span class="p">]</span> <span class="o">=</span> <span class="n">HooksRegistry</span>
+
+
+<span class="c1"># some hook specific predicates #################################################</span>
+
+<span class="nd">@objectify_predicate</span>
+<span class="k">def</span> <span class="nf">enabled_category</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">req</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">True</span> <span class="c1"># XXX how to deactivate server startup / shutdown event</span>
+    <span class="k">return</span> <span class="n">req</span><span class="o">.</span><span class="n">is_hook_activated</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+
+<span class="nd">@objectify_predicate</span>
+<span class="k">def</span> <span class="nf">from_dbapi_query</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">req</span><span class="o">.</span><span class="n">running_dbapi_query</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+    <span class="k">return</span> <span class="mi">0</span>
+
+<span class="k">class</span> <span class="nc">rechain</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">iterators</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">iterators</span> <span class="o">=</span> <span class="n">iterators</span>
+    <span class="k">def</span> <span class="nf">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">chain</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">iterators</span><span class="p">))</span>
+
+
+<span class="k">class</span> <span class="nc">match_rtype</span><span class="p">(</span><span class="n">ExpectedValuePredicate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;accept if the relation type is found in expected ones. Optional</span>
+<span class="sd">    named parameters `frometypes` and `toetypes` can be used to restrict</span>
+<span class="sd">    target subject and/or object entity types of the relation.</span>
+
+<span class="sd">    :param \*expected: possible relation types</span>
+<span class="sd">    :param frometypes: candidate entity types as subject of relation</span>
+<span class="sd">    :param toetypes: candidate entity types as object of relation</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">expected</span><span class="p">,</span> <span class="o">**</span><span class="n">more</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expected</span> <span class="o">=</span> <span class="n">expected</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">frometypes</span> <span class="o">=</span> <span class="n">more</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;frometypes&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">toetypes</span> <span class="o">=</span> <span class="n">more</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;toetypes&#39;</span><span class="p">,</span> <span class="bp">None</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="n">more</span><span class="p">,</span> <span class="s2">&quot;unexpected kwargs in match_rtype: </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="n">more</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rtype&#39;</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">frometypes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> \
+               <span class="n">req</span><span class="o">.</span><span class="n">entity_metas</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;eidfrom&#39;</span><span class="p">])[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">frometypes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">toetypes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> \
+               <span class="n">req</span><span class="o">.</span><span class="n">entity_metas</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;eidto&#39;</span><span class="p">])[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">toetypes</span><span class="p">:</span>
+            <span class="k">return</span> <span class="mi">0</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
+
+<span class="k">class</span> <span class="nc">match_rtype_sets</span><span class="p">(</span><span class="n">ExpectedValuePredicate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;accept if the relation type is in one of the sets given as initializer</span>
+<span class="sd">    argument. The goal of this predicate is that it keeps reference to original sets,</span>
+<span class="sd">    so modification to thoses sets are considered by the predicate. For instance</span>
+
+<span class="sd">    .. sourcecode:: python</span>
+
+<span class="sd">      MYSET = set()</span>
+
+<span class="sd">      class Hook1(Hook):</span>
+<span class="sd">          __regid__ = &#39;hook1&#39;</span>
+<span class="sd">          __select__ = Hook.__select__ &amp; match_rtype_sets(MYSET)</span>
+<span class="sd">          ...</span>
+
+<span class="sd">      class Hook2(Hook):</span>
+<span class="sd">          __regid__ = &#39;hook2&#39;</span>
+<span class="sd">          __select__ = Hook.__select__ &amp; match_rtype_sets(MYSET)</span>
+
+<span class="sd">    Client code can now change `MYSET`, this will changes the selection criteria</span>
+<span class="sd">    of :class:`Hook1` and :class:`Hook1`.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">expected</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expected</span> <span class="o">=</span> <span class="n">expected</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cls</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">rel_set</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">expected</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;rtype&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">rel_set</span><span class="p">:</span>
+                <span class="k">return</span> <span class="mi">1</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+
+<span class="c1"># base class for hook ##########################################################</span>
+
+<span class="k">class</span> <span class="nc">Hook</span><span class="p">(</span><span class="n">AppObject</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for hook.</span>
+
+<span class="sd">    Hooks being appobjects like views, they have a `__regid__` and a `__select__`</span>
+<span class="sd">    class attribute. Like all appobjects, hooks have the `self._cw` attribute which</span>
+<span class="sd">    represents the current connection. In entity hooks, a `self.entity` attribute is</span>
+<span class="sd">    also present.</span>
+
+<span class="sd">    The `events` tuple is used by the base class selector to dispatch the hook</span>
+<span class="sd">    on the right events. It is possible to dispatch on multiple events at once</span>
+<span class="sd">    if needed (though take care as hook attribute may vary as described above).</span>
+
+<span class="sd">    .. Note::</span>
+
+<span class="sd">      Do not forget to extend the base class selectors as in:</span>
+
+<span class="sd">      .. sourcecode:: python</span>
+
+<span class="sd">          class MyHook(Hook):</span>
+<span class="sd">            __regid__ = &#39;whatever&#39;</span>
+<span class="sd">            __select__ = Hook.__select__ &amp; is_instance(&#39;Person&#39;)</span>
+
+<span class="sd">      else your hooks will be called madly, whatever the event.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__select__</span> <span class="o">=</span> <span class="n">enabled_category</span><span class="p">()</span>
+    <span class="c1"># set this in derivated classes</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">category</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># stop pylint from complaining about missing attributes in Hooks classes</span>
+    <span class="n">eidfrom</span> <span class="o">=</span> <span class="n">eidto</span> <span class="o">=</span> <span class="n">entity</span> <span class="o">=</span> <span class="n">rtype</span> <span class="o">=</span> <span class="n">repo</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="nd">@cached</span>
+    <span class="k">def</span> <span class="nf">filterable_selectors</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="n">search</span> <span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">__select__</span><span class="o">.</span><span class="n">search_selector</span>
+        <span class="k">if</span> <span class="n">search</span><span class="p">((</span><span class="n">NotPredicate</span><span class="p">,</span> <span class="n">OrPredicate</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="bp">None</span><span class="p">,</span> <span class="bp">None</span>
+        <span class="n">enabled_cat</span> <span class="o">=</span> <span class="n">search</span><span class="p">(</span><span class="n">enabled_category</span><span class="p">)</span>
+        <span class="n">main_filter</span> <span class="o">=</span> <span class="n">search</span><span class="p">((</span><span class="n">is_instance</span><span class="p">,</span> <span class="n">match_rtype</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">enabled_cat</span><span class="p">,</span> <span class="n">main_filter</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">check_events</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">event</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">events</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">event</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALL_HOOKS</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;bad event </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                        <span class="n">event</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">raise</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">Exception</span><span class="p">(</span><span class="s1">&#39;bad .events attribute </span><span class="si">%s</span><span class="s1"> on </span><span class="si">%s</span><span class="s1">.</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span>
+                <span class="n">cls</span><span class="o">.</span><span class="n">events</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__module__</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">))</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">__registered__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">reg</span><span class="p">):</span>
+        <span class="n">cls</span><span class="o">.</span><span class="n">check_events</span><span class="p">()</span>
+
+    <span class="nd">@classproperty</span>
+    <span class="k">def</span> <span class="nf">__registries__</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">events</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">_hooks&#39;</span> <span class="o">%</span> <span class="n">ev</span> <span class="k">for</span> <span class="n">ev</span> <span class="ow">in</span> <span class="n">cls</span><span class="o">.</span><span class="n">events</span><span class="p">]</span>
+
+    <span class="n">known_args</span> <span class="o">=</span> <span class="nb">set</span><span class="p">((</span><span class="s1">&#39;entity&#39;</span><span class="p">,</span> <span class="s1">&#39;rtype&#39;</span><span class="p">,</span> <span class="s1">&#39;eidfrom&#39;</span><span class="p">,</span> <span class="s1">&#39;eidto&#39;</span><span class="p">,</span> <span class="s1">&#39;repo&#39;</span><span class="p">,</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">))</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">req</span><span class="p">,</span> <span class="n">event</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">known_args</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arg</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">arg</span><span class="p">))</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">Hook</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">req</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">event</span> <span class="o">=</span> <span class="n">event</span>
+
+<span class="n">set_log_methods</span><span class="p">(</span><span class="n">Hook</span><span class="p">,</span> <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;cubicweb.hook&#39;</span><span class="p">))</span>
+
+
+<span class="c1"># abtract hooks for relation propagation #######################################</span>
+<span class="c1"># See example usage in hooks of the nosylist cube</span>
+
+<span class="k">class</span> <span class="nc">PropagateRelationHook</span><span class="p">(</span><span class="n">Hook</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;propagate some `main_rtype` relation on entities linked as object of</span>
+<span class="sd">    `subject_relations` or as subject of `object_relations` (the watched</span>
+<span class="sd">    relations).</span>
+
+<span class="sd">    This hook ensure that when one of the watched relation is added, the</span>
+<span class="sd">    `main_rtype` relation is added to the target entity of the relation.</span>
+<span class="sd">    Notice there are no default behaviour defined when a watched relation is</span>
+<span class="sd">    deleted, you&#39;ll have to handle this by yourself.</span>
+
+<span class="sd">    You usually want to use the :class:`match_rtype_sets` predicate on concrete</span>
+<span class="sd">    classes.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;after_add_relation&#39;</span><span class="p">,)</span>
+
+    <span class="c1"># to set in concrete class</span>
+    <span class="n">main_rtype</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">subject_relations</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">object_relations</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_rtype</span>
+        <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eidfrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidto</span><span class="p">):</span>
+            <span class="n">etype</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">entity_metas</span><span class="p">(</span><span class="n">eid</span><span class="p">)[</span><span class="s1">&#39;type&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_rtype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">eschema</span><span class="p">(</span><span class="n">etype</span><span class="p">)</span><span class="o">.</span><span class="n">subjrels</span><span class="p">:</span>
+                <span class="k">return</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rtype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subject_relations</span><span class="p">:</span>
+            <span class="n">meid</span><span class="p">,</span> <span class="n">seid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidfrom</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidto</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">rtype</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_relations</span>
+            <span class="n">meid</span><span class="p">,</span> <span class="n">seid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidto</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidfrom</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">execute</span><span class="p">(</span>
+            <span class="s1">&#39;SET E </span><span class="si">%s</span><span class="s1"> P WHERE X </span><span class="si">%s</span><span class="s1"> P, X eid </span><span class="si">%%</span><span class="s1">(x)s, E eid </span><span class="si">%%</span><span class="s1">(e)s, NOT E </span><span class="si">%s</span><span class="s1"> P&#39;</span>
+            <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">main_rtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_rtype</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">main_rtype</span><span class="p">),</span>
+            <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="n">meid</span><span class="p">,</span> <span class="s1">&#39;e&#39;</span><span class="p">:</span> <span class="n">seid</span><span class="p">})</span>
+
+
+<span class="k">class</span> <span class="nc">PropagateRelationAddHook</span><span class="p">(</span><span class="n">Hook</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Propagate to entities at the end of watched relations when a `main_rtype`</span>
+<span class="sd">    relation is added.</span>
+
+<span class="sd">    `subject_relations` and `object_relations` attributes should be specified on</span>
+<span class="sd">    subclasses and are usually shared references with attributes of the same</span>
+<span class="sd">    name on :class:`PropagateRelationHook`.</span>
+
+<span class="sd">    Because of those shared references, you can use `skip_subject_relations` and</span>
+<span class="sd">    `skip_object_relations` attributes when you don&#39;t want to propagate to</span>
+<span class="sd">    entities linked through some particular relations.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;after_add_relation&#39;</span><span class="p">,)</span>
+
+    <span class="c1"># to set in concrete class (mandatory)</span>
+    <span class="n">subject_relations</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="n">object_relations</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="c1"># to set in concrete class (optionaly)</span>
+    <span class="n">skip_subject_relations</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="n">skip_object_relations</span> <span class="o">=</span> <span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">eschema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">eschema</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">entity_metas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eidfrom</span><span class="p">)[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
+        <span class="n">execute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">execute</span>
+        <span class="k">for</span> <span class="n">rel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subject_relations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">eschema</span><span class="o">.</span><span class="n">subjrels</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_subject_relations</span><span class="p">:</span>
+                <span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SET R </span><span class="si">%s</span><span class="s1"> P WHERE X eid </span><span class="si">%%</span><span class="s1">(x)s, P eid </span><span class="si">%%</span><span class="s1">(p)s, &#39;</span>
+                        <span class="s1">&#39;X </span><span class="si">%s</span><span class="s1"> R, NOT R </span><span class="si">%s</span><span class="s1"> P&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rtype</span><span class="p">,</span> <span class="n">rel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rtype</span><span class="p">),</span>
+                        <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidfrom</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidto</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">rel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_relations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">eschema</span><span class="o">.</span><span class="n">objrels</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_object_relations</span><span class="p">:</span>
+                <span class="n">execute</span><span class="p">(</span><span class="s1">&#39;SET R </span><span class="si">%s</span><span class="s1"> P WHERE X eid </span><span class="si">%%</span><span class="s1">(x)s, P eid </span><span class="si">%%</span><span class="s1">(p)s, &#39;</span>
+                        <span class="s1">&#39;R </span><span class="si">%s</span><span class="s1"> X, NOT R </span><span class="si">%s</span><span class="s1"> P&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rtype</span><span class="p">,</span> <span class="n">rel</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">rtype</span><span class="p">),</span>
+                        <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidfrom</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidto</span><span class="p">})</span>
+
+
+<span class="k">class</span> <span class="nc">PropagateRelationDelHook</span><span class="p">(</span><span class="n">PropagateRelationAddHook</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Propagate to entities at the end of watched relations when a `main_rtype`</span>
+<span class="sd">    relation is deleted.</span>
+
+<span class="sd">    This is the opposite of the :class:`PropagateRelationAddHook`, see its</span>
+<span class="sd">    documentation for how to use this class.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;after_delete_relation&#39;</span><span class="p">,)</span>
+
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">eschema</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">eschema</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">entity_metas</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">eidfrom</span><span class="p">)[</span><span class="s1">&#39;type&#39;</span><span class="p">])</span>
+        <span class="n">execute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cw</span><span class="o">.</span><span class="n">execute</span>
+        <span class="k">for</span> <span class="n">rel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">subject_relations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">eschema</span><span class="o">.</span><span class="n">subjrels</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_subject_relations</span><span class="p">:</span>
+                <span class="n">execute</span><span class="p">(</span><span class="s1">&#39;DELETE R </span><span class="si">%s</span><span class="s1"> P WHERE X eid </span><span class="si">%%</span><span class="s1">(x)s, P eid </span><span class="si">%%</span><span class="s1">(p)s, &#39;</span>
+                        <span class="s1">&#39;X </span><span class="si">%s</span><span class="s1"> R&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rtype</span><span class="p">,</span> <span class="n">rel</span><span class="p">),</span>
+                        <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidfrom</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidto</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">rel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">object_relations</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">eschema</span><span class="o">.</span><span class="n">objrels</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rel</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">skip_object_relations</span><span class="p">:</span>
+                <span class="n">execute</span><span class="p">(</span><span class="s1">&#39;DELETE R </span><span class="si">%s</span><span class="s1"> P WHERE X eid </span><span class="si">%%</span><span class="s1">(x)s, P eid </span><span class="si">%%</span><span class="s1">(p)s, &#39;</span>
+                        <span class="s1">&#39;R </span><span class="si">%s</span><span class="s1"> X&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rtype</span><span class="p">,</span> <span class="n">rel</span><span class="p">),</span>
+                        <span class="p">{</span><span class="s1">&#39;x&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidfrom</span><span class="p">,</span> <span class="s1">&#39;p&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">eidto</span><span class="p">})</span>
+
+
+
+<span class="c1"># abstract classes for operation ###############################################</span>
+
+<span class="k">class</span> <span class="nc">Operation</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Base class for operations.</span>
+
+<span class="sd">    Operation may be instantiated in the hooks&#39; `__call__` method. It always</span>
+<span class="sd">    takes a connection object as first argument (accessible as `.cnx` from the</span>
+<span class="sd">    operation instance), and optionally all keyword arguments needed by the</span>
+<span class="sd">    operation. These keyword arguments will be accessible as attributes from the</span>
+<span class="sd">    operation instance.</span>
+
+<span class="sd">    An operation is triggered on connections set events related to commit /</span>
+<span class="sd">    rollback transations. Possible events are:</span>
+
+<span class="sd">    * `precommit`:</span>
+
+<span class="sd">      the transaction is being prepared for commit. You can freely do any heavy</span>
+<span class="sd">      computation, raise an exception if the commit can&#39;t go. or even add some</span>
+<span class="sd">      new operations during this phase. If you do anything which has to be</span>
+<span class="sd">      reverted if the commit fails afterwards (eg altering the file system for</span>
+<span class="sd">      instance), you&#39;ll have to support the &#39;revertprecommit&#39; event to revert</span>
+<span class="sd">      things by yourself</span>
+
+<span class="sd">    * `revertprecommit`:</span>
+
+<span class="sd">      if an operation failed while being pre-commited, this event is triggered</span>
+<span class="sd">      for all operations which had their &#39;precommit&#39; event already fired to let</span>
+<span class="sd">      them revert things (including the operation which made the commit fail)</span>
+
+<span class="sd">    * `rollback`:</span>
+
+<span class="sd">      the transaction has been either rolled back either:</span>
+
+<span class="sd">       * intentionaly</span>
+<span class="sd">       * a &#39;precommit&#39; event failed, in which case all operations are rolled back</span>
+<span class="sd">         once &#39;revertprecommit&#39;&#39; has been called</span>
+
+<span class="sd">    * `postcommit`:</span>
+
+<span class="sd">      the transaction is over. All the ORM entities accessed by the earlier</span>
+<span class="sd">      transaction are invalid. If you need to work on the database, you need to</span>
+<span class="sd">      start a new transaction, for instance using a new internal connection,</span>
+<span class="sd">      which you will need to commit.</span>
+
+<span class="sd">    For an operation to support an event, one has to implement the `&lt;event</span>
+<span class="sd">    name&gt;_event` method with no arguments.</span>
+
+<span class="sd">    The order of operations may be important, and is controlled according to</span>
+<span class="sd">    the insert_index&#39;s method output (whose implementation vary according to the</span>
+<span class="sd">    base hook class used).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cnx</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cnx</span> <span class="o">=</span> <span class="n">cnx</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">cnx</span><span class="p">)</span>
+        <span class="c1"># execution information</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processed</span> <span class="o">=</span> <span class="bp">None</span> <span class="c1"># &#39;precommit&#39;, &#39;commit&#39;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">failed</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@deprecated</span><span class="p">(</span><span class="s1">&#39;[3.19] Operation.session is deprecated, use Operation.cnx instead&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">session</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">cnx</span>
+
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cnx</span><span class="p">):</span>
+        <span class="n">cnx</span><span class="o">.</span><span class="n">add_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">insert_index</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="nf">insert_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the index of the latest instance which is not a</span>
+<span class="sd">        LateOperation instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># faster by inspecting operation in reverse order for heavy transactions</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">op</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cnx</span><span class="o">.</span><span class="n">pending_operations</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="p">(</span><span class="n">LateOperation</span><span class="p">,</span> <span class="n">SingleLastOperation</span><span class="p">)):</span>
+                <span class="k">continue</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">i</span> <span class="ow">or</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">handle_event</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;delegate event handling to the opertaion&quot;&quot;&quot;</span>
+        <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">event</span><span class="p">)()</span>
+
+    <span class="k">def</span> <span class="nf">precommit_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;the observed connections set is preparing a commit&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">revertprecommit_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;an error went when pre-commiting this operation or a later one</span>
+
+<span class="sd">        should revert pre-commit&#39;s changes but take care, they may have not</span>
+<span class="sd">        been all considered if it&#39;s this operation which failed</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">rollback_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;the observed connections set has been rolled back</span>
+
+<span class="sd">        do nothing by default</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">postcommit_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;the observed connections set has committed&quot;&quot;&quot;</span>
+
+    <span class="c1"># these are overridden by set_log_methods below</span>
+    <span class="c1"># only defining here to prevent pylint from complaining</span>
+    <span class="n">info</span> <span class="o">=</span> <span class="n">warning</span> <span class="o">=</span> <span class="n">error</span> <span class="o">=</span> <span class="n">critical</span> <span class="o">=</span> <span class="n">exception</span> <span class="o">=</span> <span class="n">debug</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">msg</span><span class="p">,</span><span class="o">*</span><span class="n">a</span><span class="p">,</span><span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="bp">None</span>
+
+<span class="n">set_log_methods</span><span class="p">(</span><span class="n">Operation</span><span class="p">,</span> <span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;cubicweb.session&#39;</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">_container_add</span><span class="p">(</span><span class="n">container</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+    <span class="p">{</span><span class="nb">set</span><span class="p">:</span> <span class="nb">set</span><span class="o">.</span><span class="n">add</span><span class="p">,</span> <span class="nb">list</span><span class="p">:</span> <span class="nb">list</span><span class="o">.</span><span class="n">append</span><span class="p">}[</span><span class="n">container</span><span class="o">.</span><span class="n">__class__</span><span class="p">](</span><span class="n">container</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">DataOperationMixIn</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Mix-in class to ease applying a single operation on a set of data,</span>
+<span class="sd">    avoiding to create as many as operation as they are individual modification.</span>
+<span class="sd">    The body of the operation must then iterate over the values that have been</span>
+<span class="sd">    stored in a single operation instance.</span>
+
+<span class="sd">    You should try to use this instead of creating on operation for each</span>
+<span class="sd">    `value`, since handling operations becomes costly on massive data import.</span>
+
+<span class="sd">    Usage looks like:</span>
+
+<span class="sd">    .. sourcecode:: python</span>
+
+<span class="sd">        class MyEntityHook(Hook):</span>
+<span class="sd">            __regid__ = &#39;my.entity.hook&#39;</span>
+<span class="sd">            __select__ = Hook.__select__ &amp; is_instance(&#39;MyEntity&#39;)</span>
+<span class="sd">            events = (&#39;after_add_entity&#39;,)</span>
+
+<span class="sd">            def __call__(self):</span>
+<span class="sd">                MyOperation.get_instance(self._cw).add_data(self.entity)</span>
+
+
+<span class="sd">        class MyOperation(DataOperationMixIn, Operation):</span>
+<span class="sd">            def precommit_event(self):</span>
+<span class="sd">                for bucket in self.get_data():</span>
+<span class="sd">                    process(bucket)</span>
+
+<span class="sd">    You can modify the `containercls` class attribute, which defines the</span>
+<span class="sd">    container class that should be instantiated to hold payloads. An instance is</span>
+<span class="sd">    created on instantiation, and then the :meth:`add_data` method will add the</span>
+<span class="sd">    given data to the existing container. Default to a `set`. Give `list` if you</span>
+<span class="sd">    want to keep arrival ordering. You can also use another kind of container</span>
+<span class="sd">    by redefining :meth:`_build_container` and :meth:`add_data`</span>
+
+<span class="sd">    More optional parameters can be given to the `get_instance` operation, that</span>
+<span class="sd">    will be given to the operation constructor (for obvious reasons those</span>
+<span class="sd">    parameters should not vary accross different calls to this method for a</span>
+<span class="sd">    given operation).</span>
+
+<span class="sd">    .. Note::</span>
+<span class="sd">        For sanity reason `get_data` will reset the operation, so that once</span>
+<span class="sd">        the operation has started its treatment, if some hook want to push</span>
+<span class="sd">        additional data to this same operation, a new instance will be created</span>
+<span class="sd">        (else that data has a great chance to be never treated). This implies:</span>
+
+<span class="sd">        * you should **always** call `get_data` when starting treatment</span>
+
+<span class="sd">        * you should **never** call `get_data` for another reason.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">containercls</span> <span class="o">=</span> <span class="nb">set</span>
+
+    <span class="nd">@classproperty</span>
+    <span class="k">def</span> <span class="nf">data_key</span><span class="p">(</span><span class="n">cls</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="s1">&#39;cw.dataops&#39;</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__name__</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">get_instance</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">cnx</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># no need to lock: transaction_data already comes from thread&#39;s local storage</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">cnx</span><span class="o">.</span><span class="n">transaction_data</span><span class="p">[</span><span class="n">cls</span><span class="o">.</span><span class="n">data_key</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">op</span> <span class="o">=</span> <span class="n">cnx</span><span class="o">.</span><span class="n">transaction_data</span><span class="p">[</span><span class="n">cls</span><span class="o">.</span><span class="n">data_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls</span><span class="p">(</span><span class="n">cnx</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">op</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">DataOperationMixIn</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_container</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_container</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_processed</span> <span class="o">=</span> <span class="bp">False</span>
+
+    <span class="k">def</span> <span class="nf">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_container</span>
+
+    <span class="k">def</span> <span class="nf">_build_container</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">containercls</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">union</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;only when container is a set&quot;&quot;&quot;</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processed</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;Trying to add data to a closed operation.</span>
+<span class="s2">Iterating over operation data closed it and should be reserved to precommit /</span>
+<span class="s2">postcommit method of the operation.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_container</span> <span class="o">|=</span> <span class="n">data</span>
+
+    <span class="k">def</span> <span class="nf">add_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processed</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;Trying to add data to a closed operation.</span>
+<span class="s2">Iterating over operation data closed it and should be reserved to precommit /</span>
+<span class="s2">postcommit method of the operation.&quot;&quot;&quot;</span>
+        <span class="n">_container_add</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_container</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">remove_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processed</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;Trying to add data to a closed operation.</span>
+<span class="s2">Iterating over operation data closed it and should be reserved to precommit /</span>
+<span class="s2">postcommit method of the operation.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_container</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">get_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">assert</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_processed</span><span class="p">,</span> <span class="s2">&quot;&quot;&quot;Trying to get data from a closed operation.</span>
+<span class="s2">Iterating over operation data closed it and should be reserved to precommit /</span>
+<span class="s2">postcommit method of the operation.&quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_processed</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="n">op</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cnx</span><span class="o">.</span><span class="n">transaction_data</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_key</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="n">op</span> <span class="ow">is</span> <span class="bp">self</span><span class="p">,</span> <span class="s2">&quot;Bad handling of operation data, found </span><span class="si">%s</span><span class="s2"> instead of </span><span class="si">%s</span><span class="s2"> for key </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="p">(</span>
+            <span class="n">op</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_key</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_container</span>
+
+
+
+<span class="k">class</span> <span class="nc">LateOperation</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;special operation which should be called after all possible (ie non late)</span>
+<span class="sd">    operations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">insert_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the index of  the lastest instance which is not a</span>
+<span class="sd">        SingleLastOperation instance</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># faster by inspecting operation in reverse order for heavy transactions</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">op</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">cnx</span><span class="o">.</span><span class="n">pending_operations</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">op</span><span class="p">,</span> <span class="n">SingleLastOperation</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="k">return</span> <span class="o">-</span><span class="n">i</span> <span class="ow">or</span> <span class="bp">None</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">None</span>
+        <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+
+
+
+<span class="k">class</span> <span class="nc">SingleLastOperation</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;special operation which should be called once and after all other</span>
+<span class="sd">    operations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cnx</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;override register to handle cases where this operation has already</span>
+<span class="sd">        been added</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">operations</span> <span class="o">=</span> <span class="n">cnx</span><span class="o">.</span><span class="n">pending_operations</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">equivalent_index</span><span class="p">(</span><span class="n">operations</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">equivalent</span> <span class="o">=</span> <span class="n">operations</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">equivalent</span> <span class="o">=</span> <span class="bp">None</span>
+        <span class="n">cnx</span><span class="o">.</span><span class="n">add_operation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">insert_index</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">equivalent</span>
+
+    <span class="k">def</span> <span class="nf">equivalent_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operations</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;return the index of the equivalent operation if any&quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">op</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">operations</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">op</span><span class="o">.</span><span class="n">__class__</span> <span class="ow">is</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="p">:</span>
+                <span class="k">return</span> <span class="o">-</span><span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">insert_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">None</span>
+
+
+<span class="k">class</span> <span class="nc">SendMailOp</span><span class="p">(</span><span class="n">SingleLastOperation</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cnx</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">recipients</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="c1"># may not specify msg yet, as</span>
+        <span class="c1"># `cubicweb.sobjects.supervision.SupervisionMailOp`</span>
+        <span class="k">if</span> <span class="n">msg</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">recipients</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_send</span> <span class="o">=</span> <span class="p">[(</span><span class="n">msg</span><span class="p">,</span> <span class="n">recipients</span><span class="p">)]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="n">recipients</span> <span class="ow">is</span> <span class="bp">None</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_send</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="nb">super</span><span class="p">(</span><span class="n">SendMailOp</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">cnx</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cnx</span><span class="p">):</span>
+        <span class="n">previous</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">SendMailOp</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="n">cnx</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">previous</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_send</span> <span class="o">=</span> <span class="n">previous</span><span class="o">.</span><span class="n">to_send</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_send</span>
+
+    <span class="k">def</span> <span class="nf">postcommit_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cnx</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">threaded_task</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">sendmails</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">sendmails</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cnx</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">sendmails</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">to_send</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">RQLPrecommitOperation</span><span class="p">(</span><span class="n">Operation</span><span class="p">):</span>
+    <span class="c1"># to be defined in concrete classes</span>
+    <span class="n">rqls</span> <span class="o">=</span> <span class="bp">None</span>
+
+    <span class="k">def</span> <span class="nf">precommit_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">execute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cnx</span><span class="o">.</span><span class="n">execute</span>
+        <span class="k">for</span> <span class="n">rql</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">rqls</span><span class="p">:</span>
+            <span class="n">execute</span><span class="p">(</span><span class="o">*</span><span class="n">rql</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">CleanupNewEidsCacheOp</span><span class="p">(</span><span class="n">DataOperationMixIn</span><span class="p">,</span> <span class="n">SingleLastOperation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;on rollback of a insert query we have to remove from repository&#39;s</span>
+<span class="sd">    type/source cache eids of entities added in that transaction.</span>
+
+<span class="sd">    NOTE: querier&#39;s rqlst/solutions cache may have been polluted too with</span>
+<span class="sd">    queries such as Any X WHERE X eid 32 if 32 has been rolled back however</span>
+<span class="sd">    generated queries are unpredictable and analysing all the cache probably</span>
+<span class="sd">    too expensive. Notice that there is no pb when using args to specify eids</span>
+<span class="sd">    instead of giving them into the rql string.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data_key</span> <span class="o">=</span> <span class="s1">&#39;neweids&#39;</span>
+
+    <span class="k">def</span> <span class="nf">rollback_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;the observed connections set has been rolled back,</span>
+<span class="sd">        remove inserted eid from repository type/source cache</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cnx</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">clear_caches</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+<span class="k">class</span> <span class="nc">CleanupDeletedEidsCacheOp</span><span class="p">(</span><span class="n">DataOperationMixIn</span><span class="p">,</span> <span class="n">SingleLastOperation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;on commit of delete query, we have to remove from repository&#39;s</span>
+<span class="sd">    type/source cache eids of entities deleted in that transaction.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data_key</span> <span class="o">=</span> <span class="s1">&#39;pendingeids&#39;</span>
+    <span class="k">def</span> <span class="nf">postcommit_event</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;the observed connections set has been rolled back,</span>
+<span class="sd">        remove inserted eid from repository type/source cache</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">eids</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_data</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cnx</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">clear_caches</span><span class="p">(</span><span class="n">eids</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">cnx</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">app_instances_bus</span><span class="o">.</span><span class="n">publish</span><span class="p">([</span><span class="s1">&#39;delete&#39;</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">eid</span><span class="p">)</span> <span class="k">for</span> <span class="n">eid</span> <span class="ow">in</span> <span class="n">eids</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">pass</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer">
+    </div>
+  </div>
+  
+</div>
+
+<div class="footer">
+    &copy; 2015, NSAp developers &lt;antoine.grigis@cea.fr&gt;.
+</div>
+  </body>
+</html>

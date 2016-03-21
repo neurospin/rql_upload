@@ -1,0 +1,186 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+    <title>RQL Upload &mdash; Rql upload</title>
+  <!-- htmltitle is before nature.css - we use this hack to load bootstrap first -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="_static/css/bootstrap.min.css" media="screen" />
+  <link rel="stylesheet" href="_static/css/bootstrap-responsive.css"/>
+
+    
+    <link rel="stylesheet" href="_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Rql upload" href="index.html" />
+  
+   
+       <script type="text/javascript" src="_static/sidebar.js"></script>
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="_static/js/bootstrap.min.js" type="text/javascript"></script>
+  <!-- <link rel="canonical" href="https://bioproj.extra.cea.fr/redmine/projects/nsap/schema.html" /> -->
+
+  <script type="text/javascript">
+    $("div.buttonNext, div.buttonPrevious").hover(
+       function () {
+           $(this).css('background-color', '#FF9C34');
+       },
+       function () {
+           $(this).css('background-color', '#A7D6E2');
+       }
+    );
+    var bodywrapper = $('.bodywrapper');
+    var sidebarbutton = $('#sidebarbutton');
+    sidebarbutton.css({'height': '900px'});
+  </script>
+
+  </head>
+  <body role="document">
+
+<div class="header-wrapper">
+  <div class="header">
+    <p class="logo">
+      <a href="index.html">
+        <img src="_static/nsap.png" alt="Logo"/>
+      </a>
+    </p><div class="navbar">
+      <ul>
+        <li><a href="index.html">Home</a></li>
+        <li><a href="installation.html">Installation</a></li>
+        <li class="btn-li">
+          <div class="btn-group">
+		    <a href="documentation.html">Documentation</a>
+		    <a class="btn dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </a>
+		    <ul class="dropdown-menu">
+	          <li class="link-title">RQL Upload</li>
+			  <li class="divider"></li>
+			  <li><a href="#">Schema modifications</a></li>
+			  <li><a href="view.html">Views</a></li>
+			  <li class="divider"></li>
+		    </ul>
+		  </div>
+        </li>
+        <li><a href="http://neurospin-wiki.org/">NeuroSpin Wiki</a></li>
+      </ul>
+    </div> <!-- end navbar --></div>
+</div>
+
+
+<div class="content-wrapper">
+    <div class="sphinxsidebar">
+      <div class="sphinxsidebarwrapper">
+
+        <!-- info setup -->
+          <p class="doc-version">
+           This documentation is for Rql Upload <strong>version 2.0.0</strong>
+          </p>
+        <p class="citing">
+          If you use the software, please do not hesitate to
+          <a href="https://github.com/neurospin/rql_upload">report a bug</a>.
+        </p>
+
+      <!-- toc tree -->
+      <ul>
+<li><a class="reference internal" href="#">Schema modifications</a><ul>
+<li><a class="reference internal" href="#description">Description</a></li>
+<li><a class="reference internal" href="#rql-upload-schema"><code class="docutils literal"><span class="pre">rql_upload</span></code>: Schema</a></li>
+<li><a class="reference internal" href="#rql-download-associated-hooks"><code class="docutils literal"><span class="pre">rql_download</span></code>: Associated hooks</a></li>
+</ul>
+</li>
+</ul>
+
+
+      </div>
+    </div>
+  
+
+  <div class="content">
+      
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="schema-modifications">
+<span id="schema-ref"></span><h1>Schema modifications<a class="headerlink" href="#schema-modifications" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="description">
+<h2>Description<a class="headerlink" href="#description" title="Permalink to this headline">¶</a></h2>
+<p>The database schema has been modified and a CWUpload entity has been added.
+When an upload request is processed, a CWUpload entity is created. This latter is
+responsible to store the inline form parameters in an &#8216;UploadForm&#8217; entity and the
+files in a deported &#8216;UploadFile&#8217; entity.</p>
+</div>
+<div class="section" id="rql-upload-schema">
+<span id="schema-api"></span><h2><code class="xref py py-mod docutils literal"><span class="pre">rql_upload</span></code>: Schema<a class="headerlink" href="#rql-upload-schema" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/schema/rql_upload.schema.CWUpload.html#rql_upload.schema.CWUpload" title="rql_upload.schema.CWUpload"><code class="xref py py-obj docutils literal"><span class="pre">schema.CWUpload</span></code></a>([name])</td>
+<td>An entity used to to store a form.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/schema/rql_upload.schema.UploadForm.html#rql_upload.schema.UploadForm" title="rql_upload.schema.UploadForm"><code class="xref py py-obj docutils literal"><span class="pre">schema.UploadForm</span></code></a>([name])</td>
+<td>A downloadable file.</td>
+</tr>
+<tr class="row-odd"><td><a class="reference internal" href="generated/schema/rql_upload.schema.UploadFile.html#rql_upload.schema.UploadFile" title="rql_upload.schema.UploadFile"><code class="xref py py-obj docutils literal"><span class="pre">schema.UploadFile</span></code></a>([name])</td>
+<td>An entity used to upload file which may contain binary data.</td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="rql-download-associated-hooks">
+<h2><code class="xref py py-mod docutils literal"><span class="pre">rql_download</span></code>: Associated hooks<a class="headerlink" href="#rql-download-associated-hooks" title="Permalink to this headline">¶</a></h2>
+<table border="1" class="longtable docutils">
+<colgroup>
+<col width="10%" />
+<col width="90%" />
+</colgroup>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="generated/schema/rql_upload.hooks.UploadHook.html#rql_upload.hooks.UploadHook" title="rql_upload.hooks.UploadHook"><code class="xref py py-obj docutils literal"><span class="pre">hooks.UploadHook</span></code></a>(req,&nbsp;event,&nbsp;**kwargs)</td>
+<td>An upload entity is created/updated, store a fingerprint of binary data fields.</td>
+</tr>
+<tr class="row-even"><td><a class="reference internal" href="generated/schema/rql_upload.hooks.ServerStartupHook.html#rql_upload.hooks.ServerStartupHook" title="rql_upload.hooks.ServerStartupHook"><code class="xref py py-obj docutils literal"><span class="pre">hooks.ServerStartupHook</span></code></a>(req,&nbsp;event,&nbsp;**kwargs)</td>
+<td>Deport files on file system rather than database indexation</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer">
+    </div>
+  </div>
+  
+</div>
+
+<div class="footer">
+    &copy; 2015, NSAp developers &lt;antoine.grigis@cea.fr&gt;.
+</div>
+  </body>
+</html>

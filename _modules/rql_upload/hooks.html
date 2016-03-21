@@ -1,0 +1,206 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+  
+    <title>RQL Upload &mdash; Rql upload</title>
+  <!-- htmltitle is before nature.css - we use this hack to load bootstrap first -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="stylesheet" href="../../_static/css/bootstrap.min.css" media="screen" />
+  <link rel="stylesheet" href="../../_static/css/bootstrap-responsive.css"/>
+
+    
+    <link rel="stylesheet" href="../../_static/nature.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '2.0.0',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Rql upload" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" />
+  
+   
+       <script type="text/javascript" src="../../_static/sidebar.js"></script>
+   
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../../_static/js/bootstrap.min.js" type="text/javascript"></script>
+  <!-- <link rel="canonical" href="https://bioproj.extra.cea.fr/redmine/projects/nsap/_modules/rql_upload/hooks.html" /> -->
+
+  <script type="text/javascript">
+    $("div.buttonNext, div.buttonPrevious").hover(
+       function () {
+           $(this).css('background-color', '#FF9C34');
+       },
+       function () {
+           $(this).css('background-color', '#A7D6E2');
+       }
+    );
+    var bodywrapper = $('.bodywrapper');
+    var sidebarbutton = $('#sidebarbutton');
+    sidebarbutton.css({'height': '900px'});
+  </script>
+
+  </head>
+  <body role="document">
+
+<div class="header-wrapper">
+  <div class="header">
+    <p class="logo">
+      <a href="../../index.html">
+        <img src="../../_static/nsap.png" alt="Logo"/>
+      </a>
+    </p><div class="navbar">
+      <ul>
+        <li><a href="../../index.html">Home</a></li>
+        <li><a href="../../installation.html">Installation</a></li>
+        <li class="btn-li">
+          <div class="btn-group">
+		    <a href="../../documentation.html">Documentation</a>
+		    <a class="btn dropdown-toggle" data-toggle="dropdown">
+		      <span class="caret"></span>
+		    </a>
+		    <ul class="dropdown-menu">
+	          <li class="link-title">RQL Upload</li>
+			  <li class="divider"></li>
+			  <li><a href="../../schema.html">Schema modifications</a></li>
+			  <li><a href="../../view.html">Views</a></li>
+			  <li class="divider"></li>
+		    </ul>
+		  </div>
+        </li>
+        <li><a href="http://neurospin-wiki.org/">NeuroSpin Wiki</a></li>
+      </ul>
+    </div> <!-- end navbar --></div>
+</div>
+
+
+<div class="content-wrapper">
+    <div class="sphinxsidebar">
+      <div class="sphinxsidebarwrapper">
+
+        <!-- info setup -->
+          <p class="doc-version">
+           This documentation is for Rql Upload <strong>version 2.0.0</strong>
+          </p>
+        <p class="citing">
+          If you use the software, please do not hesitate to
+          <a href="https://github.com/neurospin/rql_upload">report a bug</a>.
+        </p>
+
+      <!-- toc tree -->
+      
+
+      </div>
+    </div>
+  
+
+  <div class="content">
+      
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for rql_upload.hooks</h1><div class="highlight"><pre>
+<span></span><span class="ch">#! /usr/bin/env python</span>
+<span class="c1">##########################################################################</span>
+<span class="c1"># NSAp - Copyright (C) CEA, 2013</span>
+<span class="c1"># Distributed under the terms of the CeCILL-B license, as published by</span>
+<span class="c1"># the CEA-CNRS-INRIA. Refer to the LICENSE file or to</span>
+<span class="c1"># http://www.cecill.info/licences/Licence_CeCILL-B_V1-en.html</span>
+<span class="c1"># for details.</span>
+<span class="c1">##########################################################################</span>
+
+
+<span class="c1"># System import</span>
+<span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># CW import</span>
+<span class="kn">from</span> <span class="nn">cubicweb.server</span> <span class="kn">import</span> <span class="n">hook</span>
+<span class="kn">from</span> <span class="nn">cubicweb.server</span> <span class="kn">import</span> <span class="n">hook</span>
+<span class="kn">from</span> <span class="nn">cubicweb.predicates</span> <span class="kn">import</span> <span class="n">is_instance</span>
+
+
+<div class="viewcode-block" id="UploadHook"><a class="viewcode-back" href="../../generated/schema/rql_upload.hooks.UploadHook.html#rql_upload.hooks.UploadHook">[docs]</a><span class="k">class</span> <span class="nc">UploadHook</span><span class="p">(</span><span class="n">hook</span><span class="o">.</span><span class="n">Hook</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; An upload entity is created/updated, store a fingerprint of binary data</span>
+<span class="sd">    fields.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__regid__</span> <span class="o">=</span> <span class="s2">&quot;rql_upload.upload&quot;</span>
+    <span class="n">__select__</span> <span class="o">=</span> <span class="n">hook</span><span class="o">.</span><span class="n">Hook</span><span class="o">.</span><span class="n">__select__</span> <span class="o">&amp;</span> <span class="n">is_instance</span><span class="p">(</span><span class="s2">&quot;UploadFile&quot;</span><span class="p">,</span> <span class="s2">&quot;UploadForm&quot;</span><span class="p">)</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;before_add_entity&quot;</span><span class="p">,</span> <span class="s2">&quot;before_update_entity&quot;</span><span class="p">)</span>
+    <span class="n">order</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>  <span class="c1"># should be run before other hooks</span>
+
+<div class="viewcode-block" id="UploadHook.__call__"><a class="viewcode-back" href="../../generated/schema/rql_upload.hooks.UploadHook.html#rql_upload.hooks.UploadHook.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; If a &#39;data&#39; field is uploaded, compute the associated fingerprint.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="s2">&quot;data&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">cw_edited</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">set_format_and_encoding</span><span class="p">()</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">cw_edited</span><span class="p">[</span><span class="s2">&quot;data&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">data</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">compute_sha1hex</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">getvalue</span><span class="p">())</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">entity</span><span class="o">.</span><span class="n">cw_edited</span><span class="p">[</span><span class="s2">&quot;data_sha1hex&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">data</span></div></div>
+
+
+<div class="viewcode-block" id="ServerStartupHook"><a class="viewcode-back" href="../../generated/schema/rql_upload.hooks.ServerStartupHook.html#rql_upload.hooks.ServerStartupHook">[docs]</a><span class="k">class</span> <span class="nc">ServerStartupHook</span><span class="p">(</span><span class="n">hook</span><span class="o">.</span><span class="n">Hook</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Deport files on file system rather than database indexation</span>
+
+<span class="sd">    An &#39;UploadFile&#39; entity data is deported on the server file system.</span>
+<span class="sd">    To do so, we configure the &#39;UploadFile&#39; &#39;data&#39; attribute with the</span>
+<span class="sd">    &#39;BytesFileSystemStorage&#39; storage.</span>
+<span class="sd">    The repository location is defined at the instance creation </span>
+<span class="sd">    &#39;upload_directory&#39; (instance parameter).</span>
+<span class="sd">    If no instance parameter is set, the &#39;file&#39; field won&#39;t be created.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">__regid__</span> <span class="o">=</span> <span class="s2">&quot;rql_upload.serverstartup&quot;</span>
+    <span class="n">events</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;server_startup&quot;</span><span class="p">,</span> <span class="s2">&quot;server_maintenance&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ServerStartupHook.__call__"><a class="viewcode-back" href="../../generated/schema/rql_upload.hooks.ServerStartupHook.html#rql_upload.hooks.ServerStartupHook.__call__">[docs]</a>    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Configuring the &#39;BytesFileSystem&#39; storage.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># In order sphinx to work properly: cw modify the path</span>
+        <span class="kn">from</span> <span class="nn">cubicweb.server.sources</span> <span class="kn">import</span> <span class="n">storages</span>
+
+        <span class="c1"># Get the defined upload folder</span>
+        <span class="n">upload_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="o">.</span><span class="n">vreg</span><span class="o">.</span><span class="n">config</span><span class="p">[</span><span class="s2">&quot;upload_directory&quot;</span><span class="p">]</span>
+
+        <span class="c1"># Create the folder if necessary</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">upload_dir</span><span class="p">):</span>
+                <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">upload_dir</span><span class="p">)</span>
+            <span class="c1"># Configure the storage folder</span>
+            <span class="n">storage</span> <span class="o">=</span> <span class="n">storages</span><span class="o">.</span><span class="n">BytesFileSystemStorage</span><span class="p">(</span><span class="n">upload_dir</span><span class="p">)</span>
+
+            <span class="c1"># Configure the storage file content</span>
+            <span class="n">storages</span><span class="o">.</span><span class="n">set_attribute_storage</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">repo</span><span class="p">,</span> <span class="s2">&quot;UploadFile&quot;</span><span class="p">,</span> <span class="s2">&quot;data&quot;</span><span class="p">,</span>
+                                           <span class="n">storage</span><span class="p">)</span>
+        <span class="k">except</span><span class="p">:</span>
+            <span class="k">pass</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+    <div class="clearer">
+    </div>
+  </div>
+  
+</div>
+
+<div class="footer">
+    &copy; 2015, NSAp developers &lt;antoine.grigis@cea.fr&gt;.
+</div>
+  </body>
+</html>
