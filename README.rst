@@ -7,6 +7,8 @@ Summary
 =======
 
 Cube to upload data in a cubicweb CWUpload entity.
+Check `this link <https://neurospin.github.io/rql_upload/>`_ for the complete
+documentation.
 
 
 How to
