@@ -1,5 +1,5 @@
 ==========
-RQL UPLOAD
+RQL upload
 ==========
 
 
@@ -93,12 +93,3 @@ An example with three forms 'test1', 'test2' and 'test3':
                 "required": "False", "label": "file2"}
         ]
     }
-
-
-    
-
-
-
-
-
-

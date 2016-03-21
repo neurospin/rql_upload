@@ -38,6 +38,7 @@ class CWUploadForm(FieldsForm):
     """ Create a submit button.
     """
     __regid__ = "upload-form"
+    title = _("Upload form")
 
     form_buttons = [formwidgets.SubmitButton(cwaction="apply")]
     upload_title = formfields.StringField(
@@ -70,6 +71,7 @@ class CWUploadView(View):
         'rql_upload.views.formfields.formfields' module.
     """
     __regid__ = "upload-view"
+    title = _("Upload form")
 
     bool_map = {
         "True": True,

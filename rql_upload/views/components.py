@@ -32,7 +32,7 @@ class CWUploadBox(component.CtxComponent):
     """
     __regid__ = "ctx-upload-box"
     __select__ = (component.CtxComponent.__select__ & ~anonymous_user())
-    title = _("Upload")
+    title = _("Upload forms")
     context = "left"
     order = 0
 
@@ -52,7 +52,7 @@ class CWUploadBox(component.CtxComponent):
             w(u'<div class="btn-toolbar">')
             w(u'<div class="btn-group-vertical btn-block">')
             w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-            w(u'{0}</a>'.format(self._cw._("Form: ") + 'ERROR: no json found'))
+            w(u'{0}</a>'.format("ERROR: no json found."))
             w(u'</div></div>')
 
         elif config == -2:
@@ -62,8 +62,7 @@ class CWUploadBox(component.CtxComponent):
             w(u'<div class="btn-toolbar">')
             w(u'<div class="btn-group-vertical btn-block">')
             w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-            w(u"{0}</a>".format(self._cw._("Form: ") + "ERROR: "
-               "json file can't be read"))
+            w(u"{0}</a>".format("ERROR: json file can't be read."))
             w(u'</div></div>')
 
         else:
@@ -75,6 +74,6 @@ class CWUploadBox(component.CtxComponent):
                 w(u'<div class="btn-toolbar">')
                 w(u'<div class="btn-group-vertical btn-block">')
                 w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-                w(u'{0}</a>'.format(form_name))
+                w(u'{0}</a>'.format(form_name.title()))
                 w(u'</div></div><br/>')
 
