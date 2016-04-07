@@ -4,7 +4,7 @@
     contain the root `toctree` directive.
 
 
-Rql Upload
+RQL Upload
 ==========
 
 Summary
@@ -38,8 +38,3 @@ Search
 =======
 
 :ref:`search`
-
-
-
-
-
