@@ -4,17 +4,17 @@
 modname = 'rql_upload'
 distname = 'cubicweb-rql-upload'
 
-numversion = (2, 0, 0)
+numversion = (2, 0, 1)
 version = '.'.join(str(num) for num in numversion)
 
-license = 'LGPL'
+license = 'CeCILL-B'
 author = 'NSAp'
-author_email = 'contact@logilab.fr'
-description = ''
-web = 'http://www.cubicweb.org/project/%s' % distname
+author_email = 'antoine.grigis@cea.fr'
+description = 'Cube to upload datasets'
+web = 'https://github.com/neurospin/rql_upload'
 
 __depends__ = {
-    'cubicweb': '>= 3.17.4'
+    'cubicweb': '>= 3.20.9'
 }
 __recommends__ = {}
 
