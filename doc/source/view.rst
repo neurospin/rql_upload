@@ -6,7 +6,7 @@
 Views documentation
 ###################
 
-Documentation regarding views defined on the cube.
+Documentation regarding views defined in the cube.
 
 .. currentmodule:: rql_upload.views
 
