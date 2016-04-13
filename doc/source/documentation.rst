@@ -3,7 +3,7 @@
   <div class="container-index">
 
 
-Documentation of the Rql_upload cube
+Documentation of the rql_upload cube
 ====================================
 
 .. raw:: html

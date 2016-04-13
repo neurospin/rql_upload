@@ -71,7 +71,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'Rql Upload'
+project = u'RQL Upload'
 copyright = u'2015, NSAp developers <antoine.grigis@cea.fr>'
 
 # The version info for the project you're documenting, acts as replacement for
@@ -145,10 +145,10 @@ html_theme_path = ['_themes']
 
 # The name for this set of Sphinx documents.  If None, it defaults to
 # "<project> v<release> documentation".
-html_title = "Rql upload"
+html_title = "RQL Upload"
 
 # A shorter title for the navigation bar.  Default is the same as html_title.
-html_short_title = "Rql upload"
+html_short_title = "RQL Upload"
 
 # The name of an image file (relative to this directory) to place at the top
 # of the sidebar.
