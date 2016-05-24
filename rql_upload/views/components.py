@@ -20,7 +20,7 @@ from utils import load_forms
 ###############################################################################
 
 class CWUploadBox(component.CtxComponent):
-    """ Class that generate a left box on the web browser to access all the 
+    """ Class that generate a left box on the web browser to access all the
     decalred forms in the 'upload_structure_json' cubicweb instance parameter.
 
     It will appear on the left and contain the names if all forms defined in the
@@ -32,14 +32,14 @@ class CWUploadBox(component.CtxComponent):
     """
     __regid__ = "ctx-upload-box"
     __select__ = (component.CtxComponent.__select__ & ~anonymous_user())
-    title = _("Upload")
+    title = _("Upload forms")
     context = "left"
     order = 0
 
     def render_body(self, w, **kwargs):
         """ Method that creates the upload navigation box (generates html code).
-            
-            This method displays error messages if the forms can't be extrated 
+
+            This method displays error messages if the forms can't be extracted
             from the configuration file.
         """
         # Get the field form structure
@@ -52,7 +52,7 @@ class CWUploadBox(component.CtxComponent):
             w(u'<div class="btn-toolbar">')
             w(u'<div class="btn-group-vertical btn-block">')
             w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-            w(u'{0}</a>'.format(self._cw._("Form: ") + 'ERROR: no json found'))
+            w(u'{0}</a>'.format("ERROR: no json found."))
             w(u'</div></div>')
 
         elif config == -2:
@@ -62,8 +62,7 @@ class CWUploadBox(component.CtxComponent):
             w(u'<div class="btn-toolbar">')
             w(u'<div class="btn-group-vertical btn-block">')
             w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-            w(u"{0}</a>".format(self._cw._("Form: ") + "ERROR: "
-               "json file can't be read"))
+            w(u"{0}</a>".format("ERROR: json file can't be read."))
             w(u'</div></div>')
 
         else:
@@ -75,6 +74,5 @@ class CWUploadBox(component.CtxComponent):
                 w(u'<div class="btn-toolbar">')
                 w(u'<div class="btn-group-vertical btn-block">')
                 w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-                w(u'{0}</a>'.format(form_name))
+                w(u'{0}</a>'.format(form_name.title()))
                 w(u'</div></div><br/>')
-

@@ -10,10 +10,24 @@
 # CW import
 from cubicweb.web.action import Action
 from cubicweb.web import formfields
+from cubicweb.web import formwidgets
 
 
 # Define global parameter
 DECLARED_FIELDS = {}
+
+
+# Define multiple fileField
+
+class MultipleFileField(formfields.FileField):
+    """
+    """
+    widget = formwidgets.FileInput(attrs={'multiple': 'multiple'})
+
+    def __init__(self, format_field=None, encoding_field=None, name_field=None,
+                 **kwargs):
+        super(MultipleFileField, self).__init__(**kwargs)
+
 
 
 ###############################################################################
@@ -27,7 +41,7 @@ def registration_callback(vreg):
     The preregistered fields are:
 
     * **Basic fields**: StringField - PasswordField - IntField -
-      FloatField - BooleanField - DateField - DateTimeField - TimeField - 
+      FloatField - BooleanField - DateField - DateTimeField - TimeField -
       TimeIntervalField.
 
     * **Compound fields**: FileField.
@@ -41,3 +55,5 @@ def registration_callback(vreg):
         # Define class parameters
         DECLARED_FIELDS[field_name] = formfields.__dict__[field_name]
 
+    DECLARED_FIELDS["MultipleFileField"] = MultipleFileField
+ 

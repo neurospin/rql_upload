@@ -1,5 +1,5 @@
 ==========
-RQL UPLOAD
+RQL upload
 ==========
 
 
@@ -7,6 +7,8 @@ Summary
 =======
 
 Cube to upload data in a cubicweb CWUpload entity.
+Check `this link <https://neurospin.github.io/rql_upload/>`_ for the complete
+documentation.
 
 
 How to
@@ -93,12 +95,3 @@ An example with three forms 'test1', 'test2' and 'test3':
                 "required": "False", "label": "file2"}
         ]
     }
-
-
-    
-
-
-
-
-
-
