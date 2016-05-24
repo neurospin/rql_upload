@@ -14,6 +14,7 @@ from yams.buildobjs import RichString
 from yams.buildobjs import SubjectRelation
 from cubicweb.schema import ERQLExpression
 from cubicweb.schema import RQLUniqueConstraint
+from cubicweb.schemas.bootstrap import CWGroup
 
 
 ###############################################################################
@@ -140,22 +141,18 @@ class CWUpload(EntityType):
     __permissions__ = UPLOAD_PERMISSIONS
 
     # Entity parameters
-    title = String(
-        maxsize=256, required=True,
-        constraints=[
-            RQLUniqueConstraint(
-                "X title N, S title N, X owned_by U, X is CWUpload",
-                mainvars="X",
-                msg=_("this name is already used"))
-        ])
     form_name = String(maxsize=256, required=True)
 
     # The link to the uploaded data
     result_data = SubjectRelation(
-        "UploadFile", cardinality="**", composite="subject")
+        "UploadFile", cardinality="1*", composite="subject")
     result_form = SubjectRelation(
-        "UploadForm", cardinality="**", composite="subject")
+        "UploadForm", cardinality="1?", composite="subject")
 
     # The link to the owner of the data
     uploaded_by = SubjectRelation(
         "CWUser", cardinality="1*", composite="subject")
+
+
+CWGroup.add_relation(String(maxsize=128), name="description")
+

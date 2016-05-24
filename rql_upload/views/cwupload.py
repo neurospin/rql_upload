@@ -11,6 +11,7 @@
 import json
 import os
 import re
+import traceback
 
 # CW import
 from cgi import parse_qs
@@ -41,8 +42,6 @@ class CWUploadForm(FieldsForm):
     title = _("Upload form")
 
     form_buttons = [formwidgets.SubmitButton(cwaction="apply")]
-    upload_title = formfields.StringField(
-        name="upload_title", label="Title", required=True, value="<unique>")
 
 
 @monkeypatch(FormRenderer)
@@ -100,6 +99,7 @@ class CWUploadView(View):
         # Create a structure to store values that must be checked before the
         # insertion in the data base
         check_struct = {}
+        required_file_fields = {}
 
         # If json file missing, generate error page
         if config == -1:
@@ -139,14 +139,30 @@ class CWUploadView(View):
             "upload-form", self._cw, action="", form_name=form_name)
         try:
             for field in config[form_name]:
+                # Remove reserved field keys
+                if "rql" in field:
+                    rql, dest_name = field.pop("rql").split(":")
+                    if dest_name not in field:
+                        raise ValueError("{0} not in field attributes.".format(
+                            dest_name))
+                    if not isinstance(field[dest_name], list):
+                        raise ValueError(
+                            "{0} field attribute is not a list.".format(
+                                dest_name))
+                    rset = self._cw.execute(rql)
+                    for row in rset.rows:
+                        field[dest_name].extend(row)
                 field_type = field.pop("type")
+                
+                # 
                 if field_type == "BooleanField" and "value" in field:
                     field["value"] = self.bool_map[field["value"]]
                 if "required" in field:
                     field["required"] = self.bool_map[field["required"]]
                 if "check_value" in field:
                     check_struct[field["name"]] = field.pop("check_value")
-                if field_type == "FileField":
+                if (field_type == "FileField" or 
+                        field_type == "MultipleFileField"):
                     if not os.path.isdir(
                         self._cw.vreg.config["upload_directory"]):
                         self.w(u"<p class='label label-danger'>{0}: File "
@@ -157,6 +173,9 @@ class CWUploadView(View):
                                     field.pop("label"),
                                     self._cw.vreg.config["upload_directory"]))
                         continue
+                    if "required" in field and field["required"]:
+                        required_file_fields[field["name"]] = field["label"]
+
                 # Get the declared field and add it to the form
                 if field_type in DECLARED_FIELDS:
                     form.append_field(DECLARED_FIELDS[field_type](**field))
@@ -165,6 +184,7 @@ class CWUploadView(View):
                         u"<p class='label label-danger'>'{0}': Unknown field "
                          "</p>".format(field_type))
         except:
+            print traceback.format_exc()
             self.w(u'<div class="panel panel-danger">')
             self.w(u'<div class="panel-heading">')
             self.w(u'<h2 class="panel-title">ERROR</h2>')
@@ -181,11 +201,16 @@ class CWUploadView(View):
         try:
             posted = form.process_posted()
 
+            for required_field, field_label in required_file_fields.items():
+                if required_field not in posted:
+                    raise RequestError("Required value(s) in {}".format(
+                        field_label))
+
             # Get the form parameters
             inline_params = {}
             deported_params = {}
             for field_name, field_value in posted.iteritems():
-
+                print field_name
                 # Filter fields stored in the db or deported on the filesystem
                 if isinstance(field_value, Binary):
                     # Check if the field value is valid
@@ -236,14 +261,14 @@ class CWUploadView(View):
 
             # Create the CWUpload entity
             upload_eid = self._cw.create_entity(
-                "CWUpload", title=unicode(inline_params["upload_title"]),
+                "CWUpload",
                 form_name=unicode(form_name), result_form=form_eid,
                 result_data=upload_file_eids, uploaded_by=user_eid).eid
 
             # Redirection to the created CWUpload entity
             raise Redirect(self._cw.build_url(eid=upload_eid))
         except RequestError as error:
-            self.w(u"<p class='label label-danger'>{0}</p>".format(error))
+                self.w(u"<p class='label label-danger'>{0}</p>".format(error))
 
         # Form rendering
         self.w(u"<legend>'{0}' form</legend>".format(
