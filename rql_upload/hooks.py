@@ -10,9 +10,10 @@
 
 # System import
 import os
+from importlib import import_module
+import json
 
 # CW import
-from cubicweb.server import hook
 from cubicweb.server import hook
 from cubicweb.predicates import is_instance
 
@@ -22,7 +23,7 @@ class UploadHook(hook.Hook):
     fields.
     """
     __regid__ = "rql_upload.upload"
-    __select__ = hook.Hook.__select__ & is_instance("UploadFile", "UploadForm")
+    __select__ = hook.Hook.__select__ & is_instance("UploadFile")
     events = ("before_add_entity", "before_update_entity")
     order = -1  # should be run before other hooks
 
@@ -30,6 +31,7 @@ class UploadHook(hook.Hook):
         """ If a 'data' field is uploaded, compute the associated fingerprint.
         """
         if "data" in self.entity.cw_edited:
+            #print dir(self.entity), self.entity.__class__.__name__
             self.entity.set_format_and_encoding()
             data = self.entity.cw_edited["data"]
             if data is not None:
@@ -59,10 +61,15 @@ class ServerStartupHook(hook.Hook):
         # Get the defined upload folder
         upload_dir = self.repo.vreg.config["upload_directory"]
 
+        # Get the defined validated folder
+        validated_dir = self.repo.vreg.config["validated_directory"]
+
         # Create the folder if necessary
         try:
             if not os.path.exists(upload_dir):
                 os.makedirs(upload_dir)
+            if not os.path.exists(validated_dir):
+                os.makedirs(validated_dir)
             # Configure the storage folder
             storage = storages.BytesFileSystemStorage(upload_dir)
 
@@ -71,3 +78,16 @@ class ServerStartupHook(hook.Hook):
                                            storage)
         except:
             pass
+
+        # Execute all registred AsynchroneChecks
+        forms_file = self.repo.vreg.config["upload_structure_json"]
+        with open(forms_file) as open_json:
+            forms = json.load(open_json)
+        for name in forms:
+            full_method_name = forms[name]["ASynchroneCheck"]
+            if full_method_name:
+                module_name = full_method_name[0:full_method_name.rfind('.')]
+                method_name = full_method_name[full_method_name.rfind('.')+1:]
+                module = import_module(module_name)
+                method = getattr(module, method_name)
+                self.repo.looping_task(20, method, self.repo)

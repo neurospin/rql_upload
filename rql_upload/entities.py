@@ -13,7 +13,17 @@ import hashlib
 
 # CW import
 from cubicweb.entities import AnyEntity
-from logilab.mtconverter import guess_mimetype_and_encoding
+
+
+class EntityUploadField(AnyEntity):
+    """ Define the 'UploadField' entity associated functions. """
+
+    __regid__ = "UploadField"
+
+    def dc_title(self):
+        """ Method that defines the upload field entity title. """
+
+        return self.name
 
 
 class EntityUploadFile(AnyEntity):
@@ -48,46 +58,54 @@ class EntityUploadFile(AnyEntity):
         """
         return self._cw.data_url(os.path.join("icons", "upload.ico"))
 
+    @property
+    def symbol(self):
+        return "<span class='glyphicon glyphicon-file'></span>"
 
-class EntityUploadForm(AnyEntity):
-    """ Define the 'UploadForm' entity associated functions.
-    """
-    __regid__ = "UploadForm"
-
-    def set_format_and_encoding(self):
-        """ Try to set format and encoding according to known values (filename,
-        file content, format, encoding).
-
-        This method must be called in a before_[add|update]_entity hook else it
-        won't have any effect.
+    def get_file_path(self):
+        """ Return the file path of the UploadFile using a sql query
         """
-        assert "data" in self.cw_edited, "missing mandatory attribute data"
-        data_format, data_encoding = guess_mimetype_and_encoding(
-                data=self.cw_edited.get("data"),
-                # use get and not get_value since data has changed, we only want
-                # to consider explicitly specified values, not old ones
-                filename=self.cw_edited.get("data_name"),
-                format=self.cw_edited.get("data_format"),  # encoding=encoding,
-                fallbackencoding=self._cw.encoding)
-        if data_format:
-            self.cw_edited["data_format"] = unicode(data_format)
-        if data_encoding:
-            self.cw_edited["data_encoding"] = unicode(data_encoding)
 
-    def compute_sha1hex(self, value=None):
-        """ Compute a hash of the data.
-        """
-        if value is None and self.data is not None:
-            value = self.data.getvalue()
-        if value is not None:
-            return unicode(hashlib.sha1(value).hexdigest())
+        sql = "SELECT cw_data FROM cw_uploadfile WHERE cw_eid = '{0}'"
+        sql = sql.format(self.eid)
+        cursor = self._cw.system_sql(sql)
+        path = cursor.fetchall()[0][0].__str__()
+        return path
+
+
+class EntityCWUpload(AnyEntity):
+    """ Define the 'CWUpload' entity associated functions. """
+
+    __regid__ = "CWUpload"
+    __bootstap_glyph__ = True
 
     def dc_title(self):
-        """ Method that defines the upload file entity title.
-        """
-        return self.data_name
+        """ Method that defines the upload entity title. """
 
-    def icon_url(self):
-        """ Method to get an icon for this entity.
+        return u"{} by {} on {} at {}".format(
+            self.form_name,
+            self.dc_creator(),
+            self.creation_date.strftime('%Y/%m/%d'),
+            self.creation_date.strftime('%H:%M:%S')
+        )
+
+    @property
+    def symbol(self):
+        if self.status == 'Quarantine':
+            return "<span class='glyphicon glyphicon-cog' />"
+        elif self.status == 'Rejected':
+            return "<span class='glyphicon glyphicon-remove' />"
+        elif self.status == 'Validated':
+            return "<span class='glyphicon glyphicon-ok' />"
+        else:
+            return "<span class='glyphicon glyphicon-cloud-upload' />"
+
+    def get_field_value(self, field_name):
+        """ Return the value of the UploadField with the field_name.
+            Return None if the upload not have the related UploadField
         """
-        return self._cw.data_url(os.path.join("icons", "upload.ico"))
+
+        for eField in self.upload_fields:
+            if eField.name == field_name:
+                return eField.value
+        return None
