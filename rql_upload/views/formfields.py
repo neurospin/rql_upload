@@ -8,31 +8,16 @@
 ##########################################################################
 
 # CW import
-from cubicweb.web.action import Action
 from cubicweb.web import formfields
-from cubicweb.web import formwidgets
 
 
 # Define global parameter
 DECLARED_FIELDS = {}
 
-
-# Define multiple fileField
-
-class MultipleFileField(formfields.FileField):
-    """
-    """
-    widget = formwidgets.FileInput(attrs={'multiple': 'multiple'})
-
-    def __init__(self, format_field=None, encoding_field=None, name_field=None,
-                 **kwargs):
-        super(MultipleFileField, self).__init__(**kwargs)
-
-
-
 ###############################################################################
 # Registration callback
 ###############################################################################
+
 
 def registration_callback(vreg):
     """ The authorized form fields are registered from this function.
@@ -48,12 +33,10 @@ def registration_callback(vreg):
     """
 
     # Got through fields we want to register
-    for field_name in ["StringField", "PasswordField", "IntField", "FloatField",
-                       "BooleanField", "DateField", "DateTimeField",
+    for field_name in ["StringField", "PasswordField",
+                       "IntField", "FloatField", "BooleanField",
+                       "DateField", "DateTimeField",
                        "TimeField", "TimeIntervalField", "FileField"]:
 
         # Define class parameters
         DECLARED_FIELDS[field_name] = formfields.__dict__[field_name]
-
-    DECLARED_FIELDS["MultipleFileField"] = MultipleFileField
- 
