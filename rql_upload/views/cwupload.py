@@ -8,19 +8,17 @@
 ##########################################################################
 
 # System import
-import json
 import os
 import re
 import traceback
+from importlib import import_module
 
 # CW import
 from cgi import parse_qs
-from logilab.mtconverter import xml_escape
 from logilab.common.decorators import monkeypatch
 from cubicweb import Binary
 from cubicweb.view import View
 from cubicweb.web import Redirect
-from cubicweb.web import formfields
 from cubicweb.web import formwidgets
 from cubicweb.web import RequestError
 from cubicweb.web.views.forms import FieldsForm
@@ -51,7 +49,7 @@ def render_content(self, w, form, values):
     if self.display_progress_div:
         w(u'<div id="progress" class="alert alert-warning">')
         w(u'<img width="50" src="{0}"/>'.format(
-              self._cw.build_url('data/images/uploading.gif')))
+            self._cw.build_url('data/images/uploading.gif')))
         w(u'<b>Work in progress, please wait ...</b>')
         w(u'</div>')
 
@@ -137,11 +135,14 @@ class CWUploadView(View):
         # Create the form
         form = self._cw.vreg["forms"].select(
             "upload-form", self._cw, action="", form_name=form_name)
+        dict_fieldName_fieldType = {}
+        dict_fieldName_fieldLabel = {}
         try:
-            for field in config[form_name]:
+            for field in config[form_name]["Fields"]:
                 # Remove reserved field keys
                 if "rql" in field:
                     rql, dest_name = field.pop("rql").split(":")
+                    rql = rql % {'uid': self._cw.user_data()['login']}
                     if dest_name not in field:
                         raise ValueError("{0} not in field attributes.".format(
                             dest_name))
@@ -153,15 +154,16 @@ class CWUploadView(View):
                     for row in rset.rows:
                         field[dest_name].extend(row)
                 field_type = field.pop("type")
-                
-                # 
+                dict_fieldName_fieldType[field["name"]] = field_type
+                dict_fieldName_fieldLabel[field["name"]] = field["label"]
+                #
                 if field_type == "BooleanField" and "value" in field:
                     field["value"] = self.bool_map[field["value"]]
                 if "required" in field:
                     field["required"] = self.bool_map[field["required"]]
                 if "check_value" in field:
                     check_struct[field["name"]] = field.pop("check_value")
-                if (field_type == "FileField" or 
+                if (field_type == "FileField" or
                         field_type == "MultipleFileField"):
                     if not os.path.isdir(
                         self._cw.vreg.config["upload_directory"]):
@@ -198,80 +200,107 @@ class CWUploadView(View):
             return -1
 
         # Form processings
+        error_to_display = None
+
         try:
+
             posted = form.process_posted()
 
             for required_field, field_label in required_file_fields.items():
                 if required_field not in posted:
-                    raise RequestError("Required value(s) in {}".format(
+                    raise ValueError("Required value(s) in {}".format(
                         field_label))
 
             # Get the form parameters
-            inline_params = {}
-            deported_params = {}
+            file_entities = []
+            field_entities = []
+            checks_args = {}
             for field_name, field_value in posted.iteritems():
-                print field_name
+
                 # Filter fields stored in the db or deported on the filesystem
                 if isinstance(field_value, Binary):
                     # Check if the field value is valid
                     if field_name in check_struct:
                         file_name = self._cw.form[field_name][0]
-                        if re.match(check_struct[field_name],
+                        if re.match("^.*\.{}$".format(check_struct[field_name]),
                                     file_name) is None:
-                            raise RequestError(
+                            raise ValueError(
                                 "Find wrong file name '{0}' while searching "
                                 "for pattern '{1}'".format(
                                     file_name, check_struct[field_name]))
 
-                    # Add fs item
-                    deported_params[field_name] = field_value
+                    # Save UploadFile entities
+                    extension = os.path.splitext(file_name)
+                    file_entities.append(
+                        self._cw.create_entity(
+                            "UploadFile",
+                            name=field_name,
+                            data=field_value,
+                            data_extension=unicode(extension[1:]),
+                            data_name=unicode(file_name)
+                        )
+                    )
                 else:
                     # Check if the field value is valid
                     if field_name in check_struct:
                         if re.match(check_struct[field_name],
                                     str(field_value)) is None:
-                            raise RequestError(
+                            raise ValueError(
                                 "Find wrong parameter value '{0}' while "
                                 "searching for pattern '{1}'".format(
                                     field_value, check_struct[field_name]))
 
-                    # Add db item
-                    inline_params[field_name] = str(field_value)
-
-            # Get the eid of the current user
-            user_eid = self._cw.execute(
-                "Any X Where X is CWUser, X login "
-                "'{0}'".format(self._cw.session.login))[0][0]
-
-            # Save the inline parameters in an UploadForm entity
-            form_eid = self._cw.create_entity(
-                "UploadForm", data=Binary(json.dumps(inline_params)),
-                data_format=u"text/json", data_name=u"form.json",
-                uploaded_by=user_eid).eid
-
-            # Save deported parameters in UploadFile entities
-            upload_file_eids = []
-            for field_name, field_value in deported_params.iteritems():
-                file_name = self._cw.form[field_name][0]
-                basename, extension = os.path.splitext(file_name)
-                upload_file_eids.append(self._cw.create_entity(
-                    "UploadFile", data=field_value, title=unicode(basename),
-                    data_extension=unicode(extension[1:]),
-                    data_name=unicode(file_name), uploaded_by=user_eid).eid)
+                    # Save UploadField entities
+                    field_entities.append(
+                        self._cw.create_entity(
+                            "UploadField",
+                            name=unicode(field_name),
+                            value=unicode(field_value),
+                            type=unicode(dict_fieldName_fieldType[field_name]),
+                            label=unicode(dict_fieldName_fieldLabel[field_name]),
+                        )
+                    )
+                checks_args[field_name] = field_value
 
             # Create the CWUpload entity
-            upload_eid = self._cw.create_entity(
+            upload = self._cw.create_entity(
                 "CWUpload",
-                form_name=unicode(form_name), result_form=form_eid,
-                result_data=upload_file_eids, uploaded_by=user_eid).eid
+                form_name=unicode(form_name),
+                status=u'Quarantine',
+                upload_fields=field_entities,
+                upload_files=file_entities
+            )
+
+            #call synchrone chek method
+            full_name = config[form_name]["SynchroneCheck"]
+            if full_name:
+                module_name = full_name[0:full_name.rfind('.')]
+                method_name = full_name[full_name.rfind('.')+1:]
+                module = import_module(module_name)
+                method = getattr(module, method_name)
+                result = method(upload)
+                if not result[0]:
+                    raise ValueError(result[1])
 
             # Redirection to the created CWUpload entity
-            raise Redirect(self._cw.build_url(eid=upload_eid))
-        except RequestError as error:
-                self.w(u"<p class='label label-danger'>{0}</p>".format(error))
+            raise Redirect(self._cw.build_url(eid=upload.eid))
+        except RequestError:
+            error_to_display = None
+        except ValueError as error:
+            print traceback.format_exc()
+            error_to_display = error
 
         # Form rendering
-        self.w(u"<legend>'{0}' form</legend>".format(
+        self.w(u"<legend>'{0}' upload form</legend>".format(
             form_name))
 
         form.render(w=self.w, formvalues=self._cw.form)
+        if error_to_display is not None:
+            self.w(u'<div class="panel panel-danger">')
+            self.w(u'<div class="panel-heading">')
+            self.w(u'<h2 class="panel-title">ULPLOAD ERROR</h2>')
+            self.w(u'</div>')
+            self.w(u'<div class="panel-body">')
+            self.w(u"{0}".format(error_to_display))
+            self.w(u'</div>')
+            self.w(u'</div>')

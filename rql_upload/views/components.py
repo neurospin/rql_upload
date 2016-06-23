@@ -74,5 +74,33 @@ class CWUploadBox(component.CtxComponent):
                 w(u'<div class="btn-toolbar">')
                 w(u'<div class="btn-group-vertical btn-block">')
                 w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-                w(u'{0}</a>'.format(form_name.title()))
+                w(u'{0}</a>'.format(form_name))
                 w(u'</div></div><br/>')
+
+
+class CWUploadedBox(component.CtxComponent):
+    """ Class that generate a left box on the web browser to access all user
+        and group uploads.
+
+    .. warning::
+
+        It will NOT appear for anonymous users.
+    """
+    __regid__ = "ctx-uploaded-box"
+    __select__ = (component.CtxComponent.__select__ & ~anonymous_user())
+    title = _("Uploaded data")
+    context = "left"
+    order = 1
+
+    def render_body(self, w, **kwargs):
+        rql = "Any X WHERE X is CWUpload, X created_by U, U login '{}'"
+        rql = rql.format(self._cw.user_data()['login'])
+        href = self._cw.build_url(
+            "view",
+            rql=rql
+        )
+        w(u'<div class="btn-toolbar">')
+        w(u'<div class="btn-group-vertical btn-block">')
+        w(u'<a class="btn btn-primary" href="{0}">'.format(href))
+        w(u'My uploads</a>')
+        w(u'</div></div><br/>')
