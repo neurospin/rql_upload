@@ -18,9 +18,9 @@ from cubicweb.server import hook
 from cubicweb.predicates import is_instance
 
 
-class UploadHook(hook.Hook):
-    """ An upload entity is created/updated, store a fingerprint of binary data
-    fields.
+class UploadFileHook(hook.Hook):
+    """ An upload file entity is created/updated,
+    store a fingerprint of binary data fields.
     """
     __regid__ = "rql_upload.upload"
     __select__ = hook.Hook.__select__ & is_instance("UploadFile")
@@ -31,7 +31,6 @@ class UploadHook(hook.Hook):
         """ If a 'data' field is uploaded, compute the associated fingerprint.
         """
         if "data" in self.entity.cw_edited:
-            #print dir(self.entity), self.entity.__class__.__name__
             self.entity.set_format_and_encoding()
             data = self.entity.cw_edited["data"]
             if data is not None:
