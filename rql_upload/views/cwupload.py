@@ -214,7 +214,6 @@ class CWUploadView(View):
             # Get the form parameters
             file_entities = []
             field_entities = []
-            checks_args = {}
             for field_name, field_value in posted.iteritems():
 
                 # Filter fields stored in the db or deported on the filesystem
@@ -260,7 +259,6 @@ class CWUploadView(View):
                             label=unicode(dict_fieldName_fieldLabel[field_name]),
                         )
                     )
-                checks_args[field_name] = field_value
 
             # Create the CWUpload entity
             upload = self._cw.create_entity(
@@ -280,6 +278,7 @@ class CWUploadView(View):
                 method = getattr(module, method_name)
                 result = method(upload)
                 if not result[0]:
+                    self._cw.cnx.rollback()
                     raise ValueError(result[1])
 
             # Redirection to the created CWUpload entity
@@ -287,7 +286,6 @@ class CWUploadView(View):
         except RequestError:
             error_to_display = None
         except ValueError as error:
-            print traceback.format_exc()
             error_to_display = error
 
         # Form rendering
