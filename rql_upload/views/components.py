@@ -93,7 +93,7 @@ class CWUploadedBox(component.CtxComponent):
     order = 1
 
     def render_body(self, w, **kwargs):
-        rql = "Any X WHERE X is CWUpload, X created_by U, U login '{}'"
+        rql = "Any X ORDERBY X DESC WHERE X is CWUpload, X created_by U, U login '{}'"
         rql = rql.format(self._cw.user_data()['login'])
         href = self._cw.build_url(
             "view",
