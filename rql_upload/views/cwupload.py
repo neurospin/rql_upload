@@ -137,12 +137,13 @@ class CWUploadView(View):
             "upload-form", self._cw, action="", form_name=form_name)
         dict_fieldName_fieldType = {}
         dict_fieldName_fieldLabel = {}
+
         try:
             for field in config[form_name]["Fields"]:
                 # Remove reserved field keys
                 if "rql" in field:
                     rql, dest_name = field.pop("rql").split(":")
-                    rql = rql % {'uid': self._cw.user_data()['login']}
+                    rql = rql.format(self._cw.user_data()['login'])
                     if dest_name not in field:
                         raise ValueError("{0} not in field attributes.".format(
                             dest_name))
@@ -177,10 +178,16 @@ class CWUploadView(View):
                         continue
                     if "required" in field and field["required"]:
                         required_file_fields[field["name"]] = field["label"]
-
+                style = None
+                if "style" in field:
+                    style = field.pop("style")
                 # Get the declared field and add it to the form
                 if field_type in DECLARED_FIELDS:
                     form.append_field(DECLARED_FIELDS[field_type](**field))
+                    if style:
+                        widget = form.field_by_name(
+                            field["name"]).get_widget(form)
+                        widget.attrs['style'] = unicode(style)
                 else:
                     self.w(
                         u"<p class='label label-danger'>'{0}': Unknown field "
