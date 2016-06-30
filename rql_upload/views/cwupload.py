@@ -178,6 +178,8 @@ class CWUploadView(View):
                         continue
                     if "required" in field and field["required"]:
                         required_file_fields[field["name"]] = field["label"]
+                if "sort" in field:
+                    field["sort"] = self.bool_map[field["sort"]]
                 style = None
                 if "style" in field:
                     style = field.pop("style")
@@ -232,7 +234,7 @@ class CWUploadView(View):
                                     file_name) is None:
                             raise ValueError(
                                 "Find wrong file name '{0}' while searching "
-                                "for pattern '{1}'".format(
+                                "for extension '{1}'".format(
                                     file_name, check_struct[field_name]))
 
                     # Save UploadFile entities
@@ -285,7 +287,6 @@ class CWUploadView(View):
                 method = getattr(module, method_name)
                 result = method(upload)
                 if not result[0]:
-                    self._cw.cnx.rollback()
                     raise ValueError(result[1])
 
             # Redirection to the created CWUpload entity
@@ -301,6 +302,7 @@ class CWUploadView(View):
 
         form.render(w=self.w, formvalues=self._cw.form)
         if error_to_display is not None:
+            self._cw.cnx.rollback()
             self.w(u'<div class="panel panel-danger">')
             self.w(u'<div class="panel-heading">')
             self.w(u'<h2 class="panel-title">ULPLOAD ERROR</h2>')
