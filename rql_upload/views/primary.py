@@ -88,14 +88,16 @@ class CWUploadView(PrimaryView):
         self.w(u'<b>{}</b>'.format(eUpload.status))
         print 'error: {}'.format(eUpload.error)
         if eUpload.error:
-            self.w(u'<div class="panel panel-danger">{}</di>'.format(eUpload.error))
+            self.w(u'<div class="panel panel-danger">{}</div>'.format(
+                eUpload.error))
         self.w(u'</div>')
 
         self.w(u'<div>')
         self.w(u'<h3>Fields</h3>')
         self.w(u'<table class="upload-table">')
         self.w(u'<tr><th>Name</th><th>Value</th></tr>')
-        for eField in eUpload.upload_fields:
+        for eField in sorted(eUpload.upload_fields,
+                             key=lambda field:field.name):
             self.w(u'<tr><td>{0}</td><td>{1}</td></tr>'.format(
                    eField.label, eField.value))
         self.w(u'</table>')
