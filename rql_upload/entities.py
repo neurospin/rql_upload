@@ -68,7 +68,10 @@ class EntityUploadFile(AnyEntity):
 
         sql = "SELECT cw_data FROM cw_uploadfile WHERE cw_eid = '{0}'"
         sql = sql.format(self.eid)
-        cursor = self._cw.cnx.system_sql(sql)
+        if hasattr(self._cw, 'system_sql'):
+            cursor = self._cw.system_sql(sql)
+        else:
+            cursor = self._cw.cnx.system_sql(sql)
         path = cursor.fetchall()[0][0].__str__()
         return path
 
