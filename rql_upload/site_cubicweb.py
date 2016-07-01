@@ -27,4 +27,13 @@ options = (
             "group": "rql_upload", "level": 0,
         }
     ),
+    (
+        "upload_log_dir",
+        {
+            "type": "string",
+            "default": "",
+            "help": "base directory in which log file is write.",
+            "group": "rql_upload", "level": 0,
+        }
+    ),
 )
