@@ -107,7 +107,8 @@ class CWUploadView(PrimaryView):
         self.w(u'<h3>Files</h3>')
         self.w(u'<table class="upload-table">')
         self.w(u'<tr><th>Name</th><th>SHA1</th></tr>')
-        for eFile in eUpload.upload_files:
+        for eFile in sorted(eUpload.upload_files,
+                            key=lambda field:field.name):
             self.w(u'<tr><td>{0}</td><td>{1}</td></tr>'.format(
                    eFile.data_name, eFile.data_sha1hex))
         self.w(u'</table>')
