@@ -13,6 +13,7 @@ from yams.buildobjs import Bytes
 from yams.buildobjs import RichString
 from yams.buildobjs import RelationDefinition
 from cubicweb.schema import ERQLExpression
+from yams.buildobjs import SubjectRelation
 
 
 ###############################################################################
@@ -21,14 +22,14 @@ from cubicweb.schema import ERQLExpression
 
 UPLOAD_PERMISSIONS = {
     "read": (
-        "managers", "uploaders"),
-        #ERQLExpression("X created_by U")),
-    "add": ("managers", "uploaders"),
+        "managers",
+        ERQLExpression("X created_by U")),
+    "add": ("managers", ),
     "update": ("managers", ),
     "delete": ("managers", ),
 }
 
-RELATION_PERMISSIONS = {
+UPLOAD_RELATION_PERMISSIONS = {
     "read": (
         "managers",
         "users"),
@@ -95,25 +96,25 @@ class UploadField(EntityType):
     # Set default permissions
     __permissions__ = UPLOAD_PERMISSIONS
 
-    # the name field used in the form
+    # The name field used in the form
     name = String(
         maxsize=64,
         required=True,
         description=unicode("name field used in form"))
-    # the value defined in the form
+    # The value defined in the form
     value = RichString(
         default_format="text/rest",
-        description=unicode("value defined in form"))
-    # the value type
+        description=unicode("the value defined in the form."))
+    # The value type
     type = String(
         maxsize=256,
         required=True,
-        description=unicode("value type"))
-    # the label used in the form
+        description=unicode("the value type."))
+    # The label used in the form
     label = String(
         maxsize=64,
         required=True,
-        description=unicode("label used in form"))
+        description=unicode("the label used in the form."))
 
 
 class CWUpload(EntityType):
@@ -133,20 +134,20 @@ class CWUpload(EntityType):
     # Set default permissions
     __permissions__ = UPLOAD_PERMISSIONS
 
-    # the name of the form used to upload data
+    # The name of the form used to upload data
     form_name = String(
         maxsize=256,
         required=True,
-        description=unicode("form name label used to upload data"))
-    # the status of the upload
+        description=unicode("form name label used to upload data."))
+    # The status of the upload
     status = String(
         required=True,
-        vocabulary=('Quarantine', 'Rejected', 'Validated'),
-        description=unicode("upload status"))
-    # the eror message of the upload
+        vocabulary=("Quarantine", "Rejected", "Validated"),
+        description=unicode("upload status."))
+    # The error message of the upload
     error = RichString(
         default_format="text/rest",
-        description=unicode("eror message"))
+        description=unicode("eror message."))
 
 
 class upload_files(RelationDefinition):
@@ -154,8 +155,8 @@ class upload_files(RelationDefinition):
     A CWUpload have 0..n UploadFile.
     An UploadFile have 1 CWUpload.
     """
+    __permissions__ = UPLOAD_RELATION_PERMISSIONS
 
-    __permissions__ = RELATION_PERMISSIONS
     inlined = False
     subject = "CWUpload"
     object = "UploadFile"
@@ -168,8 +169,8 @@ class upload_fields(RelationDefinition):
     A CWUpload have 0..n UploadField.
     An UploadField have 1 CWUpload.
     """
+    __permissions__ = UPLOAD_RELATION_PERMISSIONS
 
-    __permissions__ = RELATION_PERMISSIONS
     inlined = False
     subject = "CWUpload"
     object = "UploadField"

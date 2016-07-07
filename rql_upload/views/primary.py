@@ -11,112 +11,47 @@
 import json
 
 # CW import
-from cubicweb.web.views.primary import PrimaryView
+from cubes.piws.views.primary import PIWSPrimaryView
 from cubicweb.predicates import is_instance
-from logilab.mtconverter import xml_escape
 
 
-class UploadFormPrimaryView(PrimaryView):
-    """ Class that define how to display an UploadForm entity.
-
-    The table display may be tuned by specifing the 'upload-table' class in
-    a css.
+class CWUploadPrimaryView(PIWSPrimaryView):
+    """ Class that define how to display an CWUpload entity.
     """
-    __select__ = PrimaryView.__select__ & is_instance("UploadForm")
+    __select__ = PIWSPrimaryView.__select__ & is_instance("CWUpload")
     title = _("Upload form")
 
-    def display_form(self, entity):
+    def render_entity_attributes(self, upload):
         """ Generate the html code.
         """
-        # Get the json form
-        json_data = json.load(entity.data)
+        # Inherit page style
+        super(PIWSPrimaryView, self).render_entity_attributes(upload)
 
-        # Get the associated CWUpload entity
-        # cwupload = entity.reverse_result_form[0]
+        # Display a header
+        self.w(u"<table class='table cw-table-primary-entity'>")
+        self.render_attribute("&nbsp", upload.symbol, table=True)
+        self.w(u"</table>")
 
-        # Display a title
-        self.w(u'<div class="page-header">')
-        self.w(u'<h2>{0}</h2>'.format(xml_escape(entity.dc_title())))
-        self.w(u'</div>')
-
-        self.w(u'<table class="upload-table">')
-
-        # Display the form
-        for label, attribute in json_data.iteritems():
-            self.w(u'<tr><td><b>{0}</b></td><td>{1}</td></tr>'.format(
-                   self._cw._(label), attribute))
-
-        # Link to the upload entity
-        # self.w(u'<tr><td><b>{0}</b></td><td>{1}</td></tr>'.format(
-        #        self._cw._("Related upload"), cwupload.view("outofcontext")))
-
-        self.w(u'</table>')
-
-    def call(self, rset=None):
-        """ Create the form primary view.
-        """
-        # Get the entity that contains the form
-        entity = self.cw_rset.get_entity(0, 0)
-
-        # Display the form
-        self.display_form(entity)
-
-
-class CWUploadView(PrimaryView):
-    """
-    """
-
-    __select__ = PrimaryView.__select__ & is_instance("CWUpload")
-
-    def call(self, rset=None):
-        eUpload = self.cw_rset.get_entity(0, 0)
-        self.w(u'<div class="page-header">')
-        self.w(u'<h2>')
-        if eUpload.status == 'Quarantine':
-            self.w(u"<span class='glyphicon glyphicon-cog' />")
-        elif eUpload.status == 'Rejected':
-            self.w(u"<span class='glyphicon glyphicon-remove' />")
-        elif eUpload.status == 'Validated':
-            self.w(u"<span class='glyphicon glyphicon-ok' />")
-        else:
-            self.w(u"<span class='glyphicon glyphicon-cloud-upload' />")
-        self.w(u' {}</h2>'.format(eUpload.dc_title()))
-        self.w(u'</div>')
-
-        self.w(u'<div>')
-        self.w(u'<h3>Status</h3>')
-        self.w(u'<b>{}</b>'.format(eUpload.status))
-        print 'error: {}'.format(eUpload.error)
-        if eUpload.error:
-            self.w(u'<div class="panel panel-danger">{}</div>'.format(
-                eUpload.error))
-        self.w(u'</div>')
-
-        self.w(u'<div>')
-        self.w(u'<h3>Fields</h3>')
-        self.w(u'<table class="upload-table">')
-        self.w(u'<tr><th>Name</th><th>Value</th></tr>')
-        for eField in sorted(eUpload.upload_fields,
-                             key=lambda field:field.name):
-            self.w(u'<tr><td>{0}</td><td>{1}</td></tr>'.format(
-                   eField.label, eField.value))
-        self.w(u'</table>')
-        self.w(u'</div>')
-
-        self.w(u'<div>')
-        self.w(u'<h3>Files</h3>')
-        self.w(u'<table class="upload-table">')
-        self.w(u'<tr><th>Name</th><th>SHA1</th></tr>')
-        for eFile in sorted(eUpload.upload_files,
-                            key=lambda field:field.name):
-            self.w(u'<tr><td>{0}</td><td>{1}</td></tr>'.format(
-                   eFile.data_name, eFile.data_sha1hex))
-        self.w(u'</table>')
-        self.w(u'</div>')
+        # Display the upload fields
+        labels = ["Label", "Value"]
+        index = 0
+        for fields, title, label1, label2 in [
+                (upload.upload_fields, "Fields", "label", "value"),
+                (upload.upload_files, "Files", "data_name", "data_sha1hex")]:
+            if len(fields) > 0:
+                records = []
+                for field in fields:
+                    records.append([field.name,
+                                    getattr(field, label1),
+                                    getattr(field, label2)])
+                self.wview("jtable-hugetable-clientside", None, "null",
+                           labels=labels, records=records, csv_export=True,
+                           title=title, elts_to_sort="ID", use_scroller=True,
+                           index=index)
+                index += 1
 
 
 def registration_callback(vreg):
     """ Register the tuned primary views.
     """
-    vreg.register(UploadFormPrimaryView)
-    vreg.register(CWUploadView)
+    vreg.register(CWUploadPrimaryView)

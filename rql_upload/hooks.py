@@ -39,7 +39,7 @@ class UploadFileHook(hook.Hook):
 
 
 class ServerStartupHook(hook.Hook):
-    """ Deport files on file system rather than database indexation
+    """ Deport files on file system rather than database indexation.
 
     An 'UploadFile' entity data is deported on the server file system.
     To do so, we configure the 'UploadFile' 'data' attribute with the
@@ -69,6 +69,7 @@ class ServerStartupHook(hook.Hook):
                 os.makedirs(upload_dir)
             if not os.path.exists(validated_dir):
                 os.makedirs(validated_dir)
+
             # Configure the storage folder
             storage = storages.BytesFileSystemStorage(upload_dir)
 
@@ -78,15 +79,17 @@ class ServerStartupHook(hook.Hook):
         except:
             pass
 
-        # Execute all registred AsynchroneChecks
+        # Execute all asynchrone check defined in [RQL UPLOAD] ->
+        # upload_structure_json -> AsynchroneCheck in the CW task loop
         forms_file = self.repo.vreg.config["upload_structure_json"]
+        delay_in_sec = self.repo.vreg.config["default_asynchrone_delay"] * 60.
         with open(forms_file) as open_json:
             forms = json.load(open_json)
-        for name in forms:
-            full_method_name = forms[name]["ASynchroneCheck"]
-            if full_method_name:
-                module_name = full_method_name[0:full_method_name.rfind('.')]
-                method_name = full_method_name[full_method_name.rfind('.')+1:]
+        for form_name in forms:
+            check_func_desc = forms[form_name].get("ASynchroneCheck")
+            if check_func_desc is not None:
+                module_name = check_func_desc[:check_func_desc.rfind(".")]
+                func_name = check_func_desc[check_func_desc.rfind(".") + 1:]
                 module = import_module(module_name)
-                method = getattr(module, method_name)
-                self.repo.looping_task(20, method, self.repo)
+                check_func = getattr(module, func_name)
+                self.repo.looping_task(delay_in_sec, check_func, self.repo)

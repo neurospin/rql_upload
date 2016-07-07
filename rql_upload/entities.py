@@ -19,17 +19,23 @@ class EntityUploadField(AnyEntity):
     """ Define the 'UploadField' entity associated functions. """
 
     __regid__ = "UploadField"
+    __bootstap_glyph__ = True
 
     def dc_title(self):
         """ Method that defines the upload field entity title. """
 
-        return self.name
+        return self.label
+
+    @property
+    def symbol(self):
+        return "<span class='glyphicon glyphicon-edit'></span>"
 
 
 class EntityUploadFile(AnyEntity):
     """ Define the 'UploadFile' entity associated functions.
     """
     __regid__ = "UploadFile"
+    __bootstap_glyph__ = True
 
     def set_format_and_encoding(self):
         """ Try to set format and encoding according to known values (filename,
@@ -95,13 +101,13 @@ class EntityCWUpload(AnyEntity):
     @property
     def symbol(self):
         if self.status == 'Quarantine':
-            return "<span class='glyphicon glyphicon-cog' />"
+            return u"<span class='glyphicon glyphicon-cog' />"
         elif self.status == 'Rejected':
-            return "<span class='glyphicon glyphicon-remove' />"
+            return u"<span class='glyphicon glyphicon-remove' />"
         elif self.status == 'Validated':
-            return "<span class='glyphicon glyphicon-ok' />"
+            return u"<span class='glyphicon glyphicon-ok' />"
         else:
-            return "<span class='glyphicon glyphicon-cloud-upload' />"
+            return u"<span class='glyphicon glyphicon-cloud-upload' />"
 
     def get_field_value(self, field_name):
         """ Return the value of the UploadField with the field_name.

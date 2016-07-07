@@ -9,6 +9,7 @@
 
 # System import
 import os
+import sys
 import re
 import traceback
 from importlib import import_module
@@ -17,12 +18,14 @@ from importlib import import_module
 from cgi import parse_qs
 from logilab.common.decorators import monkeypatch
 from cubicweb import Binary
+from cubicweb import ValidationError
 from cubicweb.view import View
 from cubicweb.web import Redirect
 from cubicweb.web import formwidgets
 from cubicweb.web import RequestError
 from cubicweb.web.views.forms import FieldsForm
 from cubicweb.web.views.formrenderers import FormRenderer
+from cubicweb import Unauthorized
 
 # RQL UPLOAD import
 from .utils import load_forms
@@ -59,7 +62,30 @@ def render_content(self, w, form, values):
 
 class CWUploadView(View):
     """ Custom view to edit the form generated from the instance
-    configuration file.
+    configuration file [RQL_UPLOAD] -> upload_directory.
+
+    If a synchrone check is defined in the 'SynchroneCheck' form 
+    description, the check function will be executed. If an error is raised,
+    a rollback is trigered. The check function has two inputw, the posted
+    data and a cnx.
+
+    Reserved keys are:
+
+        * rql: a RQL that will be used to initialize another field.
+          The associated field must contain a list.
+          The field must be of the form <RQL>:<field_name>.
+          It is possible to format the RQL string with the user login:
+          use '{}' format synthax in your RQL to inherit from this
+          functionality.
+
+        * type: the field type that must be declared in the registry.
+
+        * style: the css style that will be applied to the associated field
+          div.
+
+        * check_value: a regex used to chack the associated field.
+    
+        * required: point out manadatory fields.
 
     .. note::
 
@@ -69,11 +95,6 @@ class CWUploadView(View):
     """
     __regid__ = "upload-view"
     title = _("Upload form")
-
-    bool_map = {
-        "True": True,
-        "False": False
-    }
 
     def call(self, **kwargs):
         """ Create the form fields.
@@ -135,172 +156,232 @@ class CWUploadView(View):
         # Create the form
         form = self._cw.vreg["forms"].select(
             "upload-form", self._cw, action="", form_name=form_name)
-        dict_fieldName_fieldType = {}
-        dict_fieldName_fieldLabel = {}
-
+        fields_types = {}
+        fields_labels = {}
+        error_to_display = None
         try:
+            # Go through each field description
             for field in config[form_name]["Fields"]:
+
                 # Remove reserved field keys
+                # > rql: a RQL that will be used to initialize another field.
+                #   The current field must contain a list.
+                #   Must be of the form <RQL>:<field_name>.
+                #   Format the RQL string with the user login: use '{}' format
+                #   synthax in your RQL to inherit from this functionality.
                 if "rql" in field:
                     rql, dest_name = field.pop("rql").split(":")
-                    rql = rql.format(self._cw.user_data()['login'])
+                    rql = rql.format(self._cw.user.login)
                     if dest_name not in field:
-                        raise ValueError("{0} not in field attributes.".format(
-                            dest_name))
+                        raise ValueError(
+                            "'{0}' not in field attributes.".format(dest_name))
                     if not isinstance(field[dest_name], list):
                         raise ValueError(
-                            "{0} field attribute is not a list.".format(
+                            "'{0}' field attribute is not a list.".format(
                                 dest_name))
                     rset = self._cw.execute(rql)
                     for row in rset.rows:
                         field[dest_name].extend(row)
+                # > type: the field type that must be declared in the registry
                 field_type = field.pop("type")
-                dict_fieldName_fieldType[field["name"]] = field_type
-                dict_fieldName_fieldLabel[field["name"]] = field["label"]
-                #
-                if field_type == "BooleanField" and "value" in field:
-                    field["value"] = self.bool_map[field["value"]]
-                if "required" in field:
-                    field["required"] = self.bool_map[field["required"]]
+                fields_types[field["name"]] = field_type
+                fields_labels[field["name"]] = field["label"]
+                # > style: the css style that will be applied to the field div
+                style = None
+                if "style" in field:
+                    style = field.pop("style")
+
+                # Store the fields that must be checked using a Regex
                 if "check_value" in field:
                     check_struct[field["name"]] = field.pop("check_value")
-                if (field_type == "FileField" or
-                        field_type == "MultipleFileField"):
+
+                # Check that the upload directory is created
+                # If not display a danger message
+                # Store also required file fields
+                if field_type in ("FileField", "MultipleFileField"):
                     if not os.path.isdir(
-                        self._cw.vreg.config["upload_directory"]):
+                            self._cw.vreg.config["upload_directory"]):
                         self.w(u"<p class='label label-danger'>{0}: File "
-                                "field can't"
-                                " be used because the  'upload_directory' "
-                                "has not been set in all-in-ine.conf file or its"
-                                " path cannot be created ({1})</p>".format(
+                                "field can't be used because the "
+                                "'upload_directory' has not been set in "
+                                "all-in-ine.conf file or its path cannot be "
+                                "created ({1})</p>".format(
                                     field.pop("label"),
                                     self._cw.vreg.config["upload_directory"]))
                         continue
                     if "required" in field and field["required"]:
                         required_file_fields[field["name"]] = field["label"]
-                if "sort" in field:
-                    field["sort"] = self.bool_map[field["sort"]]
-                style = None
-                if "style" in field:
-                    style = field.pop("style")
-                # Get the declared field and add it to the form
+
+                # If the field is in the registry add the field to the form
+                # If requested add some custom styles to the field
                 if field_type in DECLARED_FIELDS:
                     form.append_field(DECLARED_FIELDS[field_type](**field))
-                    if style:
+                    if style is not None:
                         widget = form.field_by_name(
                             field["name"]).get_widget(form)
-                        widget.attrs['style'] = unicode(style)
+                        widget.attrs["style"] = unicode(style)
+                # Otherwise display a danger message
                 else:
                     self.w(
                         u"<p class='label label-danger'>'{0}': Unknown field "
-                         "</p>".format(field_type))
+                         "type.</p>".format(field_type))
+
+        # If something goes wrong during the form creation, display a danger
+        # message and print the trace in the terminal
+        except ValueError as error:
+            print traceback.format_exc()
+            error_to_display = error.message
         except:
             print traceback.format_exc()
+            error_to_display = "The configuration file can't be read."
+
+        # Display the error message
+        if error_to_display is not None:
             self.w(u'<div class="panel panel-danger">')
             self.w(u'<div class="panel-heading">')
             self.w(u'<h2 class="panel-title">ERROR</h2>')
             self.w(u'</div>')
             self.w(u'<div class="panel-body">')
-            self.w(u"<h3>Configuration file syntax error</h3>")
-            self.w(u"The configuration file can't be read<br>")
-            self.w(u"Please refer to the documentation and make corrections")
+            self.w(u'<h3>Configuration file syntax error</h3>')
+            self.w(u'{0}<br>'.format(error_to_display))
+            self.w(u'Please refer to the documentation and make corrections')
             self.w(u'</div>')
             self.w(u'</div>')
             return -1
 
         # Form processings
         error_to_display = None
-
         try:
-
+            # Retrieve the posted form field values
             posted = form.process_posted()
 
-            for required_field, field_label in required_file_fields.items():
-                if required_field not in posted:
-                    raise ValueError("Required value(s) in {}".format(
-                        field_label))
-
-            # Get the form parameters
-            file_entities = []
-            field_entities = []
-            for field_name, field_value in posted.iteritems():
-
-                # Filter fields stored in the db or deported on the filesystem
-                if isinstance(field_value, Binary):
-                    # Check if the field value is valid
-                    if field_name in check_struct:
-                        file_name = self._cw.form[field_name][0]
-                        if re.match("^.*\.{}$".format(check_struct[field_name]),
-                                    file_name) is None:
-                            raise ValueError(
-                                "Find wrong file name '{0}' while searching "
-                                "for extension '{1}'".format(
-                                    file_name, check_struct[field_name]))
-
-                    # Save UploadFile entities
-                    extension = os.path.splitext(file_name)
-                    file_entities.append(
-                        self._cw.create_entity(
-                            "UploadFile",
-                            name=field_name,
-                            data=field_value,
-                            data_extension=unicode(extension[1:]),
-                            data_name=unicode(file_name)
-                        )
-                    )
-                else:
-                    # Check if the field value is valid
-                    if field_name in check_struct:
-                        if re.match(check_struct[field_name],
-                                    str(field_value)) is None:
-                            raise ValueError(
-                                "Find wrong parameter value '{0}' while "
-                                "searching for pattern '{1}'".format(
-                                    field_value, check_struct[field_name]))
-
-                    # Save UploadField entities
-                    field_entities.append(
-                        self._cw.create_entity(
-                            "UploadField",
-                            name=unicode(field_name),
-                            value=unicode(field_value),
-                            type=unicode(dict_fieldName_fieldType[field_name]),
-                            label=unicode(dict_fieldName_fieldLabel[field_name]),
-                        )
-                    )
+            # Check posted fields
+            errors = self.check_posted(posted, required_file_fields,
+                                       check_struct)
+            if errors != {}:
+                raise ValidationError(None, {})
 
             # Create the CWUpload entity
             upload = self._cw.create_entity(
                 "CWUpload",
                 form_name=unicode(form_name),
-                status=u'Quarantine',
-                upload_fields=field_entities,
-                upload_files=file_entities
-            )
+                status=u"Quarantine")
 
-            #call synchrone chek method
-            full_name = config[form_name]["SynchroneCheck"]
-            if full_name:
-                module_name = full_name[0:full_name.rfind('.')]
-                method_name = full_name[full_name.rfind('.')+1:]
+            # Go through the posted form parameters. Deported fields are
+            # stored in UploadFile entities, other fields in UploadField
+            # entities
+            file_eids = []
+            field_eids = []
+            for field_name, field_value in posted.items():
+
+                # > files are deported
+                if isinstance(field_value, Binary):
+
+                    # Check if the file path is valid
+                    file_name = self._cw.form[field_name][0]
+                    if field_name in check_struct:
+                        regex = check_struct[field_name]
+                        if re.match(regex, file_name) is None:
+                            errors[field_name] = (
+                                "Find wrong file name '{0}' while searching "
+                                "for extension '{1}'.".format(
+                                    file_name, regex))
+
+                    # Create an UploadFile entity
+                    extension = ".".join(file_name.split(".")[1:])
+                    file_eids.append(
+                        self._cw.create_entity(
+                            "UploadFile",
+                            name=field_name,
+                            data=field_value,
+                            data_extension=unicode(extension),
+                            data_name=unicode(file_name)).eid)
+
+                    # Add relation with the CWUpload entity
+                    self._cw.execute("SET U upload_files F WHERE "
+                                     "U eid %(u)s, F eid %(f)s",
+                                     {"u": upload.eid, "f" : file_eids[-1]})
+
+                # > other fields are stored in the database
+                else:
+                    # Check if the field value is valid
+                    if field_name in check_struct:
+                        regex = check_struct[field_name]
+                        if re.match(regex, str(field_value)) is None:
+                            errors[field_name] = (
+                                "Find wrong parameter value '{0}' while "
+                                "searching for pattern '{1}'.".format(
+                                    field_value, regex))
+
+                    # Create an UploadField entity
+                    field_eids.append(
+                        self._cw.create_entity(
+                            "UploadField",
+                            name=unicode(field_name),
+                            value=unicode(field_value),
+                            type=unicode(fields_types[field_name]),
+                            label=unicode(fields_labels[field_name])).eid)
+
+                    # Add relation with the CWUpload entity
+                    self._cw.execute("SET U upload_fields F WHERE "
+                                     "U eid %(u)s, F eid %(f)s",
+                                     {"u": upload.eid, "f" : field_eids[-1]})
+
+            # Call synchrone check function
+            check_func_desc = config[form_name].get("SynchroneCheck")
+            if check_func_desc is not None:
+                module_name = check_func_desc[:check_func_desc.rfind(".")]
+                func_name = check_func_desc[check_func_desc.rfind(".") + 1:]
                 module = import_module(module_name)
-                method = getattr(module, method_name)
-                result = method(upload)
-                if not result[0]:
-                    raise ValueError(result[1])
+                check_func = getattr(module, func_name)
+                try:
+                    error_to_display = check_func(posted, self._cw.cnx)
+                except:
+                    exc_type, exc_value, exc_tb = sys.exc_info()
+                    raise Exception(traceback.format_exc())
+                finally:
+                    if error_to_display is not None:
+                        raise ValueError(error_to_display)
 
             # Redirection to the created CWUpload entity
             raise Redirect(self._cw.build_url(eid=upload.eid))
+
+        # Handle exceptions
         except RequestError:
-            error_to_display = None
+            pass
         except ValueError as error:
-            error_to_display = error
+            error_to_display = error.message
+        except ValidationError as error:
+            # Check posted fields to concatenate the CW and application errors
+            posted = {}
+            for field in form.iter_modified_fields():
+                posted[field.name] = form._cw.form[field.name]
+            print posted
+            errors = self.check_posted(posted, required_file_fields,
+                                       check_struct)
+            concatenated_errors = {}
+            for dict_struct in (errors, error.errors):
+                for key, value in dict_struct.items():
+                    concatenated_errors.setdefault(key, []).append(value)
+            concatenated_errors = dict(
+                (key, " - ".join(value))
+                for key, value in concatenated_errors.items())
+            raise ValidationError(None, concatenated_errors)
+        except Redirect:
+            raise
+        except Unauthorized:
+            error_to_display = "You are not allowed to upload data."
+        except:
+            print traceback.format_exc()
+            error_to_display = ("Unexpected error, please contact the system "
+                                "administrator.")
 
         # Form rendering
         self.w(u"<legend>'{0}' upload form</legend>".format(
             form_name))
-
         form.render(w=self.w, formvalues=self._cw.form)
+
+        # Display the error message if set
         if error_to_display is not None:
             self._cw.cnx.rollback()
             self.w(u'<div class="panel panel-danger">')
@@ -311,3 +392,62 @@ class CWUploadView(View):
             self.w(u"{0}".format(error_to_display))
             self.w(u'</div>')
             self.w(u'</div>')
+
+    def check_posted(self, posted, required_file_fields, check_struct):
+        """ Check the posted values.
+
+        Parameters
+        ----------
+        posted: dict
+            the posted values.
+        required_file_fields: dict
+            the list of required file fields.
+        check_struct: dict
+            the fields to be checked using regexs.
+
+        Returns
+        -------
+        errors: dict
+            a dictionary with field names as keys and error as associated
+            value.
+        """
+        # Output struct
+        errors = {}
+
+        # Check that required file fields are posted
+        for required_field, field_label in required_file_fields.items():
+            if required_field not in posted or posted[required_field] == "":
+                errors[required_field] = "Value(s) required in field '{}'".format(
+                    field_label)
+
+        # Check value content
+        for field_name, field_value in posted.items():
+            # > check validity or not
+            if field_name in check_struct:
+                regex = check_struct[field_name]
+                # > files 
+                if isinstance(field_value, Binary):                   
+                    value = self._cw.form[field_name][0]
+                    message = (
+                        "Find wrong file name '{0}' while searching "
+                        "for extension '{1}'.".format(
+                            value, regex))
+                # > other fields
+                else:
+                    value = str(field_value)
+                    message = (
+                        "Find wrong parameter value '{0}' while "
+                        "searching for pattern '{1}'.".format(
+                            value, regex))
+                # > check
+                if re.match(regex, value) is None:
+                    if field_name not in required_file_fields and value == "":
+                        continue
+                    if field_name in errors:
+                        message = errors[field_name] + " - " + message
+                    errors[field_name] = message
+
+                    
+
+        return errors
+
