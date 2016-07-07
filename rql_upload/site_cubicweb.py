@@ -27,4 +27,28 @@ options = (
             "group": "rql_upload", "level": 0,
         }
     ),
+    (
+        "upload_log_dir",
+        {
+            "type": "string",
+            "default": "",
+            "help": "base directory in which log file is written.",
+            "group": "rql_upload", "level": 0,
+        }
+    ),
+    (
+        "validated_directory",
+        {
+            "type": "string",
+            "default": "",
+            "help": "base directory in which the validated files are deported.",
+            "group": "rql_upload", "level": 0,
+        }
+    ),
+    ("default_asynchrone_delay",
+      {"type": "float",
+      "default": 30,
+      "help": "specifies the asynchrone looping check delay (in minutes).",
+      "group": "rql_upload", "level": 0,
+      }),
 )

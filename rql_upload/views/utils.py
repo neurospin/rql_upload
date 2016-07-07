@@ -11,9 +11,6 @@
 import json
 import os
 
-# CW import
-from cubicweb import ValidationError
-
 
 def load_forms(cw_config):
     """ Function to load the forms structures from the file defined in the

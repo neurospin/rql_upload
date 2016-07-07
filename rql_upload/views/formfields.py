@@ -8,17 +8,16 @@
 ##########################################################################
 
 # CW import
-from cubicweb.web.action import Action
 from cubicweb.web import formfields
 
 
 # Define global parameter
 DECLARED_FIELDS = {}
 
-
 ###############################################################################
 # Registration callback
 ###############################################################################
+
 
 def registration_callback(vreg):
     """ The authorized form fields are registered from this function.
@@ -34,8 +33,9 @@ def registration_callback(vreg):
     """
 
     # Got through fields we want to register
-    for field_name in ["StringField", "PasswordField", "IntField", "FloatField",
-                       "BooleanField", "DateField", "DateTimeField",
+    for field_name in ["StringField", "PasswordField",
+                       "IntField", "FloatField", "BooleanField",
+                       "DateField", "DateTimeField",
                        "TimeField", "TimeIntervalField", "FileField"]:
 
         # Define class parameters

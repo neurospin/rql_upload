@@ -1,32 +1,82 @@
 {
-    "example1": [
-        {
-            "name": "string", "type": "StringField",
-            "value": "", "label": "string"},
-        {
-            "name": "dropdown", "type": "StringField",
-            "value": "", "label": "dropdown",
-            "choices": ["choice_1", "choice_2"]},
-        {
-            "name": "integer", "type": "IntField",
-            "required": "True", "value": 2,"label": "integer (default=2)"},
-        {
-            "name": "float", "type": "FloatField",
-            "required": "True", "label": "float"},
-        {
-            "name": "boolean", "type": "BooleanField",
-            "required": "True", "value": "True", "label": "boolean"},
-        {
-            "name": "date", "type": "DateField",
-            "required": "False", "label": "date"}
-    ],
-
-    "example2": [
-        {
-            "name": "file1", "type": "FileField",
-            "required": "False", "label": "file1", "check_value": ".*zip"},
-        {
-            "name": "file2", "type": "FileField",
-            "required": "False", "label": "file2"}
-    ]
+    "Example1": {
+        "Fields": [
+            {
+                "name": "string",
+                "type": "StringField",
+                "value": "",
+                "max_length": 1,  
+                "label": "string one char"},
+            {
+                "name": "dropdown_sorted",
+                "type": "StringField",
+                "value": "",
+                "label": "dropdown sorted",
+                "choices": ["choice2", "choice1"]},
+            {
+                "name": "integer",
+                "type": "IntField",
+                "required": true,
+                "value": 2,
+                "label": "integer (default=2)"},
+            {
+                "name": "float",
+                "type": "FloatField",
+                "required": true,
+                "label": "float required",
+                "style": "width:10%"},
+            {
+                "name": "boolean",
+                "type": "BooleanField",
+                "required": true,
+                "value": true,
+                "label": "boolean (default True)"},
+            {
+                "name": "date",
+                "type": "DateField",
+                "required": false,
+                "label": "date (not required)"},
+            {
+			    "name": "dropdown_not_sorted",
+			    "type": "StringField",
+			    "choices": ["choice2", "choice1"],
+			    "sort": false,
+			    "value": "",
+			    "label": "dropdown not sorted",
+                "required": true,
+                "style": "width:10%",
+                "rql": "DISTINCT Any C WHERE U login '{}', U in_group G, G name C:choices"}
+        ],
+        "SynchroneCheck": "cubes.rql_upload.checks.demo_example1_synchrone",
+        "ASynchroneCheck": "cubes.rql_upload.checks.demo_example1_asynchrone"
+    },
+    "Example2": {
+        "Fields": [
+            {
+                "name": "file1",
+                "type": "FileField",
+                "required": false,
+                "label": "file not required ZIP",
+                "check_value": ".*zip"},
+            {
+                "name": "file2",
+                "type": "FileField",
+                "required": true,
+                "label": "file required"},
+            {
+                "name": "float",
+                "type": "FloatField",
+                "required": true,
+                "label": "float required"},
+            {
+                "name": "string",
+                "type": "StringField",
+                "value": "a",
+                "max_length": 1,  
+                "label": "string one char",
+                "check_value": "^a"}
+        ],
+        "SynchroneCheck": null,
+        "ASynchroneCheck": null
+    }
 }

@@ -10,19 +10,20 @@
 
 # System import
 import os
+from importlib import import_module
+import json
 
 # CW import
-from cubicweb.server import hook
 from cubicweb.server import hook
 from cubicweb.predicates import is_instance
 
 
-class UploadHook(hook.Hook):
-    """ An upload entity is created/updated, store a fingerprint of binary data
-    fields.
+class UploadFileHook(hook.Hook):
+    """ An upload file entity is created/updated,
+    store a fingerprint of binary data fields.
     """
     __regid__ = "rql_upload.upload"
-    __select__ = hook.Hook.__select__ & is_instance("UploadFile", "UploadForm")
+    __select__ = hook.Hook.__select__ & is_instance("UploadFile")
     events = ("before_add_entity", "before_update_entity")
     order = -1  # should be run before other hooks
 
@@ -38,7 +39,7 @@ class UploadHook(hook.Hook):
 
 
 class ServerStartupHook(hook.Hook):
-    """ Deport files on file system rather than database indexation
+    """ Deport files on file system rather than database indexation.
 
     An 'UploadFile' entity data is deported on the server file system.
     To do so, we configure the 'UploadFile' 'data' attribute with the
@@ -59,10 +60,16 @@ class ServerStartupHook(hook.Hook):
         # Get the defined upload folder
         upload_dir = self.repo.vreg.config["upload_directory"]
 
+        # Get the defined validated folder
+        validated_dir = self.repo.vreg.config["validated_directory"]
+
         # Create the folder if necessary
         try:
             if not os.path.exists(upload_dir):
                 os.makedirs(upload_dir)
+            if not os.path.exists(validated_dir):
+                os.makedirs(validated_dir)
+
             # Configure the storage folder
             storage = storages.BytesFileSystemStorage(upload_dir)
 
@@ -71,3 +78,18 @@ class ServerStartupHook(hook.Hook):
                                            storage)
         except:
             pass
+
+        # Execute all asynchrone check defined in [RQL UPLOAD] ->
+        # upload_structure_json -> AsynchroneCheck in the CW task loop
+        forms_file = self.repo.vreg.config["upload_structure_json"]
+        delay_in_sec = self.repo.vreg.config["default_asynchrone_delay"] * 60.
+        with open(forms_file) as open_json:
+            forms = json.load(open_json)
+        for form_name in forms:
+            check_func_desc = forms[form_name].get("ASynchroneCheck")
+            if check_func_desc is not None:
+                module_name = check_func_desc[:check_func_desc.rfind(".")]
+                func_name = check_func_desc[check_func_desc.rfind(".") + 1:]
+                module = import_module(module_name)
+                check_func = getattr(module, func_name)
+                self.repo.looping_task(delay_in_sec, check_func, self.repo)

@@ -74,5 +74,16 @@ class CWUploadBox(component.CtxComponent):
                 w(u'<div class="btn-toolbar">')
                 w(u'<div class="btn-group-vertical btn-block">')
                 w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-                w(u'{0}</a>'.format(form_name.title()))
+                w(u'{0}</a>'.format(form_name))
                 w(u'</div></div><br/>')
+
+        # Create a button to access all authorized upload
+        w(u'<hr>')
+        w(u'<div class="btn-toolbar">')
+        w(u'<div class="btn-group-vertical btn-block">')
+        href = self._cw.build_url(rql="Any U ORDERBY U DESC Where U is CWUpload")
+        w(u'<a class="btn btn-primary" href="{0}">'.format(href))
+        w(u'<span class="glyphicon glyphicon glyphicon-cloud-upload">'
+            '</span> My uploads</a>')
+        w(u'</div></div><br/>')
+
