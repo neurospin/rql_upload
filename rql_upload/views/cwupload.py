@@ -275,19 +275,10 @@ class CWUploadView(View):
             for field_name, field_value in posted.items():
 
                 # > files are deported
-                if isinstance(field_value, Binary):
-
-                    # Check if the file path is valid
-                    file_name = self._cw.form[field_name][0]
-                    if field_name in check_struct:
-                        regex = check_struct[field_name]
-                        if re.match(regex, file_name) is None:
-                            errors[field_name] = (
-                                "Find wrong file name '{0}' while searching "
-                                "for extension '{1}'.".format(
-                                    file_name, regex))
+                if isinstance(field_value, Binary): 
 
                     # Create an UploadFile entity
+                    file_name = self._cw.form[field_name][0]
                     extension = ".".join(file_name.split(".")[1:])
                     file_eids.append(
                         self._cw.create_entity(
@@ -304,14 +295,6 @@ class CWUploadView(View):
 
                 # > other fields are stored in the database
                 else:
-                    # Check if the field value is valid
-                    if field_name in check_struct:
-                        regex = check_struct[field_name]
-                        if re.match(regex, str(field_value)) is None:
-                            errors[field_name] = (
-                                "Find wrong parameter value '{0}' while "
-                                "searching for pattern '{1}'.".format(
-                                    field_value, regex))
 
                     # Create an UploadField entity
                     field_eids.append(
@@ -356,7 +339,6 @@ class CWUploadView(View):
             posted = {}
             for field in form.iter_modified_fields():
                 posted[field.name] = form._cw.form[field.name]
-            print posted
             errors = self.check_posted(posted, required_file_fields,
                                        check_struct)
             concatenated_errors = {}
