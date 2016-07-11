@@ -7,7 +7,7 @@
 ##########################################################################
 
 
-def demo_example1_synchrone(posted, cnx):
+def demo_example1_synchrone(cnx, posted, upload, files, fields):
     """ Dummy: check that the integer times float result is equal to two.
     This function raise an exception if the float value is equal to two.
     """

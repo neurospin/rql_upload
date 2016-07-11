@@ -47,6 +47,13 @@ class ServerStartupHook(hook.Hook):
     The repository location is defined at the instance creation
     'upload_directory' (instance parameter).
     If no instance parameter is set, the 'file' field won't be created.
+
+    Execute asynchrone checks defined defined in the configuration file
+    section [RQL UPLOAD] -> upload_structure_json -> AsynchroneCheck.
+
+    Define a shortcut to access the uploaded files 'uploaded_file_names'. It
+    maps an 'UploadFile' eid to the uploded resource location on the server
+    file system.
     """
     __regid__ = "rql_upload.serverstartup"
     events = ("server_startup", "server_maintenance")
@@ -93,3 +100,6 @@ class ServerStartupHook(hook.Hook):
                 module = import_module(module_name)
                 check_func = getattr(module, func_name)
                 self.repo.looping_task(delay_in_sec, check_func, self.repo)
+
+        # Shortcut to access the uploaded files
+        self.repo.vreg.uploaded_file_names = {}

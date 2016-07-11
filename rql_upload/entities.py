@@ -69,12 +69,11 @@ class EntityUploadFile(AnyEntity):
         return "<span class='glyphicon glyphicon-file'></span>"
 
     def get_file_path(self):
-        """ Return the file path of the UploadFile using a sql query
+        """ Return the file path of the UploadFile using a sql query.
         """
-
         sql = "SELECT cw_data FROM cw_uploadfile WHERE cw_eid = '{0}'"
         sql = sql.format(self.eid)
-        if hasattr(self._cw, 'system_sql'):
+        if hasattr(self._cw, "system_sql"):
             cursor = self._cw.system_sql(sql)
         else:
             cursor = self._cw.cnx.system_sql(sql)
@@ -89,8 +88,8 @@ class EntityCWUpload(AnyEntity):
     __bootstap_glyph__ = True
 
     def dc_title(self):
-        """ Method that defines the upload entity title. """
-
+        """ Method that defines the upload entity title.
+        """
         return u"{} by {} on {} at {}".format(
             self.form_name,
             self.dc_creator(),
@@ -111,9 +110,8 @@ class EntityCWUpload(AnyEntity):
 
     def get_field_value(self, field_name):
         """ Return the value of the UploadField with the field_name.
-            Return None if the upload not have the related UploadField
+            Return None if the upload not have the related UploadField.
         """
-
         for eField in self.upload_fields:
             if eField.name == field_name:
                 return eField.value

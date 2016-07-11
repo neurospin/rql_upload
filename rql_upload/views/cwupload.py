@@ -66,8 +66,8 @@ class CWUploadView(View):
 
     If a synchrone check is defined in the 'SynchroneCheck' form 
     description, the check function will be executed. If an error is raised,
-    a rollback is trigered. The check function has two inputw, the posted
-    data and a cnx.
+    a rollback is trigered. The check function has five inputs, a cnx, the
+    posted data, and the upload, files and fields entities.
 
     Reserved keys are:
 
@@ -119,6 +119,18 @@ class CWUploadView(View):
         # insertion in the data base
         check_struct = {}
         required_file_fields = {}
+
+        # Update shortcut to access the uploaded files
+        if 0:
+            with self._cw.cnx._cnx.repo.internal_cnx() as cnx:
+                rset = cnx.execute("Any X Where X is UploadFile")
+                storage = cnx.repo.system_source._storages["UploadFile"]["data"]
+                for index in range(rset.rowcount):
+                    entity = rset.get_entity(index, 0)
+                    eid = entity.eid
+                    if eid not in self._cw.vreg.uploaded_file_names:
+                        fpath = storage.current_fs_path(entity, "data")
+                        self._cw.vreg.uploaded_file_names[eid] = fpath
 
         # If json file missing, generate error page
         if config == -1:
@@ -272,21 +284,23 @@ class CWUploadView(View):
             # entities
             file_eids = []
             field_eids = []
+            file_entities = []
+            field_entities = []
             for field_name, field_value in posted.items():
 
                 # > files are deported
                 if isinstance(field_value, Binary): 
 
                     # Create an UploadFile entity
-                    file_name = self._cw.form[field_name][0]
                     extension = ".".join(file_name.split(".")[1:])
-                    file_eids.append(
-                        self._cw.create_entity(
-                            "UploadFile",
-                            name=field_name,
-                            data=field_value,
-                            data_extension=unicode(extension),
-                            data_name=unicode(file_name)).eid)
+                    entity = self._cw.create_entity(
+                        "UploadFile",
+                        name=field_name,
+                        data=field_value,
+                        data_extension=unicode(extension),
+                        data_name=field_value.filename)
+                    file_eids.append(entity.eid)
+                    file_entities.append(entity)
 
                     # Add relation with the CWUpload entity
                     self._cw.execute("SET U upload_files F WHERE "
@@ -297,13 +311,14 @@ class CWUploadView(View):
                 else:
 
                     # Create an UploadField entity
-                    field_eids.append(
-                        self._cw.create_entity(
-                            "UploadField",
-                            name=unicode(field_name),
-                            value=unicode(field_value),
-                            type=unicode(fields_types[field_name]),
-                            label=unicode(fields_labels[field_name])).eid)
+                    entity = self._cw.create_entity(
+                        "UploadField",
+                        name=unicode(field_name),
+                        value=unicode(field_value),
+                        type=unicode(fields_types[field_name]),
+                        label=unicode(fields_labels[field_name]))
+                    field_eids.append(entity.eid)
+                    field_entities.append(entity)
 
                     # Add relation with the CWUpload entity
                     self._cw.execute("SET U upload_fields F WHERE "
@@ -318,7 +333,9 @@ class CWUploadView(View):
                 module = import_module(module_name)
                 check_func = getattr(module, func_name)
                 try:
-                    error_to_display = check_func(posted, self._cw.cnx)
+                    error_to_display = check_func(
+                        self._cw.cnx, posted, upload, file_entities,
+                        field_entities)
                 except:
                     exc_type, exc_value, exc_tb = sys.exc_info()
                     raise Exception(traceback.format_exc())
