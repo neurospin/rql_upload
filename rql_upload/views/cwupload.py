@@ -292,7 +292,7 @@ class CWUploadView(View):
                 if isinstance(field_value, Binary): 
 
                     # Create an UploadFile entity
-                    extension = ".".join(file_name.split(".")[1:])
+                    extension = ".".join(field_value.filename.split(".")[1:])
                     entity = self._cw.create_entity(
                         "UploadFile",
                         name=field_name,
@@ -447,9 +447,7 @@ class CWUploadView(View):
                         continue
                     if field_name in errors:
                         message = errors[field_name] + " - " + message
-                    errors[field_name] = message
-
-                    
+                    errors[field_name] = message                    
 
         return errors
 
