@@ -341,7 +341,8 @@ class CWUploadView(View):
                     raise Exception(traceback.format_exc())
                 finally:
                     if error_to_display is not None:
-                        raise ValueError(error_to_display)
+                        raise ValidationError(
+                            None, {None: "<br><br>" + error_to_display})
 
             # Redirection to the created CWUpload entity
             raise Redirect(self._cw.build_url(eid=upload.eid))
@@ -372,15 +373,17 @@ class CWUploadView(View):
             error_to_display = "You are not allowed to upload data."
         except:
             print traceback.format_exc()
-            error_to_display = ("Unexpected error, please contact the system "
+            error_to_display = ("Unexpected error, please contact the service "
                                 "administrator.")
+            raise ValidationError(
+                None, {None: "<br><br>" + error_to_display})
 
         # Form rendering
         self.w(u"<legend>'{0}' upload form</legend>".format(
             form_name))
         form.render(w=self.w, formvalues=self._cw.form)
 
-        # Display the error message if set
+        # Display the error message in the page
         if error_to_display is not None:
             self._cw.cnx.rollback()
             self.w(u'<div class="panel panel-danger">')
