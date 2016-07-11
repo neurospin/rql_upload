@@ -90,16 +90,17 @@ class ServerStartupHook(hook.Hook):
         # upload_structure_json -> AsynchroneCheck in the CW task loop
         forms_file = self.repo.vreg.config["upload_structure_json"]
         delay_in_sec = self.repo.vreg.config["default_asynchrone_delay"] * 60.
-        with open(forms_file) as open_json:
-            forms = json.load(open_json)
-        for form_name in forms:
-            check_func_desc = forms[form_name].get("ASynchroneCheck")
-            if check_func_desc is not None:
-                module_name = check_func_desc[:check_func_desc.rfind(".")]
-                func_name = check_func_desc[check_func_desc.rfind(".") + 1:]
-                module = import_module(module_name)
-                check_func = getattr(module, func_name)
-                self.repo.looping_task(delay_in_sec, check_func, self.repo)
+        if forms_file:
+            with open(forms_file) as open_json:
+                forms = json.load(open_json)
+            for form_name in forms:
+                check_func_desc = forms[form_name].get("ASynchroneCheck")
+                if check_func_desc is not None:
+                    module_name = check_func_desc[:check_func_desc.rfind(".")]
+                    func_name = check_func_desc[check_func_desc.rfind(".") + 1:]
+                    module = import_module(module_name)
+                    check_func = getattr(module, func_name)
+                    self.repo.looping_task(delay_in_sec, check_func, self.repo)
 
         # Shortcut to access the uploaded files
         self.repo.vreg.uploaded_file_names = {}
