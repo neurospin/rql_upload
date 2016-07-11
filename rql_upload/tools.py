@@ -7,18 +7,35 @@
 # for details.
 ##########################################################################
 
+# System import
 import logging
 
 
 def get_or_create_logger(config):
+    """ Create a 'rql_upload' logger if not already created.
+
+    Parameters
+    ----------
+    config
+        the CW configuration
+
+    Returns
+    -------
+    logger:
+        the 'rql_upload' configured logger.
+    """
+    # Get the logger
     logger = logging.getLogger("rql_upload")
+
+    # Check if it has already been configured
     if len(logger.handlers) > 0:
         return logger
 
+    # Configure the logger
     logger.setLevel(logging.INFO)
     formatter = logging.Formatter(
-        ('%(asctime)s --%(levelname)s-- %(message)s'
-         ' [%(module)s.%(funcName)s (%(lineno)d)]'))
+        ("%(asctime)s --%(levelname)s-- %(message)s"
+         " [%(module)s.%(funcName)s (%(lineno)d)]"))
     handler = logging.StreamHandler()
     handler.setFormatter(formatter)
     logger.addHandler(handler)
@@ -28,4 +45,5 @@ def get_or_create_logger(config):
         handler = logging.FileHandler(path)
         handler.setFormatter(formatter)
         logger.addHandler(handler)
+
     return logger
