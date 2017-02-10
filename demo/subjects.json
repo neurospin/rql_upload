@@ -1,0 +1,44 @@
+{
+    "Subjects": {
+        "Fields": [
+            {
+                "name": "code_in_study",
+                "type": "StringField",
+                "required": true,
+                "value": "",
+                "max_length": 5,  
+                "label": "code in study"},
+            {
+                "name": "gender",
+                "type": "StringField",
+                "required": true,
+                "value": "",
+                "label": "gender",
+                "choices": ["male", "female", "unknown"]},
+            {
+                "name": "handedness",
+                "type": "StringField",
+                "required": true,
+                "label": "handedness",
+                "choices": ["right", "left", "ambidextrous", "mixed", "unknown"]},
+            {
+                "name": "study",
+                "type": "StringField",
+                "required": true,
+                "label": "study",
+                "choices": ["study1", "study2"]},
+            {
+			    "name": "position_in_family",
+			    "type": "StringField",
+                "value": "",
+                "max_length": 10,  
+                "label": "position in family"}
+        ],
+        "SynchroneCheck": "cubes.rql_upload.checks.subjects",
+        "ASynchroneCheck": null,
+        "Mapping": {
+            "study1": ["Example1", "Example2"],
+            "study2": ["Example1"]
+        }
+    }
+}

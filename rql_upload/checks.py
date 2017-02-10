@@ -6,6 +6,9 @@
 # for details.
 ##########################################################################
 
+# System import
+import re
+
 
 def demo_example1_synchrone(cnx, posted, upload, files, fields):
     """ Dummy: check that the integer times float result is equal to two.
@@ -30,10 +33,24 @@ def demo_example1_asynchrone(repo):
     for eid, string_value in rset:
          if string_value == "a":
             status = "Validated"
+            error = None
          else:
             status = "Rejected"
+            error = "The <string_value> must be equal to <a>."
          with repo.internal_cnx() as cnx:
             cnx.execute("SET X status '{0}' WHERE X eid '{1}'".format(
                 status, eid))
+            if error is not None:
+                cnx.execute("SET X error '{0}' WHERE X eid '{1}'".format(
+                    error, eid))
             cnx.commit()
+
+
+def subjects(cnx, posted, subject, files, fields):
+    """ Dummy: check that the code_in_study respect the regex
+    '^[a-z]{2}[0-9]{3}'.
+    This function raise an exception if code in study is not valid.
+    """
+    if re.match("^[a-z]{2}[0-9]{3}", posted["code_in_study"]) is None:
+        return "The code in study must be of the form 'aa000'."
 

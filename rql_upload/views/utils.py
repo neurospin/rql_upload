@@ -10,6 +10,7 @@
 # System import
 import json
 import os
+from bisect import bisect_left
 
 
 def load_forms(cw_config):
@@ -26,21 +27,44 @@ def load_forms(cw_config):
     -------
     config: dict
         the forms descriptions defined in the 'upload_structure_json' setting
-        file.
+        files.
     -1
-        if the file is not specified or found on the system.
+        if a configuration file is not specified or found on the system.
     -2
-        if the file cannot be decoded as json file.
+        if a configuration file cannot be decoded as json file.
     """
-    config_file = cw_config["upload_structure_json"]
-    if not os.path.isfile(config_file):
-        # if file not found, return -1
-        return -1
-    try:
-        with open(config_file) as open_json:
-            config = json.load(open_json)
+    # Go through each configuration file
+    config_files = cw_config["upload_structure_json"]
+    config = {}
+    for path in config_files:
 
-        return config
-    except:
-        # if file not readable as json, return -2
-        return -2
+        # Try to load the json file
+        if not os.path.isfile(path):
+            return -1
+        try:
+            with open(path) as open_json:
+                config.update(json.load(open_json))
+        except:
+            return -2
+    return config
+
+
+def get_cwuploads(subject_entity):
+    """ Sort the subject uploads.
+
+    Create a dictionary with form name as keys associated with a
+    sorted list by dates of 3-uplets (status, date, entity).
+    """
+    cwuploads = {}
+    for upload_entity in subject_entity.cwuploads:
+        status = upload_entity.status
+        date = upload_entity.creation_date
+        if upload_entity.form_name not in cwuploads:
+            cwuploads[upload_entity.form_name] = [
+                (status, date, upload_entity)]
+        else:
+            keys = [elem[1] for elem in cwuploads[upload_entity.form_name]]
+            index = bisect_left(keys, date)
+            cwuploads[upload_entity.form_name].insert(
+                index, (status, date, upload_entity))
+    return cwuploads

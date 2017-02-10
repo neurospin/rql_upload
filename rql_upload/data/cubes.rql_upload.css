@@ -1,3 +1,15 @@
 .hasDatepicker{
     width: auto;
 }
+
+.btn-toolbar > #link-box {
+    width: 78%;
+}
+
+.btn-toolbar > #link {
+    width: 20%;
+}
+
+.form-ooview {
+    margin-bottom: 1em;
+}

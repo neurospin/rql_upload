@@ -14,8 +14,56 @@ from importlib import import_module
 import json
 
 # CW import
+from cubicweb import ValidationError
 from cubicweb.server import hook
 from cubicweb.predicates import is_instance
+
+# Package import
+from cubes.rql_upload.views.utils import load_forms
+from cubes.rql_upload.views.utils import get_cwuploads
+
+
+class CWUploadSubjectHook(hook.Hook):
+    """ When using the subject collection type, assess that only one valid
+    upload can be found for each form of the study the subject is concerned by.
+    """
+    __regid__ = "rql_upload.upload-subject-unicity"
+    __select__ = hook.Hook.__select__ & is_instance("CWUpload")
+    events = ("after_add_entity", )
+    order = -1  # should be run before other hooks
+
+    def __call__(self):
+        """ If a valid upload is found with the same associated form name,
+        do not create again this upload: unicity constrain.
+        """
+        # This hook is activated only if the subject collection strategy is
+        # used
+        if self._cw.vreg.subjects_mapping is not None:
+
+            # Get all the uploads related with this subject
+            subject_eid = self.entity.cw_edited["error"]
+            rset = self._cw.execute("Any X Where X eid '{0}'".format(
+                subject_eid))
+            subject_entity = rset.get_entity(0, 0)
+            cwuploads = get_cwuploads(subject_entity)
+
+            # Based on the latest upload status reject this creation or not
+            latest_upload_desc = cwuploads.get(
+                self.entity.form_name, [None])[-1]
+            if latest_upload_desc is None:
+                return
+            latest_status = latest_upload_desc[0].lower()
+
+            if latest_status in ("validated", "quarantine", "canceled"):
+                raise ValidationError(
+                    "CWUpload", {
+                        "unicity not respected": _(
+                            "Subject '{0}' already have a '{1}' upload with "
+                            "status '{2}'. Please wait or contact the system "
+                            "administrator.".format(
+                                subject_entity.code_in_study,
+                                self.entity.form_name,
+                                latest_status))})
 
 
 class UploadFileHook(hook.Hook):
@@ -54,6 +102,8 @@ class ServerStartupHook(hook.Hook):
     Define a shortcut to access the uploaded files 'uploaded_file_names'. It
     maps an 'UploadFile' eid to the uploded resource location on the server
     file system.
+
+    Store the upload type in the 'upload_type' configuration parameter.
     """
     __regid__ = "rql_upload.serverstartup"
     events = ("server_startup", "server_maintenance")
@@ -88,11 +138,14 @@ class ServerStartupHook(hook.Hook):
 
         # Execute all asynchrone check defined in [RQL UPLOAD] ->
         # upload_structure_json -> AsynchroneCheck in the CW task loop
-        forms_file = self.repo.vreg.config["upload_structure_json"]
+        forms = load_forms(self.repo.vreg.config)
+        self.repo.vreg.forms = forms
+        self.repo.vreg.subjects_mapping = None
         delay_in_sec = self.repo.vreg.config["default_asynchrone_delay"] * 60.
-        if forms_file:
-            with open(forms_file) as open_json:
-                forms = json.load(open_json)
+        if isinstance(forms, dict):
+            if "Subjects" in forms:
+                self.repo.vreg.subjects_mapping = forms["Subjects"].pop(
+                    "Mapping")
             for form_name in forms:
                 check_func_desc = forms[form_name].get("ASynchroneCheck")
                 if check_func_desc is not None:

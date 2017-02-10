@@ -85,7 +85,7 @@ class EntityCWUpload(AnyEntity):
     """ Define the 'CWUpload' entity associated functions. """
 
     __regid__ = "CWUpload"
-    __bootstap_glyph__ = True
+    __bootstap_glyph__ = False
 
     def dc_title(self):
         """ Method that defines the upload entity title.
@@ -99,14 +99,14 @@ class EntityCWUpload(AnyEntity):
 
     @property
     def symbol(self):
-        if self.status == 'Quarantine':
-            return u"<span class='glyphicon glyphicon-cog' />"
-        elif self.status == 'Rejected':
-            return u"<span class='glyphicon glyphicon-remove' />"
-        elif self.status == 'Validated':
-            return u"<span class='glyphicon glyphicon-ok' />"
+        if self.status == "Quarantine":
+            return os.path.join("images", "orange_dot.png")
+        elif self.status in ("Rejected", "Canceled"):
+            return os.path.join("images", "red_dot.png")
+        elif self.status == "Validated":
+            return os.path.join("images", "green_dot.png")
         else:
-            return u"<span class='glyphicon glyphicon-cloud-upload' />"
+            return os.path.join("images", "yellow_dot.png")
 
     def get_field_value(self, field_name):
         """ Return the value of the UploadField with the field_name.

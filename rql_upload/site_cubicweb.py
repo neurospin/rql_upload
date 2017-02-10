@@ -21,9 +21,11 @@ options = (
     (
         "upload_structure_json",
         {
-            "type": "string",
+            "type": "csv",
             "default": "",
-            "help": "json file describing the different upload entities.",
+            "help": ("json files describing the different upload entities. "
+                     "If a 'subjects' file is specified organize the upload "
+                     "by subject."),
             "group": "rql_upload", "level": 0,
         }
     ),

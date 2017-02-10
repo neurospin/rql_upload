@@ -10,4 +10,3 @@
 STYLESHEETS += [
     data('cubes.rql_upload.css')
 ]
-

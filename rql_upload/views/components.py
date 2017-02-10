@@ -25,6 +25,9 @@ class CWUploadBox(component.CtxComponent):
 
     It will appear on the left and contain the names if all forms defined in the
     json file.
+    
+    If a 'Subjects' name is defined, organize the collect using the subjects
+    as pivotal entities.
 
     .. warning::
 
@@ -43,9 +46,8 @@ class CWUploadBox(component.CtxComponent):
             from the configuration file.
         """
         # Get the field form structure
-        config = load_forms(self._cw.vreg.config)
-
-        if config == -1:
+        forms = self._cw.vreg.forms
+        if forms == -1:
             href = self._cw.build_url("view", vid="upload-view",
                                       title=self._cw._("Upload form"),
                                       form_name='ERROR: no json found')
@@ -54,30 +56,29 @@ class CWUploadBox(component.CtxComponent):
             w(u'<a class="btn btn-primary" href="{0}">'.format(href))
             w(u'{0}</a>'.format("ERROR: no json found."))
             w(u'</div></div>')
+            return
 
-        elif config == -2:
+        elif forms == -2:
             href = self._cw.build_url("view", vid="upload-view",
                                       title=self._cw._("Upload form"),
                                       form_name="ERROR: json file can't be read")
             w(u'<div class="btn-toolbar">')
             w(u'<div class="btn-group-vertical btn-block">')
             w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-            w(u"{0}</a>".format("ERROR: json file can't be read."))
+            w(u"{0}</a>".format("ERROR: at least one json file can't be read."))
             w(u'</div></div>')
+            return
 
+        # Organize the collect using subjects as pivotal entities
+        if self._cw.vreg.subjects_mapping is not None:
+            self._create_btn_new_form(w, "Subjects", title="Add new subject")
+            self._subject_search_box(w)
+
+        # List all forms
         else:
             # Create a link to each form declared in the settings
-            for form_name in config:
-                href = self._cw.build_url("view", vid="upload-view",
-                                          title=self._cw._("Upload form"),
-                                          form_name=form_name)
-                w(u'<div class="btn-toolbar">')
-                w(u'<div class="btn-group-vertical btn-block">')
-                w(u'<a class="btn btn-primary" href="{0}">'.format(href))
-                w(u'<span class="glyphicon glyphicon glyphicon-list">'
-                    '</span>')
-                w(u' {0}</a>'.format(form_name))
-                w(u'</div></div><br/>')
+            for form_name in forms:
+                self._create_btn_new_form(w, form_name)
 
         # Create a button to access my upload
         w(u'<hr>')
@@ -101,4 +102,68 @@ class CWUploadBox(component.CtxComponent):
         w(u'<span class="glyphicon glyphicon glyphicon-cloud-upload">'
             '</span> All uploads</a>')
         w(u'</div></div><br/>')
+
+        # Create a button to access the uploads summary board
+        rset = self._cw.execute("Any N Where S is Study, S name N")
+        study_names = [line[0] for line in rset.rows]
+        if len(study_names) > 0:
+            w(u'<hr>')
+
+            # > main button
+            w(u'<div class="btn-toolbar">')
+            w(u'<div class="btn-group btn-group-justified">')
+            w(u'<a class="btn btn-info"'
+               'data-toggle="collapse" data-target="#summary-boards" '
+               'style="width:100%">')
+            w(u'Summary boards</a>')
+            w(u'</div></div>')
+            # > typed buttons container
+            w(u'<div id="summary-boards" class="collapse">')
+            w(u'<div class="panel-body">')
+            w(u'<hr>')
+            # > typed buttons
+            for name in study_names:
+                href = self._cw.build_url("view", vid="summary-uploads-board",
+                                           study=name)
+                w(u'<div class="btn-toolbar">')
+                w(u'<div class="btn-group btn-group-justified">')
+                w(u'<a class="btn btn-primary" href="{0}" style="width:100%">'.format(href))
+                w(u'{0}</a>'.format(name))
+                w(u'</div></div><br/>')
+            w(u'<hr>')
+            w(u'</div></div><br/>')
+
+    def _create_btn_new_form(self, w, form_name, title=None):
+        """ Create a new button to fill a new form.
+        """
+        href = self._cw.build_url("view", vid="upload-view",
+                                  title=self._cw._("Upload form"),
+                                  form_name=form_name)
+        w(u'<div class="btn-toolbar">')
+        w(u'<div class="btn-group-vertical btn-block">')
+        w(u'<a class="btn btn-primary" href="{0}">'.format(href))
+        w(u'<span class="glyphicon glyphicon glyphicon-list">'
+            '</span>')
+        w(u' {0}</a>'.format(title or form_name))
+        w(u'</div></div><br/>')
+
+    def _subject_search_box(self, w):
+        """ Create a search box for subjects.
+        """
+        # JS
+        basesearch = "view?rql=Any+X+Where+X+is+Subject%2C+X+code_in_study+"
+        w(u'<script>')
+        w(u'function SubjectSearchBox() {')
+        w(u'var link = "{0}" + "\'" + '
+           'document.getElementById("link-box").value + "\'";'.format(basesearch))
+        w(u'window.location = link;')
+        w(u'}')
+        w(u'</script>')
+
+        # Add search box
+        w(u'<div class="btn-toolbar">')
+        w(u'<input type="text" id="link-box">')
+        w(u'<input type="button" id="link" value="Search" '
+           'onClick="SubjectSearchBox()">')
+        w(u'</div>')
 

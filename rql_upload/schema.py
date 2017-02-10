@@ -12,8 +12,12 @@ from yams.buildobjs import String
 from yams.buildobjs import Bytes
 from yams.buildobjs import RichString
 from yams.buildobjs import RelationDefinition
-from cubicweb.schema import ERQLExpression
 from yams.buildobjs import SubjectRelation
+from cubicweb.schema import ERQLExpression
+from cubicweb.schema import RRQLExpression
+
+# Brainomics import
+from cubes.brainomics2.schema.medicalexp import Subject
 
 
 ###############################################################################
@@ -33,8 +37,12 @@ UPLOAD_RELATION_PERMISSIONS = {
     "read": (
         "managers",
         "users"),
-    "add": ("managers",),
-    "delete": ("managers",),
+    "add": (
+        "managers",
+        RRQLExpression("S in_assessment A, U in_group G, G can_update A")),
+    "delete": (
+        "managers",
+        RRQLExpression("S in_assessment A, U in_group G, G can_update A"))
 }
 
 
@@ -142,7 +150,7 @@ class CWUpload(EntityType):
     # The status of the upload
     status = String(
         required=True,
-        vocabulary=("Quarantine", "Rejected", "Validated"),
+        vocabulary=("Quarantine", "Rejected", "Validated", "Canceled"),
         description=unicode("upload status."))
     # The error message of the upload
     error = RichString(
@@ -152,8 +160,8 @@ class CWUpload(EntityType):
 
 class upload_files(RelationDefinition):
     """ Define the relation between CWUpload and UploadFile
-    A CWUpload have 0..n UploadFile.
-    An UploadFile have 1 CWUpload.
+    A CWUpload has 0..n UploadFile.
+    An UploadFile has 1 CWUpload.
     """
     __permissions__ = UPLOAD_RELATION_PERMISSIONS
 
@@ -166,8 +174,8 @@ class upload_files(RelationDefinition):
 
 class upload_fields(RelationDefinition):
     """ Define the relation between CWUpload and UploadField
-    A CWUpload have 0..n UploadField.
-    An UploadField have 1 CWUpload.
+    A CWUpload has 0..n UploadField.
+    An UploadField has 1 CWUpload.
     """
     __permissions__ = UPLOAD_RELATION_PERMISSIONS
 
@@ -176,3 +184,29 @@ class upload_fields(RelationDefinition):
     object = "UploadField"
     cardinality = "*1"
     composite = "subject"
+
+
+class cwuploads(RelationDefinition):
+    """ Define the relation between Subject and CWUpload
+    A Subject has 0..n CWUpload.
+    A CWUpload has 0..1 Subject.
+    """
+    __permissions__ = UPLOAD_RELATION_PERMISSIONS
+
+    inlined = False
+    subject = "Subject"
+    object = "CWUpload"
+    cardinality = "*?"
+
+
+class cwupload_subject(RelationDefinition):
+    """ Define the relation between CWUpload and Subject
+    A CWUpload has 0..1 Subject.
+    A Subject has 0..n CWUpload.
+    """
+    __permissions__ = UPLOAD_RELATION_PERMISSIONS
+
+    inlined = False
+    subject = "CWUpload"
+    object = "Subject"
+    cardinality = "?*"
