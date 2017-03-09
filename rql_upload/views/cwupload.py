@@ -14,8 +14,14 @@ import re
 import copy
 import traceback
 from importlib import import_module
+from packaging import version
 
-# CW import
+# Cubicweb import
+import cubicweb
+cw_version = version.parse(cubicweb.__version__)
+if cw_version >= version.parse("3.21.0"):
+    from cubicweb import _
+
 from cgi import parse_qs
 from logilab.common.decorators import monkeypatch
 from cubicweb import Binary

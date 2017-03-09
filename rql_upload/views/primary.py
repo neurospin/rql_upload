@@ -11,8 +11,14 @@
 import os
 import json
 import collections
+from packaging import version
 
-# CW import
+# Cubicweb import
+import cubicweb
+cw_version = version.parse(cubicweb.__version__)
+if cw_version >= version.parse("3.21.0"):
+    from cubicweb import _
+
 from cubes.piws.views.primary import PIWSPrimaryView
 from cubicweb.predicates import is_instance
 

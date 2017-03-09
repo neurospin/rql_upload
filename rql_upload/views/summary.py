@@ -9,8 +9,14 @@
 
 # System import
 import os
+from packaging import version
 
 # Cubicweb import
+import cubicweb
+cw_version = version.parse(cubicweb.__version__)
+if cw_version >= version.parse("3.21.0"):
+    from cubicweb import _
+
 from cubicweb.view import View
 from logilab.common.registry import yes
 from cubicweb.predicates import authenticated_user
