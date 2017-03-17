@@ -32,9 +32,13 @@ def load_forms(cw_config):
         if a configuration file is not specified or found on the system.
     -2
         if a configuration file cannot be decoded as json file.
+    -3
+        if no configuration is specified.
     """
     # Go through each configuration file
-    config_files = cw_config["upload_structure_json"]
+    config_files = cw_config.get("upload_structure_json", None)
+    if config_files is None or len(config_files) == 0:
+        return -3
     config = {}
     for path in config_files:
 
