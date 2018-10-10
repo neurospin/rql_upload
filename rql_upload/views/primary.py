@@ -70,7 +70,7 @@ class SubjectPrimaryView(PIWSPrimaryView):
         """ Generate the html code.
         """
         # Inherit page style
-        super(PIWSPrimaryView, self).render_entity_attributes(entity)
+        super(SubjectPrimaryView, self).render_entity_attributes(entity)
 
         # Deal with subjects data collection style
         if self._cw.vreg.subjects_mapping is not None:
