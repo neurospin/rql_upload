@@ -93,7 +93,7 @@ class EntityCWUpload(AnyEntity):
         return u"{} by {} on {} at {}".format(
             self.form_name,
             self.dc_creator(),
-            self.creation_date.strftime('%Y/%m/%d'),
+            self.creation_date.strftime('%Y-%m-%d'),
             self.creation_date.strftime('%H:%M:%S')
         )
 
